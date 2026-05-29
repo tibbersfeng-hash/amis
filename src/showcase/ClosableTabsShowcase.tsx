@@ -2,32 +2,49 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { AmisLivePreview } from './AmisLivePreview';
 
 /**
- * Closable Tabs — React-driven with configurable title prefix via data prop.
+ * Closable Tabs — config read from Amis JSON schema.
  *
- * The title prefix (e.g. "Sub Mission") is passed through AmisLivePreview's data
- * and injected into a hidden DOM element, then read by this component.
- *
- * Schema usage:
+ * Schema format:
  * {
- *   "type": "tpl",
- *   "className": "custom-closable-tabs-wrapper",
- *   "tpl": "<div class='closable-tab-config' data-title-prefix='Sub Mission' data-max-tabs='10'></div>",
- *   "tabs": [...]
+ *   "type": "tabs",
+ *   "className": "custom-closable-tabs",
+ *   "addable": true,
+ *   "addBtnText": "+ Add",
+ *   "maxTabs": 10,
+ *   "titlePrefix": "Sub Mission",
+ *   "tabs": [
+ *     { "title": "Sub Mission 1", "closable": true, "body": "..." },
+ *     { "title": "Sub Mission 2", "closable": true, "body": "..." }
+ *   ]
  * }
+ *
+ * titlePrefix: prefix for newly added tabs (default: "Tab")
+ * maxTabs: maximum number of tabs allowed (default: 10)
+ * tabs: initial tab definitions
  */
 
-export interface ClosableTabsShowcaseProps {
-  /** Prefix for newly added tab titles, e.g. "Sub Mission" → "Sub Mission 3" */
-  titlePrefix?: string;
-  /** Maximum number of tabs allowed (default: 10) */
+interface TabDef {
+  title: string;
+  closable?: boolean;
+  body?: unknown;
+}
+
+interface ClosableTabsSchema {
+  type: string;
+  className: string;
+  addable?: boolean;
+  addBtnText?: string;
   maxTabs?: number;
-  /** Initial tab titles */
-  tabs?: string[];
+  titlePrefix?: string;
+  tabs?: TabDef[];
 }
 
 const DEFAULT_PREFIX = 'Tab';
 const DEFAULT_MAX_TABS = 10;
-const DEFAULT_TABS = ['Tab 1', 'Tab 2'];
+const DEFAULT_TABS: TabDef[] = [
+  { title: 'Tab 1', body: 'Tab 1 content' },
+  { title: 'Tab 2', body: 'Tab 2 content' },
+];
 
 let nextIndex = 3;
 
@@ -35,19 +52,19 @@ export function resetNextIndex(val: number) {
   nextIndex = val;
 }
 
-export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
-  titlePrefix = DEFAULT_PREFIX,
-  maxTabs = DEFAULT_MAX_TABS,
-  tabs: initialTabs = DEFAULT_TABS,
-}) => {
-  const [tabs, setTabs] = useState<string[]>(initialTabs);
-  const [activeTab, setActiveTab] = useState(initialTabs[0]);
+export const ClosableTabsShowcase: React.FC<{ schema: ClosableTabsSchema }> = ({ schema }) => {
+  const titlePrefix = schema?.titlePrefix ?? DEFAULT_PREFIX;
+  const maxTabs = schema?.maxTabs ?? DEFAULT_MAX_TABS;
+  const initialTabs: TabDef[] = schema?.tabs ?? DEFAULT_TABS;
+
+  const [tabs, setTabs] = useState<TabDef[]>(initialTabs);
+  const [activeTab, setActiveTab] = useState<TabDef>(initialTabs[0]);
   const [showScrollHint, setShowScrollHint] = useState({ left: false, right: false });
   const scrollRef = useRef<HTMLDivElement>(null);
   const ulRef = useRef<HTMLUListElement>(null);
   const rafRef = useRef<number>(0);
 
-  // Reset nextIndex when prefix changes (for showcase switching)
+  // Reset nextIndex when schema changes
   useEffect(() => {
     nextIndex = initialTabs.length + 1;
   }, [initialTabs.length]);
@@ -57,20 +74,25 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
       if (prev.length >= maxTabs) return prev;
       const idx = nextIndex++;
       const title = `${titlePrefix} ${idx}`;
-      setActiveTab(title);
-      return [...prev, title];
+      const newTab: TabDef = {
+        title,
+        closable: true,
+        body: { type: 'tpl', tpl: `<div style="padding:12px;">${title} content area</div>` },
+      };
+      setActiveTab(newTab);
+      return [...prev, newTab];
     });
   }, [maxTabs, titlePrefix]);
 
   const removeTab = useCallback((title: string) => {
     setTabs(prev => {
-      const next = prev.filter(t => t !== title);
-      if (title === activeTab && next.length > 0) {
+      const next = prev.filter(t => t.title !== title);
+      if (title === activeTab.title && next.length > 0) {
         setActiveTab(next[next.length - 1]);
       }
       return next;
     });
-  }, [activeTab]);
+  }, [activeTab.title]);
 
   const scroll = useCallback((direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -152,7 +174,7 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
     </button>
   );
 
-  const renderTab = (title: string, isAdd: boolean) => {
+  const renderTab = (tab: TabDef, isAdd: boolean) => {
     if (isAdd) {
       return (
         <li
@@ -195,9 +217,9 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
 
     return (
       <li
-        key={title}
-        className={`cxd-Tabs-link ${title === activeTab ? 'is-active' : ''}`}
-        onClick={() => setActiveTab(title)}
+        key={tab.title}
+        className={`cxd-Tabs-link ${tab.title === activeTab.title ? 'is-active' : ''}`}
+        onClick={() => setActiveTab(tab)}
         style={{
           display: 'inline-flex',
           flexDirection: 'row',
@@ -207,9 +229,9 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
           gap: '10px',
           height: '40px',
           margin: 0,
-          background: title === activeTab ? '#fff' : '#F9FAFA',
+          background: tab.title === activeTab.title ? '#fff' : '#F9FAFA',
           border: 'none',
-          borderTop: title === activeTab ? '4px solid #394DB9' : '4px solid transparent',
+          borderTop: tab.title === activeTab.title ? '4px solid #394DB9' : '4px solid transparent',
           borderRadius: 0,
           boxSizing: 'border-box',
           flex: 'none',
@@ -227,21 +249,21 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
             padding: 0,
             margin: 0,
             fontSize: '18px',
-            fontWeight: title === activeTab ? 500 : 400,
-            color: title === activeTab ? '#394DB9' : '#555',
+            fontWeight: tab.title === activeTab.title ? 500 : 400,
+            color: tab.title === activeTab.title ? '#394DB9' : '#555',
             background: 'transparent',
             border: 'none',
             textDecoration: 'none',
             lineHeight: 1,
           }}
         >
-          {title}
+          {tab.title}
         </a>
         <span
           className="cxd-Tabs-link-close"
           onClick={(e) => {
             e.stopPropagation();
-            removeTab(title);
+            removeTab(tab.title);
           }}
           style={{
             width: '10px',
@@ -266,6 +288,12 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
     );
   };
 
+  // Build content schema from active tab's body
+  const contentSchema = activeTab?.body ?? {
+    type: 'tpl',
+    tpl: `<div style="padding:12px;">${activeTab?.title ?? 'Tab'} content area</div>`,
+  };
+
   return (
     <div className="custom-closable-tabs" style={{ margin: 0 }}>
       {/* Max tabs indicator */}
@@ -284,7 +312,7 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
       <div style={containerStyle}>
         {tabs.length === 0 ? (
           <ul style={ulStyle}>
-            {renderTab('', true)}
+            {renderTab({ title: '', body: null }, true)}
           </ul>
         ) : (
           <>
@@ -300,22 +328,17 @@ export const ClosableTabsShowcase: React.FC<ClosableTabsShowcaseProps> = ({
               }}
             >
               <ul ref={ulRef} style={ulStyle}>
-                {tabs.map(title => renderTab(title, false))}
-                {renderTab('', true)}
+                {tabs.map(tab => renderTab(tab, false))}
+                {renderTab({ title: '', body: null }, true)}
               </ul>
             </div>
           </>
         )}
       </div>
 
-      {/* Tab content — rendered via Amis for each active tab */}
+      {/* Tab content — rendered via Amis */}
       <div style={{ background: '#fff', padding: '20px', paddingBottom: 0 }}>
-        <AmisLivePreview
-          schema={{
-            type: 'tpl',
-            tpl: `<div style="padding:12px;">${activeTab} content area</div>`,
-          }}
-        />
+        <AmisLivePreview schema={contentSchema} />
       </div>
     </div>
   );

@@ -123,8 +123,7 @@ const PageRenderer = React.forwardRef<AmisLivePreviewRef, { pageId: string; json
   ({ pageId, jsonSchema, dataJson, lang = 'zh', label }, ref) => {
     if (LazyCustomComponents[pageId]) {
       const CustomComponent = LazyCustomComponents[pageId];
-      const data = dataJson ? JSON.parse(dataJson) : {};
-      return <CustomComponent {...data} />;
+      return <CustomComponent schema={JSON.parse(jsonSchema)} />;
     }
     const schema = JSON.parse(jsonSchema);
     const data = dataJson ? JSON.parse(dataJson) : {};
