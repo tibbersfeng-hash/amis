@@ -101,7 +101,6 @@ import tabs_nav from './tabs-nav';
 import tag from './tag';
 import test_nested_tabs from './test-nested-tabs';
 import textarea from './textarea';
-import three_layer_tabs from './three-layer-tabs';
 import timeline from './timeline';
 import tooltip from './tooltip';
 import top_border_tab from './top-border-tab';
@@ -211,7 +210,6 @@ export const amisShowcasePages: ShowcasePage[] = [
   ...tag,
   ...test_nested_tabs,
   ...textarea,
-  ...three_layer_tabs,
   ...timeline,
   ...tooltip,
   ...top_border_tab,

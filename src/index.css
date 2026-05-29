@@ -2175,8 +2175,11 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   background: transparent !important;
 }
 
-.custom-underline-tabs .cxd-Tabs-linksContainer,
-.custom-underline-tabs .cxd-Tabs-linksContainer-wrapper {
+/* === FULL > child selector chains to prevent style leaking into nested tabs === */
+/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper,
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer {
   background: #FFFFFF !important;
   border: none !important;
   border-bottom: none !important;
@@ -2186,7 +2189,8 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   overflow: visible !important;
 }
 
-.custom-underline-tabs .cxd-Tabs-links {
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main,
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2197,13 +2201,13 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   overflow: visible !important;
 }
 
-/* Kill all default underlines */
-.custom-underline-tabs .cxd-Tabs-link::after {
+/* Kill all default underlines — scoped to direct children only */
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after {
   display: none !important;
 }
 
 /* Nav items — default (inactive) state */
-.custom-underline-tabs .cxd-Tabs-link {
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
   padding: 0 12px !important;
   font-size: 14px !important;
   font-weight: 500 !important;
@@ -2221,12 +2225,12 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   flex-shrink: 0 !important;
 }
 /* White background for ALL tabs (inactive + active) */
-body .custom-underline-tabs .cxd-Tabs-link {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
   background: #FFFFFF !important;
 }
 
 /* Inactive tab a tag */
-.custom-underline-tabs .cxd-Tabs-link a {
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
   color: inherit !important;
   text-decoration: none !important;
   font-weight: inherit !important;
@@ -2235,50 +2239,50 @@ body .custom-underline-tabs .cxd-Tabs-link {
   border-bottom: none !important;
 }
 
-/* No hover effect — .amis-scope prefix to match + exceed Amis specificity (0-0-4-0) */
-.amis-scope .custom-underline-tabs .cxd-Tabs-link:hover {
+/* No hover effect */
+.amis-scope .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
   background: #FFFFFF !important;
 }
-.amis-scope .custom-underline-tabs .cxd-Tabs-link:hover a {
+.amis-scope .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
   border-bottom: none !important;
 }
 
 /* Active: blue text + BLUE UNDERLINE 4px at bottom + white bg */
-body .custom-underline-tabs .cxd-Tabs-link.is-active {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
   color: var(--primary) !important;
   font-weight: 600 !important;
   background: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: inset 0 -4px 0 0 var(--primary) !important;
 }
-body .custom-underline-tabs .cxd-Tabs-link.is-active:hover {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
   color: var(--primary) !important;
   font-weight: 600 !important;
   background: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: inset 0 -4px 0 0 var(--primary) !important;
 }
-body .custom-underline-tabs .cxd-Tabs-link.is-active a {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
   color: var(--primary) !important;
   border-bottom: none !important;
 }
-body .custom-underline-tabs .cxd-Tabs-link.is-active a:hover {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a:hover {
   border-bottom: none !important;
 }
 /* Kill ::before and ::after on active tab */
-body .custom-underline-tabs .cxd-Tabs-link.is-active::before {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::before {
   display: none !important;
 }
-body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
+body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::after {
   display: none !important;
 }
 
 /* Hide Amis indicator */
-.custom-underline-tabs .cxd-Tabs__indicator { display: none !important; }
-.custom-underline-tabs .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs__indicator { display: none !important; }
+.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* Content area: gray bg, no border, full width */
-.custom-underline-tabs .cxd-Tabs-content {
+.custom-underline-tabs > .cxd-Tabs-content {
   background: #F5F6FA !important;
   border: none !important;
   border-radius: 0 !important;
@@ -2286,7 +2290,7 @@ body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
   margin: 0 !important;
   width: 100% !important;
 }
-.custom-underline-tabs .cxd-Tabs-pane {
+.custom-underline-tabs > .cxd-Tabs-pane {
   padding: 20px !important;
 }
 
@@ -2295,42 +2299,34 @@ body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
   margin: 20px 0 0 20px !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-linksContainer,
-.custom-solid-fill-tabs .cxd-Tabs-linksContainer-wrapper {
-  padding: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
+/* === FULL > child selector chains to prevent style leaking into nested tabs === */
+/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
 
-.custom-solid-fill-tabs .cxd-Tabs-links {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
   gap: 0 !important;
   border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
   background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Kill Amis line-mode defaults */
-.custom-solid-fill-tabs .cxd-Tabs-link::after {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after {
   content: none !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs__indicator {
-  display: none !important;
-}
-
-.custom-solid-fill-tabs .cxd-Tabs-linksContainer-arrow {
-  display: none !important;
-}
-
-/* Kill bottom border on tab bar container */
-.custom-solid-fill-tabs .cxd-Tabs-linksContainer::after,
-.custom-solid-fill-tabs .cxd-Tabs-links::after {
+/* Kill bottom border on tab bar */
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
   content: none !important;
   border: none !important;
+  box-shadow: none !important;
 }
 
 /* Reset default tab button container */
-.custom-solid-fill-tabs .cxd-Tabs-link {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
   padding: 0 !important;
   margin: 0 !important;
   background: transparent !important;
@@ -2338,12 +2334,12 @@ body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
 }
 
 /* Default tab (inactive): white bg, blue text, solid border */
-.custom-solid-fill-tabs .cxd-Tabs-link a {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
   position: relative !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 8px 20px !important;
+  padding: 7px 12px !important;
   min-width: 80px !important;
   font-size: 14px !important;
   font-weight: 500 !important;
@@ -2357,49 +2353,277 @@ body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
 }
 
 /* Kill all pseudo-elements on active tab */
-.custom-solid-fill-tabs .cxd-Tabs-link.is-active::before {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::before {
   content: none !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-link.is-active::after {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::after {
   content: none !important;
 }
 
 /* Active tab: blue bg, white text */
-.custom-solid-fill-tabs .cxd-Tabs-link.is-active {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
   background: transparent !important;
   padding: 0 !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-link.is-active a {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
   background: #394DB9 !important;
   color: #fff !important;
   border: 1px solid #394DB9 !important;
 }
 
 /* No hover effect on any tab */
-.custom-solid-fill-tabs .cxd-Tabs-link:hover a {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
   background: #fff !important;
   color: #394DB9 !important;
   border: 1px solid #394DB9 !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-link.is-active:hover a {
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
   background: #394DB9 !important;
   color: #fff !important;
 }
 
-/* Content area: white bg, bottom padding 20px */
-.custom-solid-fill-tabs .cxd-Tabs-content {
+/* Content area: white bg, bottom padding 20px, kill any separator line */
+.custom-solid-fill-tabs > .cxd-Tabs-content {
   background: #fff !important;
   margin-top: 0 !important;
   padding-bottom: 20px !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-pane {
+.custom-solid-fill-tabs > .cxd-Tabs-pane {
+  padding: 20px !important;
+  background: #fff !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Kill any form item separator line inside tab body */
+.custom-solid-fill-tabs .cxd-FormItem::before,
+.custom-solid-fill-tabs .cxd-FormItem::after,
+.custom-solid-fill-tabs .cxd-FormItem-label,
+.custom-solid-fill-tabs .cxd-Form-label {
+  border-bottom: none !important;
+}
+
+/* Tab buttons: overlap borders so tabs connect seamlessly */
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(:last-child) > a {
+  margin-right: -1px !important;
+}
+
+/* Active tab needs higher z-index so its border covers the neighbor */
+.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ===== Closable Tabs — 选中顶部蓝条 + 可关闭 + 加号添加按钮 ===== */
+.custom-closable-tabs {
+  margin: 0 !important;
+}
+
+/* === FULL > child selector chains to prevent style leaking into nested tabs === */
+/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+
+/* Hide scrollbar for the scroll container */
+.custom-closable-tabs .closable-scroll-container::-webkit-scrollbar {
+  display: none !important;
+}
+
+.custom-closable-tabs .closable-scroll-container {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
+  gap: 0 !important;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background: #F9FAFA !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Kill pseudo-elements */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after,
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::before,
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
+  content: none !important;
+  border: none !important;
+  display: none !important;
+}
+
+/* Tab link container (li) — this is the actual "tab button" containing both text and close button */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 10px 10px 10px 20px !important;
+  gap: 10px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  background: #F9FAFA !important;
+  border: none !important;
+  border-top: 4px solid transparent !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  transition: none !important;
+  flex: none !important;
+  cursor: pointer !important;
+}
+
+/* Active tab: blue top bar, blue text, white bg */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
+  background: #fff !important;
+  border-top: 4px solid #394DB9 !important;
+}
+
+/* No hover effect */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
+  background: #F9FAFA !important;
+  border-top-color: transparent !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
+  background: #fff !important;
+  border-top: 4px solid #394DB9 !important;
+}
+
+/* Tab text (<a> tag) — reset to transparent, let <li> carry the visual style */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: static !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  color: #555 !important;
+  background: transparent !important;
+  border: none !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+  transition: none !important;
+  cursor: inherit !important;
+  line-height: 1 !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+  color: #394DB9 !important;
+  font-weight: 500 !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
+  color: #555 !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
+  color: #394DB9 !important;
+  font-weight: 500 !important;
+}
+
+/* Content area */
+.custom-closable-tabs > .cxd-Tabs-content {
+  background: #fff !important;
+  margin-top: 0 !important;
+  padding-bottom: 20px !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-pane {
   padding: 20px !important;
   background: #fff !important;
   opacity: 1 !important;
   transform: none !important;
   transition: none !important;
+}
+
+/* Close button (×) inside tab — 10x10, vertically centered within the <li> */
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close {
+  width: 10px !important;
+  height: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  color: #9CA3AF !important;
+  cursor: pointer !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.6 !important;
+  transition: none !important;
+  flex-shrink: 0 !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close:hover {
+  color: #9CA3AF !important;
+  opacity: 0.6 !important;
+}
+
+.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close-icon {
+  font-size: 10px !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* + Add button — matches Figma specs */
+.custom-closable-tabs .cxd-Tabs-addable {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 10px 10px 10px 20px !important;
+  gap: 10px !important;
+  width: auto !important;
+  height: 40px !important;
+  color: #394DB9 !important;
+  font-weight: 500 !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  margin-left: 0 !important;
+  border-left: none !important;
+  background: #F9FAFA !important;
+  border-right: none !important;
+  border-top: 4px solid transparent !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+  line-height: 1 !important;
+  position: relative !important;
+}
+
+/* Divider line between last tab and Add button — 24px tall, vertically centered */
+.custom-closable-tabs .cxd-Tabs-addable::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 1px !important;
+  height: 24px !important;
+  background: #e0e0e0 !important;
+  display: block !important;
+}
+
+.custom-closable-tabs .cxd-Tabs-addable-icon {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
 }

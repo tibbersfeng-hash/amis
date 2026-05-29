@@ -264,7 +264,7 @@ const customShowcasePages: ShowcasePage[] = [
     id: 'solid-fill-tabs',
     category: '布局组件',
     title: 'Solid Fill Tabs',
-    description: '实心填充型 Tab 样式。选中=蓝底白字，未选中=白底蓝字+实线外框+虚线内框。无 hover 效果，无下划线。',
+    description: '实心填充型 Tab 样式。选中=蓝底白字，未选中=白底蓝字+实线外框。无 hover 效果，无下划线。',
     jsonSchema: JSON.stringify({
       type: 'tabs',
       className: 'custom-solid-fill-tabs',
@@ -276,6 +276,26 @@ const customShowcasePages: ShowcasePage[] = [
     component: () => {
       const SolidFillTabsShowcase = React.lazy(() => import('./SolidFillTabsShowcase'));
       return <SolidFillTabsShowcase />;
+    },
+  },
+  {
+    id: 'closable-tabs',
+    category: '布局组件',
+    title: 'Closable Tabs',
+    description: '可关闭 Tab + 添加按钮。选中=顶部蓝条+蓝字粗体+白底，未选中=灰字+浅灰底。支持滚动、最大数量限制（MAX_TABS=10）。',
+    jsonSchema: JSON.stringify({
+      type: 'tabs',
+      className: 'custom-closable-tabs',
+      maxTabs: 10,
+      addBtn: { label: '+ Add' },
+      tabs: [
+        { title: 'Sub Mission 1', closable: true, body: '内容区域 1' },
+        { title: 'Sub Mission 2', closable: true, body: '内容区域 2' },
+      ],
+    }, null, 2),
+    component: () => {
+      const ClosableTabsShowcase = React.lazy(() => import('./ClosableTabsShowcase'));
+      return <ClosableTabsShowcase />;
     },
   },
 ];

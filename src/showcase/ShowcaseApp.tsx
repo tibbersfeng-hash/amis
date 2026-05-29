@@ -108,6 +108,7 @@ const customImports: Record<string, () => Promise<{ default: React.FC }>> = {
   'preview-panel': () => import('../components/PreviewPanel/showcase'),
   'amis-drawer': () => import('../components/DrawerShowcase'),
   'solid-fill-tabs': () => import('./SolidFillTabsShowcase'),
+  'closable-tabs': () => import('./ClosableTabsShowcase'),
 };
 
 for (const [id, importFn] of Object.entries(customImports)) {
