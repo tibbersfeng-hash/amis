@@ -1,0 +1,238 @@
+{
+  "missionRule": {
+    "ruleSetup": {
+      "missionCode": "MISSION_20260430_001",
+      "missionName": "Summer Spending Mission",
+      "displayInMissionCenter": false,
+      "registrationPeriod": {
+        "startTime": "2019-03-01 12:00:00",
+        "endTime": "2019-03-03 23:59:59"
+      },
+      "missionPeriod": {
+        "startTime": "2019-03-01 12:00:00",
+        "endTime": "2019-12-31 23:59:59"
+      },
+      "minimumRegistration": {
+        "type": "THRESHOLD",
+        "threshold": 101
+      },
+      "quotation": {
+        "type": "LIMITED",
+        "limitValue": 25000,
+        "unit": "SLC_MEMBERS"
+      },
+      "continuousOrIndependent": "CONTINUE"
+    },
+    "displayConfig": {
+      "missionThumbnail": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+      "missionShortName": {
+        "zh": "夏季任务",
+        "en": "Summer Mission"
+      },
+      "missionLongName": {
+        "zh": "夏季消费任务 2025",
+        "en": "Summer Spending Mission 2025"
+      },
+      "missionDescription": {
+        "zh": "完成住宿消费任务，赚取丰厚积分奖励和专属优惠券",
+        "en": "Complete your stay spending mission to earn generous points rewards and exclusive vouchers"
+      },
+      "awardDescription": {
+        "zh": "每达成就可获积分奖励，终极目标解锁8倍积分券",
+        "en": "Earn points rewards for each achievement, unlock 8x points voucher for ultimate goal"
+      },
+      "missionSegmentIcon": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+      "missionSegmentDescription": "Gold及以上等级专享",
+      "missionDetail": {
+        "zh": "<h3>夏季消费任务详情</h3><p>在活动期间内完成指定金额的房费消费即可逐步解锁多重奖励。</p>",
+        "en": "<h3>Summer Spending Mission Details</h3><p>Complete the specified room spending during the event period to unlock multiple rewards.</p>"
+      },
+      "tcLink": "https://www.shangri-la.com/terms-and-conditions/mission-summer-2025",
+      "tcContent": {
+        "zh": "<h3>条款与细则</h3><ol><li>本活动仅限 SLC 会员参加</li></ol>",
+        "en": "<h3>Terms & Conditions</h3><ol><li>This event is exclusive to SLC members</li></ol>"
+      },
+      "shareLink": "https://www.shangri-la.com/mission/share/summer-2025",
+      "startMission": "开启你的夏季积分之旅",
+      "skinSetting": {
+        "effectivePeriod": {
+          "startTime": "2019-01-15 00:00:00",
+          "endTime": "2019-02-28 23:59:00"
+        },
+        "backgroundColor": "#FFF8F0",
+        "fontColor": "#1A1A1A",
+        "taskNotStartedIcon": {
+          "zh": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+          "en": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg"
+        },
+        "taskInProgressIcon": {
+          "zh": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+          "en": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg"
+        }
+      },
+      "taskNotStartedIcon": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+      "taskInProgressIcon": "https://sitecore-cd.shangri-la.com/-/media/Shangri-La/Corporate/dlp/2026spring_China/Unnamed-item/1--1140x760.jpg",
+      "countdownAppPush": {
+        "countdownDay": "2019-12-31",
+        "countdownAppPushTitle": {
+          "zh": "任务即将结束！",
+          "en": "Mission Ending Soon!"
+        },
+        "countdownAppPushContent": {
+          "zh": "夏季消费任务还剩最后几天，快去完成任务赢取8倍积分券吧！",
+          "en": "Summer spending mission ends in a few days. Complete it now to earn 8x points voucher!"
+        },
+        "countdownAppPushCtaLink": "https://www.shangri-la.com/mission/detail/summer-2025"
+      }
+    }
+  },
+  "registrationRule": {
+    "ruleSetup": {
+      "registrationKeyword": "KEYWORD_SUMMER_2025",
+      "limitationKeyword": "LIMIT_GOLD_ONLY",
+      "registrationAward": {
+        "type": "AWARD_POINTS",
+        "awardPointsValue": 15,
+        "billingCode": "BCODE_REG_001",
+        "inventory": 25000,
+        "transactionNote": "Registration bonus points"
+      },
+      "registrationSpecialAward": {
+        "type": "AWARD_POINTS",
+        "awardPointsValue": 100,
+        "billingCode": "BCODE_REG_002",
+        "inventory": 100,
+        "transactionNote": "Every 100th member bonus"
+      },
+      "limitation": {
+        "type": "every",
+        "everyN": 100,
+        "specifiedRanking": null
+      }
+    },
+    "displayConfig": {
+      "registrationNotice": {
+        "title": "立即参与",
+        "subTitle": "前25,000位登记参与的会员即领额外 15 积分!",
+        "content": "已有 15007 人参与本任务\n\n每第 100 位登记参与的会员可获得额外 100 积分"
+      },
+      "registerSuccessfully": {
+        "title": "成功参与",
+        "subTitle": "额外奖励",
+        "content": "15 积分\n\n每 第 100 位登记参与的会员 可获得 100 额外积分"
+      }
+    }
+  },
+  "subMissionRules": [
+    {
+      "subMissionId": "sub_001",
+      "ruleSetup": {
+        "subMissionType": "ROOM_STAY_NIGHTS",
+        "noOfNights": 2,
+        "businessUnit": "ROOM",
+        "paymentMethod": "CREDIT_CARD",
+        "marketCode": "GDS",
+        "marketCodeExclude": false,
+        "rateCode": "RACK",
+        "rateCodeExclude": false,
+        "roomCategory": "DELUXE",
+        "roomType": "KING",
+        "source": "DIRECT",
+        "stayPeriod": {
+          "startTime": "2019-03-01 12:00:00",
+          "endTime": "2019-06-30 23:59:00"
+        },
+        "awardType": "POINTS",
+        "awardPoints": 20,
+        "billingCode": "BCODE_ROOM_001",
+        "transactionNote": "Summer promotion special rate",
+        "targetSpending": null,
+        "currency": null,
+        "minimumSpending": null,
+        "registrationAward": {
+          "type": "AWARD_POINTS",
+          "awardPointsValue": 20
+        }
+      },
+      "displayConfig": {
+        "spending": {
+          "zh": "HKD 10,000 累计房费消费",
+          "en": "HKD 10,000 cumulative room spending"
+        },
+        "awardName": {
+          "zh": "获得 20 积分奖励",
+          "en": "Earn 20 points reward"
+        },
+        "cta": {
+          "zh": "立即预订",
+          "en": "Book Now"
+        },
+        "ctaLink": "https://www.shangri-la.com/reservation/summer",
+        "ctaWechatLink": "weixin://dl/business/?t=summer_mission_001",
+        "subMissionDetail": {
+          "zh": "<p>累计入住 <strong>2</strong> 晚，且房费消费达到 <strong>HKD 10,000</strong></p>",
+          "en": "<p>Stay for <strong>2</strong> nights with room spending of <strong>HKD 10,000</strong></p>"
+        },
+        "awardAppNotification": {
+          "zh": "<p>恭喜！您已达成里程碑！</p><p>积分将在7个工作日内到账。</p>",
+          "en": "<p>Congratulations! You've reached a milestone!</p><p>Points will be credited within 7 business days.</p>"
+        }
+      }
+    },
+    {
+      "subMissionId": "sub_002",
+      "ruleSetup": {
+        "subMissionType": "ROOM_STAY_NIGHTS",
+        "noOfNights": 3,
+        "businessUnit": "ROOM",
+        "paymentMethod": "CREDIT_CARD",
+        "marketCode": "GDS",
+        "marketCodeExclude": false,
+        "rateCode": "RACK",
+        "rateCodeExclude": false,
+        "roomCategory": "DELUXE",
+        "roomType": "KING",
+        "source": "DIRECT",
+        "stayPeriod": {
+          "startTime": "2019-03-01 12:00:00",
+          "endTime": "2019-06-30 23:59:00"
+        },
+        "awardType": "POINTS",
+        "awardPoints": 20,
+        "billingCode": "BCODE_ROOM_001",
+        "transactionNote": "Summer promotion special rate",
+        "targetSpending": null,
+        "currency": null,
+        "minimumSpending": null,
+        "registrationAward": {
+          "type": "AWARD_POINTS",
+          "awardPointsValue": 20
+        }
+      },
+      "displayConfig": {
+        "spending": {
+          "zh": "HKD 10,000 累计房费消费",
+          "en": "HKD 10,000 cumulative room spending"
+        },
+        "awardName": {
+          "zh": "获得 20 积分奖励",
+          "en": "Earn 20 points reward"
+        },
+        "cta": {
+          "zh": "立即预订",
+          "en": "Book Now"
+        },
+        "ctaLink": "https://www.shangri-la.com/reservation/summer",
+        "ctaWechatLink": "weixin://dl/business/?t=summer_mission_001",
+        "subMissionDetail": {
+          "zh": "<p>累计入住 <strong>2</strong> 晚，且房费消费达到 <strong>HKD 10,000</strong></p>",
+          "en": "<p>Stay for <strong>2</strong> nights with room spending of <strong>HKD 10,000</strong></p>"
+        },
+        "awardAppNotification": {
+          "zh": "<p>恭喜！您已达成里程碑！</p><p>积分将在7个工作日内到账。</p>",
+          "en": "<p>Congratulations! You've reached a milestone!</p><p>Points will be credited within 7 business days.</p>"
+        }
+      }
+    }
+  ]
+}

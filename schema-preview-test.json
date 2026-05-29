@@ -1,0 +1,438 @@
+{
+  "type": "page",
+  "title": "",
+  "style": {
+    "background": "#f5f5f7"
+  },
+  "bodyClassName": "p-0 m-0",
+  "body": [
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "10px 12px",
+        "borderRadius": "0 0 10px 10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.05)"
+      },
+      "body": [
+        {
+          "type": "flex",
+          "justify": "space-between",
+          "alignItems": "center",
+          "items": [
+            {
+              "type": "flex",
+              "alignItems": "center",
+              "items": [
+                {
+                  "type": "tpl",
+                  "tpl": "<div style=\"width:28px;height:28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:bold;flex-shrink:0;\">S</div>",
+                  "inline": false
+                },
+                {
+                  "type": "tpl",
+                  "tpl": "<div style=\"margin-left:8px;min-width:0;\"><div style=\"font-size:14px;font-weight:600;color:#1a1a2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">Shangri-La Qianta...</div><div style=\"font-size:10px;color:#999;margin-top:1px;\">Shangri-La Group</div></div>",
+                  "inline": false
+                }
+              ]
+            },
+            {
+              "type": "flex",
+              "alignItems": "center",
+              "gap": "10px",
+              "items": [
+                {
+                  "type": "tpl",
+                  "tpl": "<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#666\" stroke-width=\"2\" style=\"flex-shrink:0;\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.35-4.35\"/></svg>",
+                  "inline": false
+                },
+                {
+                  "type": "tpl",
+                  "tpl": "<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#666\" stroke-width=\"2\" style=\"flex-shrink:0;\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"/><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"/></svg>",
+                  "inline": false
+                },
+                {
+                  "type": "tpl",
+                  "tpl": "<div style=\"width:26px;height:26px;background:#f0e6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"#6366f1\"><circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M20 21a8 8 0 0 0-16 0\"/></svg></div>",
+                  "inline": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tabs",
+          "mode": "line",
+          "activeKey": "0",
+          "tabs": [
+            { "title": "营销", "body": [{ "type": "container", "body": [] }] },
+            { "title": "客户", "body": [{ "type": "container", "body": [] }] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#f8f9fa",
+        "padding": "10px 12px",
+        "marginTop": "10px"
+      },
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;\"><div style=\"display:flex;gap:2px;flex:1;\"><button style=\"flex:1;padding:5px 0;background:#3b82f6;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:500;\">日</button><button style=\"flex:1;padding:5px 0;background:#fff;color:#666;border:1px solid #e5e7eb;border-radius:4px;font-size:12px;font-weight:500;\">周</button><button style=\"flex:1;padding:5px 0;background:#fff;color:#666;border:1px solid #e5e7eb;border-radius:4px;font-size:12px;font-weight:500;\">月</button><button style=\"flex:1;padding:5px 0;background:#fff;color:#666;border:1px solid #e5e7eb;border-radius:4px;font-size:12px;font-weight:500;\">季</button><button style=\"flex:1;padding:5px 0;background:#fff;color:#666;border:1px solid #e5e7eb;border-radius:4px;font-size:12px;font-weight:500;\">年</button></div><button style=\"margin-left:6px;padding:5px 8px;background:#fff;color:#666;border:1px solid #e5e7eb;border-radius:4px;font-size:11px;white-space:nowrap;\">筛选</button></div>",
+          "inline": false
+        },
+        {
+          "type": "flex",
+          "justify": "space-between",
+          "style": { "gap": "8px" },
+          "items": [
+            {
+              "type": "container",
+              "style": { "background": "#fff", "padding": "8px 4px", "borderRadius": "8px", "textAlign": "center", "flex": "1" },
+              "body": [
+                { "type": "tpl", "tpl": "<div style=\"font-size:10px;color:#999;margin-bottom:2px;\">选择日期</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:12px;font-weight:500;color:#333;\">2021-10-27</div>", "inline": false }
+              ]
+            },
+            {
+              "type": "container",
+              "style": { "background": "#fff", "padding": "8px 4px", "borderRadius": "8px", "textAlign": "center", "flex": "1" },
+              "body": [
+                { "type": "tpl", "tpl": "<div style=\"font-size:10px;color:#999;margin-bottom:2px;\">选择单位</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:12px;font-weight:500;color:#333;\">280</div>", "inline": false }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "10px 12px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "flex",
+          "justify": "space-between",
+          "alignItems": "center",
+          "items": [
+            { "type": "tpl", "tpl": "<div style=\"font-size:12px;color:#666;\">客房管理完成率</div>", "inline": false },
+            { "type": "tpl", "tpl": "<div style=\"font-size:10px;color:#bbb;\">2024-10-15</div>", "inline": false }
+          ]
+        },
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"display:flex;align-items:baseline;margin-top:8px;\"><span style=\"font-size:28px;font-weight:700;color:#e53e3e;line-height:1;\">103.4</span><span style=\"font-size:14px;font-weight:600;color:#e53e3e;line-height:1;\">%</span><div style=\"margin-left:auto;text-align:right;\"><div style=\"font-size:12px;color:#333;font-weight:500;\">¥51,458</div><div style=\"font-size:11px;color:#999;margin-top:1px;\">/ ¥49,750</div></div></div>",
+          "inline": false
+        },
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"margin-top:10px;background:#f0f0f0;border-radius:3px;height:6px;\"><div style=\"width:100%;height:100%;background:#3b82f6;border-radius:3px;\"></div></div>",
+          "inline": false
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "0 12px 10px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"font-size:13px;font-weight:600;color:#333;margin-bottom:10px;\">核心指标</div>",
+          "inline": false
+        },
+        {
+          "type": "flex",
+          "justify": "space-between",
+          "style": { "gap": "6px" },
+          "items": [
+            {
+              "type": "container",
+              "style": { "background": "#f0f9ff", "borderRadius": "10px", "padding": "8px 4px", "textAlign": "center", "flex": "1" },
+              "body": [
+                { "type": "tpl", "tpl": "<div style=\"width:20px;height:20px;background:#dbeafe;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"#3b82f6\"><rect x=\"3\" y=\"12\" width=\"4\" height=\"9\" rx=\"1\"/><rect x=\"10\" y=\"8\" width=\"4\" height=\"13\" rx=\"1\"/><rect x=\"17\" y=\"4\" width=\"4\" height=\"17\" rx=\"1\"/></svg></div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:9px;color:#999;margin-bottom:2px;\">入住率</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:14px;font-weight:700;color:#1a1a2e;\">85.6%</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:8px;color:#10b981;margin-top:1px;\">▲0.2%</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:7px;color:#ccc;margin-top:1px;\">环比0%</div>", "inline": false }
+              ]
+            },
+            {
+              "type": "container",
+              "style": { "background": "#f0fdf4", "borderRadius": "10px", "padding": "8px 4px", "textAlign": "center", "flex": "1" },
+              "body": [
+                { "type": "tpl", "tpl": "<div style=\"width:20px;height:20px;background:#dcfce7;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"#22c55e\"><path d=\"M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"/></svg></div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:9px;color:#999;margin-bottom:2px;\">平均房价</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:14px;font-weight:700;color:#1a1a2e;\">¥568.5</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:8px;color:#e53e3e;margin-top:1px;\">▼0.2%</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:7px;color:#ccc;margin-top:1px;\">环比0%</div>", "inline": false }
+              ]
+            },
+            {
+              "type": "container",
+              "style": { "background": "#fff7ed", "borderRadius": "10px", "padding": "8px 4px", "textAlign": "center", "flex": "1" },
+              "body": [
+                { "type": "tpl", "tpl": "<div style=\"width:20px;height:20px;background:#ffedd5;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" fill=\"#f59e0b\"><path d=\"M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"/></svg></div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:9px;color:#999;margin-bottom:2px;\">单房收益</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:14px;font-weight:700;color:#1a1a2e;\">¥486.6</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:8px;color:#10b981;margin-top:1px;\">▲0.2%</div>", "inline": false },
+                { "type": "tpl", "tpl": "<div style=\"font-size:7px;color:#ccc;margin-top:1px;\">环比0%</div>", "inline": false }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "0 12px 10px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "tabs",
+          "mode": "line",
+          "activeKey": "0",
+          "tabs": [
+            {
+              "title": "OCC趋势",
+              "body": [
+                {
+                  "type": "chart",
+                  "height": "180px",
+                  "config": {
+                    "title": { "show": false },
+                    "tooltip": { "trigger": "axis" },
+                    "legend": {
+                      "data": ["OCC-去年同比", "OCC"],
+                      "top": "0",
+                      "textStyle": { "fontSize": 9 },
+                      "itemWidth": 10,
+                      "itemHeight": 2
+                    },
+                    "grid": { "left": "35", "right": "8", "top": "20", "bottom": "20" },
+                    "xAxis": {
+                      "type": "category",
+                      "data": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月"],
+                      "axisLabel": { "fontSize": 9, "color": "#999" },
+                      "axisLine": { "lineStyle": { "color": "#eee" } }
+                    },
+                    "yAxis": {
+                      "type": "value",
+                      "axisLabel": { "formatter": "{value}%", "fontSize": 9, "color": "#999" },
+                      "splitLine": { "lineStyle": { "color": "#f0f0f0" } }
+                    },
+                    "series": [
+                      {
+                        "name": "OCC-去年同比",
+                        "type": "line",
+                        "data": [23, 35, 45, 52, 48, 58, 62, 68, 65, 55],
+                        "smooth": true,
+                        "symbol": "none",
+                        "lineStyle": { "color": "#bbb", "width": 1.5, "type": "dashed" }
+                      },
+                      {
+                        "name": "OCC",
+                        "type": "line",
+                        "data": [28, 42, 55, 68, 72, 82, 88, 92, 85, 73],
+                        "smooth": true,
+                        "symbol": "circle",
+                        "symbolSize": 3,
+                        "lineStyle": { "color": "#3b82f6", "width": 2 },
+                        "itemStyle": { "color": "#3b82f6" },
+                        "areaStyle": {
+                          "color": {
+                            "type": "linear", "x": 0, "y": 0, "x2": 0, "y2": 1,
+                            "colorStops": [
+                              { "offset": 0, "color": "rgba(59,130,246,0.3)" },
+                              { "offset": 1, "color": "rgba(59,130,246,0.02)" }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            { "title": "ADR趋势", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:40px;\">ADR趋势图表</div>" }] },
+            { "title": "RevPAR趋势", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:40px;\">RevPAR趋势图表</div>" }] },
+            { "title": "营效趋势", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:40px;\">营效趋势图表</div>" }] },
+            { "title": "收入趋势", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:40px;\">收入趋势图表</div>" }] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "0 12px 10px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"font-size:13px;font-weight:600;color:#333;margin-bottom:10px;\">客源数据分析</div>",
+          "inline": false
+        },
+        {
+          "type": "chart",
+          "height": "200px",
+          "config": {
+            "tooltip": { "trigger": "item" },
+            "legend": {
+              "orient": "horizontal",
+              "bottom": "0",
+              "textStyle": { "fontSize": 9 },
+              "itemWidth": 8,
+              "itemHeight": 8
+            },
+            "series": [
+              {
+                "name": "客源分析",
+                "type": "pie",
+                "radius": ["40%", "60%"],
+                "center": ["50%", "42%"],
+                "avoidLabelOverlap": true,
+                "label": { "show": true, "position": "outside", "formatter": "{b} {d}%", "fontSize": 9 },
+                "labelLine": { "length": 8, "length2": 6 },
+                "data": [
+                  { "value": 45, "name": "协议散客", "itemStyle": { "color": "#3b82f6" } },
+                  { "value": 30, "name": "团队会议", "itemStyle": { "color": "#8b5cf6" } },
+                  { "value": 15, "name": "旅行社", "itemStyle": { "color": "#f59e0b" } },
+                  { "value": 10, "name": "其他", "itemStyle": { "color": "#6b7280" } }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "0 12px 10px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<div style=\"font-size:13px;font-weight:600;color:#333;margin-bottom:10px;\">新/老客占比</div>",
+          "inline": false
+        },
+        {
+          "type": "chart",
+          "height": "180px",
+          "config": {
+            "tooltip": { "trigger": "item" },
+            "legend": {
+              "orient": "horizontal",
+              "bottom": "0",
+              "textStyle": { "fontSize": 9 },
+              "itemWidth": 8,
+              "itemHeight": 8
+            },
+            "series": [
+              {
+                "name": "新老客",
+                "type": "pie",
+                "radius": ["50%", "68%"],
+                "center": ["50%", "42%"],
+                "label": { "show": true, "position": "outside", "formatter": "{b}", "fontSize": 9 },
+                "labelLine": { "length": 8, "length2": 6 },
+                "data": [
+                  { "value": 65, "name": "老客户", "itemStyle": { "color": "#86efac" } },
+                  { "value": 35, "name": "新客户", "itemStyle": { "color": "#1e293b" } }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "container",
+      "style": {
+        "background": "#fff",
+        "padding": "14px 12px",
+        "margin": "0 12px 10px",
+        "borderRadius": "10px",
+        "boxShadow": "0 1px 6px rgba(0,0,0,0.04)"
+      },
+      "body": [
+        {
+          "type": "tabs",
+          "mode": "line",
+          "activeKey": "0",
+          "tabs": [
+            {
+              "title": "个人",
+              "body": [
+                {
+                  "type": "tpl",
+                  "tpl": "<div style=\"font-size:12px;font-weight:600;color:#333;margin-bottom:8px;\">会员入住明细</div>",
+                  "inline": false
+                },
+                {
+                  "type": "table",
+                  "columns": [
+                    { "label": "会员", "name": "name", "width": 65 },
+                    { "label": "OCR", "name": "ocr", "width": 38 },
+                    { "label": "间夜", "name": "nights", "width": 42 },
+                    { "label": "ADR", "name": "adr" },
+                    { "label": "RevPAR", "name": "revpar" }
+                  ],
+                  "data": [
+                    { "name": "POLARIS", "ocr": 5, "nights": 12, "adr": "¥300", "revpar": "¥300" },
+                    { "name": "DIAMOND", "ocr": 28, "nights": 52, "adr": "¥351", "revpar": "¥320" },
+                    { "name": "JADE", "ocr": 45, "nights": 80, "adr": "¥297", "revpar": "¥290" },
+                    { "name": "GOLD", "ocr": 18, "nights": 35, "adr": "¥295", "revpar": "¥270" },
+                    { "name": "PRIM.SLC", "ocr": 22, "nights": 40, "adr": "¥304", "revpar": "¥290" },
+                    { "name": "Total", "ocr": 118, "nights": 219, "adr": "-", "revpar": "-" }
+                  ],
+                  "columnsTogglable": false,
+                  "affixHeader": false,
+                  "showHeader": true,
+                  "style": { "fontSize": "11px" }
+                }
+              ]
+            },
+            { "title": "企业", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:30px;\">企业数据</div>" }] },
+            { "title": "中介", "body": [{ "type": "tpl", "tpl": "<div style=\"text-align:center;color:#999;padding:30px;\">中介数据</div>" }] }
+          ]
+        }
+      ]
+    }
+  ]
+}

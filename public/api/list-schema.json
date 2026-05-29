@@ -1,0 +1,203 @@
+{
+  "type": "page",
+  "title": "",
+  "className": "list-root",
+  "body": [
+    {
+      "type": "wrapper",
+      "className": "page-header-bar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<h1 class=\"page-title\">Mission List</h1>",
+          "inline": false
+        }
+      ]
+    },
+    {
+      "type": "form",
+      "mode": "inline",
+      "wrapWithPanel": false,
+      "className": "search-form",
+      "body": [
+        {
+          "type": "input-text",
+          "name": "searchCode",
+          "label": "Mission Code / Name",
+          "placeholder": "Please Input",
+          "clearable": true,
+          "size": "md"
+        },
+        {
+          "type": "input-date-range",
+          "name": "enrollPeriod",
+          "label": "Enrollment Period",
+          "format": "YYYY-MM-DD",
+          "size": "md"
+        },
+        {
+          "type": "input-date-range",
+          "name": "missionPeriod",
+          "label": "Mission Period",
+          "format": "YYYY-MM-DD",
+          "size": "md"
+        },
+        {
+          "type": "select",
+          "name": "showCenter",
+          "label": "Show Mission Center",
+          "options": [
+            { "label": "Please Select", "value": "" },
+            { "label": "Yes", "value": "yes" },
+            { "label": "No", "value": "no" }
+          ],
+          "clearable": true,
+          "size": "md"
+        }
+      ],
+      "actions": []
+    },
+    {
+      "type": "divider",
+      "className": "search-divider"
+    },
+    {
+      "type": "wrapper",
+      "className": "search-actions-row",
+      "body": [
+        {
+          "type": "button",
+          "label": "Clear",
+          "actionType": "custom",
+          "script": "var form=document.querySelector('.search-form');if(form){var items=form.querySelectorAll('input[type=\"text\"],input[type=\"date\"],select');items.forEach(function(i){i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));});}",
+          "className": "btn-clear",
+          "size": "md"
+        },
+        {
+          "type": "button",
+          "label": "Search",
+          "actionType": "submit",
+          "target": "search-form",
+          "primary": true,
+          "className": "btn-search",
+          "size": "md"
+        }
+      ]
+    },
+    {
+      "type": "wrapper",
+      "className": "add-btn-row",
+      "body": [
+        {
+          "type": "button",
+          "label": "+ Add",
+          "className": "btn-add",
+          "actionType": "link",
+          "link": "index.html?page=mission"
+        }
+      ]
+    },
+    {
+      "type": "crud",
+      "api": {
+        "method": "get",
+        "url": "/api/list-config.json"
+      },
+      "syncLocation": false,
+      "perPage": 10,
+      "perPageAvailable": [10, 20, 50],
+      "columns": [
+        {
+          "name": "missionCode",
+          "label": "Mission Code / Name",
+          "type": "tpl",
+          "tpl": "<div class=\"cell-code\">${missionCode}</div><div><a href=\"index.html?page=mission&id=${id}\" class=\"cell-name\">${missionName}</a></div>",
+          "width": 200
+        },
+        {
+          "name": "enrollStart",
+          "label": "Enrollment Period",
+          "type": "tpl",
+          "tpl": "<div>${enrollStart}</div><div>${enrollEnd}</div>",
+          "width": 120
+        },
+        {
+          "name": "missionStart",
+          "label": "Mission Period",
+          "type": "tpl",
+          "tpl": "<div>${missionStart}</div><div>${missionEnd}</div>",
+          "width": 120
+        },
+        {
+          "name": "missionType",
+          "label": "Mission Type",
+          "width": 120
+        },
+        {
+          "name": "showMissionCenter",
+          "label": "Show Mission Center",
+          "type": "mapping",
+          "map": {
+            "true": "<span class=\"cell-yes\">Yes</span>",
+            "false": "<span class=\"cell-no\">No</span>"
+          },
+          "width": 120
+        },
+        {
+          "name": "quota",
+          "label": "Quota",
+          "width": 80
+        },
+        {
+          "name": "minRegistration",
+          "label": "Minimum Registration",
+          "width": 100
+        },
+        {
+          "name": "continuousOrIndependent",
+          "label": "Continuous Or Independent",
+          "width": 140,
+          "type": "mapping",
+          "map": {
+            "Continue": "<span class=\"cell-continue\">Continue</span>",
+            "Independent": "<span class=\"cell-single\">Independent</span>"
+          }
+        },
+        {
+          "name": "ruleDisplayStatus",
+          "label": "Rule Display Status",
+          "type": "mapping",
+          "map": {
+            "Active": "<span class=\"rule-status-dot active\"></span>Active",
+            "Inactive": "<span class=\"rule-status-dot inactive\"></span>Inactive"
+          },
+          "width": 140
+        },
+        {
+          "type": "operation",
+          "label": "Operation",
+          "fixed": "right",
+          "width": 100,
+          "buttons": [
+            {
+              "type": "link",
+              "label": "View",
+              "className": "action-link action-view",
+              "link": "index.html?page=mission&id=${id}"
+            },
+            {
+              "type": "link",
+              "label": "Edit",
+              "className": "action-link action-edit",
+              "link": "index.html?page=mission&id=${id}"
+            }
+          ],
+          "placeholder": "-",
+          "toggled": true
+        }
+      ],
+      "headerToolbar": [],
+      "footerToolbar": ["statistics", "pagination"]
+    }
+  ]
+}

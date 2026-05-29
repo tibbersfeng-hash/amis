@@ -1,0 +1,932 @@
+{
+  "type": "page",
+  "className": "mission-root",
+  "data": {},
+  "body": [
+    {
+      "type": "wrapper",
+      "className": "page-header-bar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<h1 class=\"page-title\">Add Mission</h1>",
+          "inline": false
+        },
+        {
+          "type": "button",
+          "label": "Return to List",
+          "className": "return-link",
+          "actionType": "link",
+          "link": "index.html?page=list"
+        }
+      ]
+    },
+    {
+      "type": "wrapper",
+      "className": "mission-body-split",
+      "body": [
+        {
+          "type": "wrapper",
+          "className": "mission-left",
+          "body": {
+            "type": "tabs",
+            "tabsMode": "line",
+            "className": "mb-3",
+            "mountOnEnter": false,
+            "unmountOnExit": false,
+            "tabs": [
+              {
+                "title": "Mission Setup",
+                "hash": "mission-setup",
+                "body": {
+                  "type": "wrapper",
+                  "className": "form-card",
+                  "body": {
+                    "type": "form",
+                    "mode": "normal",
+                    "wrapWithPanel": false,
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title\">Mission Code<span class=\"asterisk\">*</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "missionCode",
+                        "label": "",
+                        "required": true,
+                        "placeholder": "Please input"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"hint-text\">Format: MISSION_YYYYMMDD_XXX</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "missionName",
+                            "label": "Mission Name",
+                            "required": true,
+                            "placeholder": "Please input"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "missionShortName",
+                            "label": "Mission Short Name",
+                            "placeholder": "Follows preview language"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Display in Mission Center</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"displayInCenter\" value=\"yes\"> Yes</label><label class=\"radio-item\"><input type=\"radio\" name=\"displayInCenter\" value=\"no\" checked> No</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title\" style=\"margin-top:24px;\">Registration Period<span class=\"asterisk\">*</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "date-range-picker",
+                        "startName": "regStartTime",
+                        "endName": "regEndTime",
+                        "required": true,
+                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "validationText": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>",
+                        "inline": false,
+                        "visibleOn": "${regEndTime && regStartTime && regEndTime <= regStartTime}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Mission Period<span class=\"asterisk\">*</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "date-range-picker",
+                        "startName": "missionStartTime",
+                        "endName": "missionEndTime",
+                        "required": true,
+                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "validationText": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>",
+                        "inline": false,
+                        "visibleOn": "${missionEndTime && missionStartTime && missionEndTime <= missionStartTime}"
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "thresholdType",
+                            "label": "Type",
+                            "required": true,
+                            "options": [
+                              {
+                                "label": "No Limit",
+                                "value": "NO_LIMIT"
+                              },
+                              {
+                                "label": "Limit to",
+                                "value": "LIMIT_TO"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "input-number",
+                            "name": "thresholdValue",
+                            "label": "Quota",
+                            "placeholder": ""
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div style=\"padding-top:32px;color:var(--text-secondary);font-size:13px;\">max SLC members</div>",
+                            "inline": false
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "registrationKeyword",
+                            "label": "Registration Keyword",
+                            "required": true,
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "limitationKeyword",
+                            "label": "Limitation Keyword",
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Sequential or Non-sequential</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"sequenceType\" value=\"continue\" checked> Continuous</label><label class=\"radio-item\"><input type=\"radio\" name=\"sequenceType\" value=\"independent\"> Independent</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "divider",
+                        "lineStyle": {
+                          "color": "#E8E8E8"
+                        }
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Mission Thumbnail</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-image",
+                        "name": "missionThumbnail",
+                        "label": "",
+                        "multiple": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"hint-text\">Recommended Dimensions: 1200px × 800px, The Maximum size of the file is 10MB</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "missionLongName",
+                            "label": "Mission Long Name",
+                            "placeholder": "Follows preview language"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "awardDescription",
+                            "label": "Award Description",
+                            "placeholder": "Follows preview language"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-text",
+                            "name": "missionDescription",
+                            "label": "Mission Description",
+                            "placeholder": "Follows preview language"
+                          },
+                          {
+                            "type": "input-text",
+                            "name": "missionSegmentDescription",
+                            "label": "Mission Segment Description",
+                            "placeholder": "Follows preview language"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Mission Segment Icon</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-image",
+                        "name": "missionSegmentIcon",
+                        "label": ""
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Mission Detail<span class=\"asterisk\">*</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "editor",
+                        "name": "missionDetail",
+                        "label": "",
+                        "language": "html",
+                        "size": "lg",
+                        "placeholder": "Please input"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">T&C Link</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-url",
+                        "name": "tcLink",
+                        "label": "",
+                        "placeholder": "Please input"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">T&C Content</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "editor",
+                        "name": "tcContent",
+                        "label": "",
+                        "language": "html",
+                        "size": "lg",
+                        "placeholder": "Please input"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Share Link</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-url",
+                        "name": "shareLink",
+                        "label": "",
+                        "placeholder": "Please input"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Start Mission</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "startMission",
+                        "label": "",
+                        "placeholder": "Follows preview language"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "title": "Sub-Mission Rules",
+                "hash": "sub-mission-rules",
+                "body": {
+                  "type": "wrapper",
+                  "className": "form-card",
+                  "body": {
+                    "type": "form",
+                    "mode": "normal",
+                    "wrapWithPanel": false,
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"sub-tab-bar\"><span class=\"sub-tab-btn active\">Rule Setup</span><span class=\"sub-tab-btn\">Display</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "subMissionType",
+                            "label": "Sub Mission Type",
+                            "required": true,
+                            "options": [
+                              {
+                                "label": "F&B Spending",
+                                "value": "FNB_SPENDING"
+                              },
+                              {
+                                "label": "F&B Frequency",
+                                "value": "FNB_FREQUENCY"
+                              },
+                              {
+                                "label": "Room Stay Nights",
+                                "value": "ROOM_STAY_NIGHTS"
+                              },
+                              {
+                                "label": "Room Spending",
+                                "value": "ROOM_SPENDING"
+                              },
+                              {
+                                "label": "Room Stay Prepaid Booking",
+                                "value": "ROOM_STAY_PREPAID"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "select",
+                            "name": "businessUnit",
+                            "label": "Business Unit",
+                            "required": true,
+                            "options": [
+                              {
+                                "label": "Room",
+                                "value": "ROOM"
+                              },
+                              {
+                                "label": "F&B",
+                                "value": "FNB"
+                              },
+                              {
+                                "label": "Health",
+                                "value": "HEALTH"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-number",
+                            "name": "targetSpending",
+                            "label": "Target Spending",
+                            "placeholder": "Please input"
+                          },
+                          {
+                            "type": "select",
+                            "name": "currency",
+                            "label": "Currency",
+                            "options": [
+                              {
+                                "label": "HKD",
+                                "value": "HKD"
+                              },
+                              {
+                                "label": "USD",
+                                "value": "USD"
+                              },
+                              {
+                                "label": "CNY",
+                                "value": "CNY"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-number",
+                            "name": "noOfNights",
+                            "label": "No. of Nights",
+                            "placeholder": "Please input"
+                          },
+                          {
+                            "type": "input-number",
+                            "name": "minimumSpending",
+                            "label": "Minimum Spending",
+                            "placeholder": "Please input"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "paymentMethod",
+                            "label": "Payment Method",
+                            "options": [
+                              {
+                                "label": "Credit Card",
+                                "value": "CREDIT_CARD"
+                              },
+                              {
+                                "label": "Cash",
+                                "value": "CASH"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "select",
+                            "name": "source",
+                            "label": "Source",
+                            "options": [
+                              {
+                                "label": "Direct",
+                                "value": "DIRECT"
+                              },
+                              {
+                                "label": "OTA",
+                                "value": "OTA"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "marketCode",
+                            "label": "Market Code",
+                            "options": [
+                              {
+                                "label": "GDS",
+                                "value": "GDS"
+                              },
+                              {
+                                "label": "CORPORATE",
+                                "value": "CORPORATE"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "select",
+                            "name": "rateCode",
+                            "label": "Rate Code",
+                            "options": [
+                              {
+                                "label": "RACK",
+                                "value": "RACK"
+                              },
+                              {
+                                "label": "BAR",
+                                "value": "BAR"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "select",
+                            "name": "roomCategory",
+                            "label": "Room Category",
+                            "options": [
+                              {
+                                "label": "Deluxe",
+                                "value": "DELUXE"
+                              },
+                              {
+                                "label": "Premier",
+                                "value": "PREMIER"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "select",
+                            "name": "roomType",
+                            "label": "Room Type",
+                            "options": [
+                              {
+                                "label": "King",
+                                "value": "KING"
+                              },
+                              {
+                                "label": "Twin",
+                                "value": "TWIN"
+                              }
+                            ],
+                            "placeholder": "Please Select"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "date-range-picker",
+                        "startName": "subStayStart",
+                        "endName": "subStayEnd",
+                        "required": false,
+                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "validationText": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>",
+                        "inline": false,
+                        "visibleOn": "${subStayEnd && subStayStart && subStayEnd <= subStayStart}"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Registration Award</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"AWARD_POINTS\" checked> Award Points</label><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"AWARD_VOUCHER\"> Voucher</label><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"NO_AWARD\"> No Award</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "wrapper",
+                        "className": "award-panel",
+                        "body": {
+                          "type": "form",
+                          "mode": "normal",
+                          "wrapWithPanel": false,
+                          "body": [
+                            {
+                              "type": "input-number",
+                              "name": "awardPoints",
+                              "label": "Award Points",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "select",
+                              "name": "billingCode",
+                              "label": "Billing Code",
+                              "options": [
+                                {
+                                  "label": "BCODE_ROOM_001",
+                                  "value": "BCODE_ROOM_001"
+                                },
+                                {
+                                  "label": "BCODE_FNB_001",
+                                  "value": "BCODE_FNB_001"
+                                }
+                              ],
+                              "placeholder": "Please Select"
+                            },
+                            {
+                              "type": "input-number",
+                              "name": "inventory",
+                              "label": "库存数",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "transactionNote",
+                              "label": "Transaction Note",
+                              "placeholder": "Please input"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "title": "Skin Setting",
+                "hash": "skin-setting",
+                "body": {
+                  "type": "wrapper",
+                  "className": "form-card",
+                  "body": {
+                    "type": "form",
+                    "mode": "normal",
+                    "wrapWithPanel": false,
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Skin Setting</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "date-range-picker",
+                        "startName": "skinStartTime",
+                        "endName": "skinEndTime",
+                        "required": false,
+                        "format": "YYYY-MM-DD HH:mm:ss",
+                        "validationText": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"cxd-Form-validation is-error\" style=\"color:var(--danger);font-size:12px;line-height:1;margin-top:4px;\">End time must be after start time</div>",
+                        "inline": false,
+                        "visibleOn": "${skinEndTime && skinStartTime && skinEndTime <= skinStartTime}"
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-color",
+                            "name": "backgroundColor",
+                            "label": "Background Color"
+                          },
+                          {
+                            "type": "input-color",
+                            "name": "fontColor",
+                            "label": "Font Color"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "input-image",
+                        "name": "taskNotStartedIcon",
+                        "label": "Task Not Started Icon"
+                      },
+                      {
+                        "type": "input-image",
+                        "name": "taskInProgressIcon",
+                        "label": "Task In Progress Icon"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "title": "Countdown Push",
+                "hash": "countdown-push",
+                "body": {
+                  "type": "wrapper",
+                  "className": "form-card",
+                  "body": {
+                    "type": "form",
+                    "mode": "normal",
+                    "wrapWithPanel": false,
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Countdown App Push</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-date",
+                        "name": "countdownDay",
+                        "label": "Countdown Day",
+                        "required": true,
+                        "format": "YYYY-MM-DD",
+                        "inputFormat": "YYYY-MM-DD"
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "countdownAppPushTitle",
+                        "label": "Countdown App Push Title",
+                        "placeholder": "Follows preview language"
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "countdownAppPushContent",
+                        "label": "Countdown App Push Content",
+                        "placeholder": "Follows preview language"
+                      },
+                      {
+                        "type": "input-url",
+                        "name": "countdownAppPushCtaLink",
+                        "label": "Countdown App Push CTA Link",
+                        "placeholder": "https://..."
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "title": "Registration Rule",
+                "hash": "registration-rule",
+                "body": {
+                  "type": "wrapper",
+                  "className": "form-card",
+                  "body": {
+                    "type": "form",
+                    "mode": "normal",
+                    "wrapWithPanel": false,
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"sub-tab-bar\"><span class=\"sub-tab-btn active\">Rule Setup</span><span class=\"sub-tab-btn\">Display</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "registrationKeyword",
+                        "label": "Registration Keyword",
+                        "required": true,
+                        "placeholder": "Please Select"
+                      },
+                      {
+                        "type": "input-text",
+                        "name": "limitationKeyword",
+                        "label": "Limitation Keyword",
+                        "placeholder": "Please Select"
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\">Registration Award</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"AWARD_POINTS\" checked> Award Points</label><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"AWARD_VOUCHER\"> Voucher</label><label class=\"radio-item\"><input type=\"radio\" name=\"regAwardType\" value=\"NO_AWARD\"> No Award</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "wrapper",
+                        "className": "award-panel",
+                        "body": {
+                          "type": "form",
+                          "mode": "normal",
+                          "wrapWithPanel": false,
+                          "body": [
+                            {
+                              "type": "input-number",
+                              "name": "regAwardPoints",
+                              "label": "Award Points",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "select",
+                              "name": "regBillingCode",
+                              "label": "Billing Code",
+                              "options": [
+                                {
+                                  "label": "BCODE_REG_001",
+                                  "value": "BCODE_REG_001"
+                                },
+                                {
+                                  "label": "BCODE_REG_002",
+                                  "value": "BCODE_REG_002"
+                                }
+                              ],
+                              "placeholder": "Please Select"
+                            },
+                            {
+                              "type": "input-number",
+                              "name": "regInventory",
+                              "label": "库存数",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "regTransactionNote",
+                              "label": "Transaction Note",
+                              "placeholder": "Please input"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\" style=\"margin-top:24px;\">Registration Special Award</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"specialAwardType\" value=\"AWARD_POINTS\" checked> Award Points</label><label class=\"radio-item\"><input type=\"radio\" name=\"specialAwardType\" value=\"AWARD_VOUCHER\"> Voucher</label><label class=\"radio-item\"><input type=\"radio\" name=\"specialAwardType\" value=\"NO_AWARD\"> No Award</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "wrapper",
+                        "className": "award-panel",
+                        "body": {
+                          "type": "form",
+                          "mode": "normal",
+                          "wrapWithPanel": false,
+                          "body": [
+                            {
+                              "type": "input-number",
+                              "name": "specialAwardPoints",
+                              "label": "Award Points",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "select",
+                              "name": "specialBillingCode",
+                              "label": "Billing Code",
+                              "options": [
+                                {
+                                  "label": "BCODE_REG_001",
+                                  "value": "BCODE_REG_001"
+                                },
+                                {
+                                  "label": "BCODE_REG_002",
+                                  "value": "BCODE_REG_002"
+                                }
+                              ],
+                              "placeholder": "Please Select"
+                            },
+                            {
+                              "type": "input-number",
+                              "name": "specialInventory",
+                              "label": "库存数",
+                              "placeholder": "Please input"
+                            },
+                            {
+                              "type": "input-text",
+                              "name": "specialTransactionNote",
+                              "label": "Transaction Note",
+                              "placeholder": "Please input"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"section-title-sm\" style=\"margin-top:24px;\">Limitation</div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"radio-group\"><label class=\"radio-item\"><input type=\"radio\" name=\"limitType\" value=\"every\" checked> Every</label><label class=\"radio-item\"><input type=\"radio\" name=\"limitType\" value=\"specified\"> Specified Ranking</label></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "group",
+                        "body": [
+                          {
+                            "type": "input-number",
+                            "name": "limitEvery",
+                            "label": "",
+                            "placeholder": "Please input"
+                          },
+                          {
+                            "type": "tpl",
+                            "tpl": "<div style=\"padding-top:32px;color:var(--text-secondary);font-size:13px;\">members</div>",
+                            "inline": false
+                          },
+                          {
+                            "type": "input-number",
+                            "name": "limitRanking",
+                            "label": "",
+                            "placeholder": "Please input"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wrapper",
+          "className": "mission-right",
+          "body": {
+            "type": "wrapper",
+            "className": "preview-panel",
+            "body": [
+              {
+                "type": "tpl",
+                "tpl": "<div class=\"language-switcher\"><span class=\"language-label\">Preview Language:</span><select class=\"language-select\" onchange=\"window.__onPreviewLanguageChange && window.__onPreviewLanguageChange(this.value)\"><option value=\"zh\">中文</option><option value=\"en\">English</option></select></div>",
+                "inline": false
+              },
+              {
+                "type": "wrapper",
+                "className": "phone-card",
+                "body": {
+                  "type": "phone-mockup"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

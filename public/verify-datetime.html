@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日历控件像素验证</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f6fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .comparison {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .panel {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .design-ref {
+      background: #f9f9f9;
+      padding: 16px;
+      border-radius: 4px;
+    }
+
+    .design-ref img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .measurements {
+      margin-top: 16px;
+    }
+
+    .measure-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .measure-label {
+      width: 120px;
+      color: #666;
+    }
+
+    .measure-value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .measure-diff {
+      margin-left: 8px;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .match { background: #e6f7e6; color: #52c41a; }
+    .mismatch { background: #fff1f0; color: #ff4d4f; }
+
+    .picker-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .date-input {
+      height: 36px;
+      padding: 0 8px;
+      border: 1px solid #d9dde6;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .date-input:focus {
+      outline: none;
+      border-color: #4a5cbf;
+      box-shadow: 0 0 0 2px rgba(74,92,191,0.08);
+    }
+
+    .picker-popup {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      padding: 0;
+      min-width: 280px;
+      display: none;
+      z-index: 100;
+    }
+
+    .picker-popup.show {
+      display: block;
+    }
+
+    .picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+    }
+
+    .picker-nav {
+      color: #666;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .picker-nav:hover {
+      color: #4a5cbf;
+      background: #f0f1ff;
+    }
+
+    .picker-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .picker-switch {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .picker-switch:hover {
+      color: #4a5cbf;
+      background: #f0f1ff;
+      border-radius: 4px;
+    }
+
+    .picker-divider {
+      border-bottom: 1px solid #e8e8e8;
+      margin: 0;
+    }
+
+    .picker-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 8px 12px 0;
+    }
+
+    .picker-weekday {
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .picker-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 0 12px 12px;
+      gap: 2px;
+    }
+
+    .picker-day {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      border-radius: 50%;
+      margin: 2px auto;
+    }
+
+    .picker-day:hover {
+      background: #f0f1ff;
+      color: #4a5cbf;
+    }
+
+    .picker-day.other-month {
+      color: #d0d5dd;
+    }
+
+    .picker-day.other-month:hover {
+      background: transparent;
+      color: #d0d5dd;
+    }
+
+    .picker-day.today {
+      position: relative;
+    }
+
+    .picker-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #4a5cbf;
+    }
+
+    .picker-day.selected {
+      background: #4a5cbf;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .picker-day.selected:hover {
+      background: #4a5cbf;
+      color: #fff;
+    }
+
+    .picker-time-section {
+      border-top: 1px solid #e8e8e8;
+      padding: 12px 16px;
+    }
+
+    .picker-time-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .picker-time-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .picker-time-input {
+      background: #f5f6fa;
+      border-radius: 4px;
+      padding: 4px 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .picker-time-input:hover {
+      border-color: #4a5cbf;
+      background: #f0f1ff;
+    }
+
+    .checklist {
+      margin-top: 20px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+
+    .check-pass {
+      background: #e6f7e6;
+      color: #52c41a;
+    }
+
+    .check-fail {
+      background: #fff1f0;
+      color: #ff4d4f;
+    }
+
+    .check-pending {
+      background: #f5f5f5;
+      color: #999;
+    }
+
+    .check-content {
+      flex: 1;
+    }
+
+    .check-title {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .check-desc {
+      color: #666;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>日历控件像素验证</h1>
+
+    <div class="comparison">
+      <!-- 设计图参考 -->
+      <div class="panel">
+        <h2>设计图参考</h2>
+        <div class="design-ref">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjM2MCIgdmlld0JveD0iMCAwIDI4MCAzNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMzYwIiBmaWxsPSJ3aGl0ZSIgcng9IjgiLz4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjQwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8dGV4dCB4PSIxNiIgeT0iMzYiIGZpbGw9IiM2NjYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI1MDAiPlN1PC90ZXh0Pgo8dGV4dCB4PSI1MiIgeT0iMzYiIGZpbGw9IiM2NjYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI1MDAiPk1vPC90ZXh0Pgo8dGV4dCB4PSI4OCIgeT0iMzYiIGZpbGw9IiM2NjYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI1MDAiPlR1PC90ZXh0Pgo8dGV4dCB4PSIxMjQiIHk9IjM2IiBmaWxsPSIjNjY2IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNTAwIj5XZTwvdGV4dD4KPHRleHQgeD0iMTYwIiB5PSIzNiIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjUwMCI+VGg8L3RleHQ+Cjx0ZXh0IHg9IjE5NiIgeT0iMzYiIGZpbGw9IiM2NjYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI1MDAiPkZyPC90ZXh0Pgo8dGV4dCB4PSIyMzIiIHk9IjM2IiBmaWxsPSIjNjY2IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNTAwIj5TYTwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjEyIiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjEiIGZpbGw9IiNlOGU4ZTgiLz4KPC9zdmc+" alt="Design Reference" />
+        </div>
+        <div class="measurements">
+          <div class="measure-item">
+            <span class="measure-label">面板宽度</span>
+            <span class="measure-value">280px</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">面板圆角</span>
+            <span class="measure-value">8px</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">头部内边距</span>
+            <span class="measure-value">12px 16px</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">日期格子尺寸</span>
+            <span class="measure-value">36x36px</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">日期格子间距</span>
+            <span class="measure-value">2px</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">选中态背景</span>
+            <span class="measure-value">#4A5CBF</span>
+          </div>
+          <div class="measure-item">
+            <span class="measure-label">时间区域上边距</span>
+            <span class="measure-value">12px 16px</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 实际渲染 -->
+      <div class="panel">
+        <h2>实际渲染</h2>
+        <div class="picker-container">
+          <input type="text" class="date-input" placeholder="点击打开日历" id="dateInput" readonly />
+          <div class="picker-popup" id="pickerPopup">
+            <div class="picker-header">
+              <span class="picker-nav" id="prevMonth">‹</span>
+              <div class="picker-center">
+                <span class="picker-switch" id="yearSwitch">2026 年</span>
+                <span class="picker-switch" id="monthSwitch">5 月</span>
+              </div>
+              <span class="picker-nav" id="nextMonth">›</span>
+            </div>
+            <div class="picker-divider"></div>
+            <div class="picker-weekdays">
+              <div class="picker-weekday">日</div>
+              <div class="picker-weekday">一</div>
+              <div class="picker-weekday">二</div>
+              <div class="picker-weekday">三</div>
+              <div class="picker-weekday">四</div>
+              <div class="picker-weekday">五</div>
+              <div class="picker-weekday">六</div>
+            </div>
+            <div class="picker-days" id="pickerDays">
+              <!-- Days will be generated by JS -->
+            </div>
+            <div class="picker-time-section">
+              <div class="picker-time-label">选择时间</div>
+              <div class="picker-time-inputs">
+                <div class="picker-time-input">12</div>
+                <div class="picker-time-input">00</div>
+                <div class="picker-time-input">00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checklist" id="checklist">
+          <h3 style="font-size: 14px; margin-bottom: 12px; color: #333;">像素检查清单</h3>
+          <!-- Checklist items will be populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate calendar days
+    const daysContainer = document.getElementById('pickerDays');
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const currentDate = today.getDate();
+
+    // Generate days for current month
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    // Previous month days
+    const prevMonth = new Date(currentYear, currentMonth, 0);
+    const daysInPrevMonth = prevMonth.getDate();
+
+    let dayHTML = '';
+
+    // Previous month days
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      dayHTML += `<div class="picker-day other-month">${day}</div>`;
+    }
+
+    // Current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const isToday = i === currentDate;
+      const isSelected = i === 15; // Simulate selected day
+      let classes = 'picker-day';
+      if (isToday) classes += ' today';
+      if (isSelected) classes += ' selected';
+      dayHTML += `<div class="${classes}">${i}</div>`;
+    }
+
+    // Next month days to fill grid
+    const totalCells = startOffset + daysInMonth;
+    const remaining = 42 - totalCells; // 6 rows x 7 columns
+    for (let i = 1; i <= remaining; i++) {
+      dayHTML += `<div class="picker-day other-month">${i}</div>`;
+    }
+
+    daysContainer.innerHTML = dayHTML;
+
+    // Show/hide picker
+    const dateInput = document.getElementById('dateInput');
+    const pickerPopup = document.getElementById('pickerPopup');
+
+    dateInput.addEventListener('click', () => {
+      pickerPopup.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.picker-container')) {
+        pickerPopup.classList.remove('show');
+      }
+    });
+
+    // Pixel comparison checks
+    const checks = [
+      {
+        title: '面板宽度',
+        expected: '280px',
+        actual: () => {
+          const popup = document.getElementById('pickerPopup');
+          return popup.offsetWidth + 'px';
+        }
+      },
+      {
+        title: '面板圆角',
+        expected: '8px',
+        actual: () => {
+          const popup = document.getElementById('pickerPopup');
+          return getComputedStyle(popup).borderRadius;
+        }
+      },
+      {
+        title: '头部内边距',
+        expected: '12px 16px',
+        actual: () => {
+          const header = document.querySelector('.picker-header');
+          return getComputedStyle(header).padding;
+        }
+      },
+      {
+        title: '日期格子宽度',
+        expected: '36px',
+        actual: () => {
+          const day = document.querySelector('.picker-day');
+          return day.offsetWidth + 'px';
+        }
+      },
+      {
+        title: '日期格子高度',
+        expected: '36px',
+        actual: () => {
+          const day = document.querySelector('.picker-day');
+          return day.offsetHeight + 'px';
+        }
+      },
+      {
+        title: '日期格子圆角',
+        expected: '50%',
+        actual: () => {
+          const day = document.querySelector('.picker-day');
+          return getComputedStyle(day).borderRadius;
+        }
+      },
+      {
+        title: '选中态背景色',
+        expected: '#4A5CBF',
+        actual: () => {
+          const selected = document.querySelector('.picker-day.selected');
+          return getComputedStyle(selected).backgroundColor;
+        }
+      },
+      {
+        title: '时间区域上边框',
+        expected: '1px solid #E8E8E8',
+        actual: () => {
+          const timeSection = document.querySelector('.picker-time-section');
+          return getComputedStyle(timeSection).borderTop;
+        }
+      }
+    ];
+
+    const checklist = document.getElementById('checklist');
+
+    checks.forEach(check => {
+      const actualValue = check.actual();
+      const isMatch = actualValue === check.expected ||
+                      (check.expected.includes('#') && actualValue.includes(check.expected.replace('#', ''))) ||
+                      (check.expected.includes('rgb') && actualValue.includes(check.expected.replace('rgb', '')));
+
+      const status = isMatch ? 'pass' : 'fail';
+      const icon = status === 'pass' ? '✓' : '';
+      const statusClass = status === 'pass' ? 'check-pass' : 'check-fail';
+
+      const item = document.createElement('div');
+      item.className = 'check-item';
+      item.innerHTML = `
+        <div class="check-icon ${statusClass}">${icon}</div>
+        <div class="check-content">
+          <div class="check-title">${check.title}</div>
+          <div class="check-desc">预期：${check.expected} | 实际：${actualValue}</div>
+        </div>
+      `;
+
+      checklist.appendChild(item);
+    });
+  </script>
+</body>
+</html>
