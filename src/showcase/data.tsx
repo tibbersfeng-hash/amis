@@ -258,6 +258,26 @@ const customShowcasePages: ShowcasePage[] = [
       return <DrawerShowcase />;
     },
   },
+
+  // === 布局组件 ===
+  {
+    id: 'solid-fill-tabs',
+    category: '布局组件',
+    title: 'Solid Fill Tabs',
+    description: '实心填充型 Tab 样式。选中=蓝底白字，未选中=白底蓝字+实线外框+虚线内框。无 hover 效果，无下划线。',
+    jsonSchema: JSON.stringify({
+      type: 'tabs',
+      className: 'custom-solid-fill-tabs',
+      tabs: [
+        { title: 'Rule Setup', body: '规则配置内容区域' },
+        { title: 'Display', body: '显示设置内容区域' },
+      ],
+    }, null, 2),
+    component: () => {
+      const SolidFillTabsShowcase = React.lazy(() => import('./SolidFillTabsShowcase'));
+      return <SolidFillTabsShowcase />;
+    },
+  },
 ];
 
 /**

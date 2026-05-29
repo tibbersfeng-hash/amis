@@ -107,6 +107,7 @@ const customImports: Record<string, () => Promise<{ default: React.FC }>> = {
   'date-range-picker': () => import('../components/DateRangePicker/showcase'),
   'preview-panel': () => import('../components/PreviewPanel/showcase'),
   'amis-drawer': () => import('../components/DrawerShowcase'),
+  'solid-fill-tabs': () => import('./SolidFillTabsShowcase'),
 };
 
 for (const [id, importFn] of Object.entries(customImports)) {

@@ -2289,3 +2289,121 @@ body .custom-underline-tabs .cxd-Tabs-link.is-active::after {
 .custom-underline-tabs .cxd-Tabs-pane {
   padding: 20px !important;
 }
+
+/* ===== Solid Fill Tab — 选中蓝底白字，未选中白底蓝边框+虚线内框 ===== */
+.custom-solid-fill-tabs {
+  margin: 20px 0 0 20px !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-linksContainer,
+.custom-solid-fill-tabs .cxd-Tabs-linksContainer-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-links {
+  gap: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Kill Amis line-mode defaults */
+.custom-solid-fill-tabs .cxd-Tabs-link::after {
+  content: none !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs__indicator {
+  display: none !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-linksContainer-arrow {
+  display: none !important;
+}
+
+/* Reset default tab button container */
+.custom-solid-fill-tabs .cxd-Tabs-link {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Default tab (inactive): white bg, blue text, solid border + dashed inner border */
+.custom-solid-fill-tabs .cxd-Tabs-link a {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 20px !important;
+  min-width: 80px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #3F476A !important;
+  background: #fff !important;
+  border: 1px solid #3F476A !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+  transition: none !important;
+  cursor: pointer !important;
+}
+
+/* Inner dashed border for inactive tabs only */
+.custom-solid-fill-tabs .cxd-Tabs-link:not(.is-active) a::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 3px !important;
+  left: 3px !important;
+  right: 3px !important;
+  bottom: 3px !important;
+  border: 1px dashed #3F476A !important;
+  pointer-events: none !important;
+}
+
+/* Kill all pseudo-elements on active tab (no underline, no dashed border) */
+.custom-solid-fill-tabs .cxd-Tabs-link.is-active::before {
+  content: none !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-link.is-active::after {
+  content: none !important;
+}
+
+/* Active tab: blue bg, white text, solid border (same color = invisible border) */
+.custom-solid-fill-tabs .cxd-Tabs-link.is-active {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-link.is-active a {
+  background: #3F476A !important;
+  color: #fff !important;
+  border: 1px solid #3F476A !important;
+}
+
+/* No hover effect on any tab */
+.custom-solid-fill-tabs .cxd-Tabs-link:hover a {
+  background: #fff !important;
+  color: #3F476A !important;
+  border: 1px solid #3F476A !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-link.is-active:hover a {
+  background: #3F476A !important;
+  color: #fff !important;
+}
+
+/* Content area: white bg */
+.custom-solid-fill-tabs .cxd-Tabs-content {
+  background: #fff !important;
+  margin-top: 0 !important;
+}
+
+.custom-solid-fill-tabs .cxd-Tabs-pane {
+  padding: 0 !important;
+  background: #fff !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
