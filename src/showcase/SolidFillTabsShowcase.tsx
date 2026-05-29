@@ -5,8 +5,8 @@ const schema = {
   type: 'tabs',
   className: 'custom-solid-fill-tabs',
   tabs: [
-    { title: 'Rule Setup', body: { type: 'tpl', tpl: '<div style="padding:24px;color:#5a607a;font-size:14px;">Rule Setup content area. White background, no extra styling.</div>' } },
-    { title: 'Display', body: { type: 'tpl', tpl: '<div style="padding:24px;color:#5a607a;font-size:14px;">Display content area. Same white background.</div>' } },
+    { title: 'Rule Setup', body: { type: 'input-text', name: 'ruleName', label: '规则名称', placeholder: '请输入规则名称' } },
+    { title: 'Display', body: { type: 'input-text', name: 'displayName', label: '显示名称', placeholder: '请输入显示名称' } },
   ],
 };
 
