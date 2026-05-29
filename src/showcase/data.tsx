@@ -282,7 +282,7 @@ const customShowcasePages: ShowcasePage[] = [
     id: 'closable-tabs',
     category: '布局组件',
     title: 'Closable Tabs',
-    description: '可关闭 Tab + 添加按钮。选中=顶部蓝条+蓝字粗体+白底，未选中=灰字+浅灰底。支持滚动、最大数量限制。通过 schema 的 addable/addBtnText/closable 属性控制。',
+    description: '可关闭 Tab + 添加按钮。选中=顶部蓝条+蓝字粗体+白底，未选中=灰字+浅灰底。支持滚动、最大数量限制。新 tab 的 title 前缀可通过 data 配置。',
     jsonSchema: JSON.stringify({
       type: 'tabs',
       className: 'custom-closable-tabs',
@@ -294,6 +294,17 @@ const customShowcasePages: ShowcasePage[] = [
         { title: 'Sub Mission 2', closable: true, body: '内容区域 2' },
       ],
     }, null, 2),
+    /**
+     * Configuration data passed as React props to the ClosableTabsShowcase component.
+     * titlePrefix: prefix for newly added tabs (e.g. "Sub Mission" → "Sub Mission 3")
+     * maxTabs: maximum number of tabs allowed
+     * tabs: initial tab titles
+     */
+    data: JSON.stringify({
+      titlePrefix: 'Sub Mission',
+      maxTabs: 10,
+      tabs: ['Sub Mission 1', 'Sub Mission 2'],
+    }),
     component: () => {
       const ClosableTabsShowcase = React.lazy(() => import('./ClosableTabsShowcase'));
       return <ClosableTabsShowcase />;

@@ -123,7 +123,8 @@ const PageRenderer = React.forwardRef<AmisLivePreviewRef, { pageId: string; json
   ({ pageId, jsonSchema, dataJson, lang = 'zh', label }, ref) => {
     if (LazyCustomComponents[pageId]) {
       const CustomComponent = LazyCustomComponents[pageId];
-      return <CustomComponent />;
+      const data = dataJson ? JSON.parse(dataJson) : {};
+      return <CustomComponent {...data} />;
     }
     const schema = JSON.parse(jsonSchema);
     const data = dataJson ? JSON.parse(dataJson) : {};
@@ -316,7 +317,7 @@ export const ShowcaseApp: React.FC = () => {
                       <h2 className="showcase-section-title">Live Preview</h2>
                       <div className="showcase-preview-container">
                         <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                          <PageRenderer pageId={page.id} jsonSchema={page.jsonSchema} lang={lang} />
+                          <PageRenderer pageId={page.id} jsonSchema={page.jsonSchema} dataJson={page.data} lang={lang} />
                         </Suspense>
                       </div>
                     </div>
