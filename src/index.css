@@ -1392,6 +1392,35 @@ body {
   color: var(--text-primary);
 }
 
+/* Schema Preview Editor Tabs */
+.schema-preview-editor-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--divider);
+}
+.schema-preview-tab {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: none;
+  font-family: var(--font-family);
+}
+.schema-preview-tab.is-active {
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom-color: var(--primary);
+}
+.schema-preview-tab:hover:not(.is-active) {
+  color: var(--text-primary);
+}
+
 /* Showcase demo helpers */
 .showcase-demo-row {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 12px;
