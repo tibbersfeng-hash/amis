@@ -22,6 +22,8 @@ interface AmisLivePreviewProps {
   lang?: Language;
   /** Optional label to display above the preview */
   label?: string;
+  /** Called with merged form data whenever form values change */
+  onDataChange?: (data: Record<string, unknown>) => void;
 }
 
 /**
@@ -36,6 +38,7 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
   data = {},
   lang = 'zh',
   label,
+  onDataChange,
 }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   // Store user-modified values — survives language switch and re-mount
@@ -97,6 +100,7 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
           if (changeValue && typeof changeValue === 'object') {
             modifiedValues.current = { ...modifiedValues.current, ...changeValue };
             setUserValues({ ...modifiedValues.current });
+            onDataChange?.({ ...modifiedValues.current });
           }
         },
       },
@@ -122,6 +126,7 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
         if (snapshot !== lastSyncedRef.current) {
           lastSyncedRef.current = snapshot;
           setUserValues({ ...modifiedValues.current });
+          onDataChange?.({ ...modifiedValues.current });
         }
       }
     };

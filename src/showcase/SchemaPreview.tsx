@@ -106,7 +106,14 @@ export const SchemaPreview: React.FC = () => {
           <span>实时预览</span>
         </div>
         <div className="schema-preview-ami-container">
-          <AmisLivePreview key={renderKey} schema={schema} data={data} />
+          <AmisLivePreview
+            key={renderKey}
+            schema={schema}
+            data={data}
+            onDataChange={(merged) => {
+              setDataJson(JSON.stringify(merged, null, 2));
+            }}
+          />
         </div>
       </div>
     </div>
