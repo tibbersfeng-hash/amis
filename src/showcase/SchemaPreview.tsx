@@ -74,40 +74,33 @@ const DEFAULT_SCHEMA = JSON.stringify({
         title: 'Sub Mission Rule',
         body: {
           type: 'tabs',
-          className: 'custom-closable-tabs',
-          maxTabs: 10,
-          addBtnText: '+ Add',
+          className: 'custom-solid-fill-tabs',
           tabs: [
             {
               title: 'Sub Mission 1',
-              closable: true,
               body: {
-                type: 'tabs',
-                className: 'custom-solid-fill-tabs',
-                tabs: [
-                  {
-                    title: 'Rule Setup',
-                    body: {
-                      type: 'form',
-                      wrapWithPanel: false,
-                      body: [
-                        { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name', value: '连续签到7天' },
-                        { type: 'input-text', name: 'currency', label: 'Currency', value: '积分' },
-                      ],
-                    },
-                  },
-                  {
-                    title: 'Display',
-                    body: {
-                      type: 'form',
-                      wrapWithPanel: false,
-                      body: [
-                        { type: 'input-text', name: 'awardName', label: 'Award name', value: '宝箱钥匙' },
-                        { type: 'input-text', name: 'ctaText', label: 'cta Text', value: '立即签到' },
-                        { type: 'input-text', name: 'ctaLink', label: 'cta Link', value: '/mission/daily-checkin' },
-                      ],
-                    },
-                  },
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name', value: '连续签到7天' },
+                  { type: 'input-text', name: 'currency', label: 'Currency', value: '积分' },
+                  { type: 'input-text', name: 'awardName', label: 'Award name', value: '宝箱钥匙' },
+                  { type: 'input-text', name: 'ctaText', label: 'cta Text', value: '立即签到' },
+                  { type: 'input-text', name: 'ctaLink', label: 'cta Link', value: '/mission/daily-checkin' },
+                ],
+              },
+            },
+            {
+              title: 'Sub Mission 2',
+              body: {
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name', value: '连续签到30天' },
+                  { type: 'input-text', name: 'currency', label: 'Currency', value: '钻石' },
+                  { type: 'input-text', name: 'awardName', label: 'Award name', value: '限定头像框' },
+                  { type: 'input-text', name: 'ctaText', label: 'cta Text', value: '查看详情' },
+                  { type: 'input-text', name: 'ctaLink', label: 'cta Link', value: '/mission/monthly-checkin' },
                 ],
               },
             },
