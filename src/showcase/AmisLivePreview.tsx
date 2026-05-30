@@ -47,6 +47,8 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
   const lastSyncedRef = useRef<string>('');
   // Track if we've received an onChange callback (means user has modified something)
   const [userValues, setUserValues] = useState<Record<string, unknown> | null>(null);
+  // Baseline input values on mount — only sync values that differ from baseline
+  const baselineValues = useRef<Record<string, string>>({});
 
   // Expose getData via ref — reads from hidden data-field-data divs in the DOM
   useImperativeHandle(ref, () => ({
@@ -132,9 +134,47 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
     };
     // Run after Amis renders
     let observer: MutationObserver | null = null;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
     requestAnimationFrame(() => {
       syncFieldData();
-      // Also watch for subsequent updates (pagination, data reload, field changes)
+      // Record baseline input values on first run — only track changes from baseline
+      const inputs = containerRef.current?.querySelectorAll('input[name], textarea[name], select[name]');
+      inputs?.forEach((el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+        const name = el.getAttribute('name');
+        if (name) {
+          baselineValues.current[name] = 'value' in el ? el.value : '';
+        }
+      });
+      // Poll input values every 500ms — input value changes don't trigger DOM mutations
+      pollTimer = setInterval(() => {
+        if (!containerRef.current) return;
+        const currentInputs = containerRef.current.querySelectorAll('input[name], textarea[name], select[name]');
+        let changed = false;
+        currentInputs.forEach((el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+          const name = el.getAttribute('name');
+          if (name) {
+            const value = 'value' in el ? el.value : undefined;
+            if (value !== undefined) {
+              // Only sync if value differs from baseline
+              if (baselineValues.current[name] !== value) {
+                if (modifiedValues.current[name] !== value) {
+                  modifiedValues.current[name] = value;
+                  changed = true;
+                }
+              }
+            }
+          }
+        });
+        if (changed) {
+          const snapshot = JSON.stringify(modifiedValues.current);
+          if (snapshot !== lastSyncedRef.current) {
+            lastSyncedRef.current = snapshot;
+            setUserValues({ ...modifiedValues.current });
+            onDataChange?.({ ...modifiedValues.current });
+          }
+        }
+      }, 500);
+      // Also watch for DOM mutations (custom data-field-data, pagination, etc.)
       observer = new MutationObserver(() => {
         syncFieldData();
       });
@@ -145,6 +185,9 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
 
     return () => {
       observer?.disconnect();
+      if (pollTimer) clearInterval(pollTimer);
+      // Reset baseline when component unmounts
+      baselineValues.current = {};
       if (containerRef.current) {
         ReactDOM.unmountComponentAtNode(containerRef.current);
       }

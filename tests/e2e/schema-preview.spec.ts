@@ -165,4 +165,117 @@ test.describe('Schema Preview', () => {
 
     await expect(page.locator('.schema-preview-error')).toBeVisible();
   });
+
+  // === Data JSON Tab ===
+
+  test('has two editor tabs: Schema and Data', async ({ page }) => {
+    const schemaTab = page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' });
+    const dataTab = page.locator('.schema-preview-tab', { hasText: 'Data JSON' });
+    await expect(schemaTab).toBeVisible();
+    await expect(dataTab).toBeVisible();
+
+    // Schema tab should be active by default
+    await expect(schemaTab).toHaveClass(/is-active/);
+    await expect(dataTab).not.toHaveClass(/is-active/);
+  });
+
+  test('clicking Data tab switches to data JSON editor', async ({ page }) => {
+    const dataTab = page.locator('.schema-preview-tab', { hasText: 'Data JSON' });
+    await dataTab.click();
+
+    await expect(dataTab).toHaveClass(/is-active/);
+    const schemaTab = page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' });
+    await expect(schemaTab).not.toHaveClass(/is-active/);
+
+    // Toolbar title should update
+    await expect(page.locator('.schema-preview-toolbar-title')).toHaveText('Data JSON');
+
+    // Textarea should contain default data
+    const textarea = page.locator('.schema-preview-textarea');
+    const value = await textarea.inputValue();
+    expect(value).toContain('张三');
+  });
+
+  test('data JSON edits are independent of schema JSON', async ({ page }) => {
+    // Switch to Data tab
+    await page.locator('.schema-preview-tab', { hasText: 'Data JSON' }).click();
+
+    const textarea = page.locator('.schema-preview-textarea');
+    await textarea.fill('');
+    await textarea.fill(JSON.stringify({ name: '李四', email: 'lisi@test.com' }, null, 2));
+
+    const value = await textarea.inputValue();
+    expect(value).toContain('李四');
+
+    // Switch back to Schema tab — should still have schema content
+    await page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' }).click();
+    const schemaValue = await textarea.inputValue();
+    expect(schemaValue).toContain('input-text');
+  });
+
+  // === Data Sync (form edits → Data JSON) ===
+
+  test('form edits sync back to Data JSON textarea', async ({ page }) => {
+    // Ensure schema tab is active and render the form
+    const textarea = page.locator('.schema-preview-textarea');
+    await page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' }).click();
+
+    // Set a simple form
+    await textarea.fill('');
+    await textarea.fill(JSON.stringify({
+      type: 'form',
+      body: [{ type: 'input-text', name: 'name', label: '姓名' }],
+    }, null, 2));
+
+    await page.locator('.schema-preview-render-btn').click();
+    await page.waitForTimeout(500);
+
+    // Type in the input — Amis wraps input in a container, find by input inside form
+    const inputEl = page.locator('.schema-preview-ami-container input[type="text"]').first();
+    await inputEl.click();
+    await inputEl.fill('王五');
+    await page.waitForTimeout(500);
+
+    // Also try blur to trigger onChange
+    await inputEl.press('Tab');
+    await page.waitForTimeout(500);
+
+    // Switch to Data tab
+    await page.locator('.schema-preview-tab', { hasText: 'Data JSON' }).click();
+    await page.waitForTimeout(300);
+
+    const dataValue = await textarea.inputValue();
+    expect(dataValue).toContain('王五');
+  });
+
+  test('clicking render with both schema and data uses data as initial values', async ({ page }) => {
+    // Set data first
+    await page.locator('.schema-preview-tab', { hasText: 'Data JSON' }).click();
+    const dataTextarea = page.locator('.schema-preview-textarea');
+    await dataTextarea.fill('');
+    await dataTextarea.fill(JSON.stringify({ name: '预设姓名', email: 'preset@test.com' }, null, 2));
+
+    // Set schema
+    await page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' }).click();
+    const schemaTextarea = page.locator('.schema-preview-textarea');
+    await schemaTextarea.fill('');
+    await schemaTextarea.fill(JSON.stringify({
+      type: 'form',
+      body: [
+        { type: 'input-text', name: 'name', label: '姓名' },
+        { type: 'input-email', name: 'email', label: '邮箱' },
+      ],
+    }, null, 2));
+
+    // Click render
+    await page.locator('.schema-preview-render-btn').click();
+    await page.waitForTimeout(500);
+
+    // Verify data values rendered in form fields
+    const nameVal = await page.locator('input[name="name"]').inputValue();
+    expect(nameVal).toBe('预设姓名');
+
+    const emailVal = await page.locator('input[name="email"]').inputValue();
+    expect(emailVal).toBe('preset@test.com');
+  });
 });
