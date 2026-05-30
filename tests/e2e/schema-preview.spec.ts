@@ -215,7 +215,7 @@ test.describe('Schema Preview', () => {
 
   // === Data Sync (form edits → Data JSON) ===
 
-  test('form edits sync back to Data JSON textarea', async ({ page }) => {
+  test('clicking 同步数据 syncs form values to Data JSON textarea', async ({ page }) => {
     // Ensure schema tab is active and render the form
     const textarea = page.locator('.schema-preview-textarea');
     await page.locator('.schema-preview-tab', { hasText: 'Amis Schema JSON' }).click();
@@ -230,19 +230,19 @@ test.describe('Schema Preview', () => {
     await page.locator('.schema-preview-render-btn').click();
     await page.waitForTimeout(500);
 
-    // Type in the input — Amis wraps input in a container, find by input inside form
+    // Type in the input
     const inputEl = page.locator('.schema-preview-ami-container input[type="text"]').first();
     await inputEl.click();
     await inputEl.fill('王五');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
-    // Also try blur to trigger onChange
-    await inputEl.press('Tab');
-    await page.waitForTimeout(500);
-
-    // Switch to Data tab
-    await page.locator('.schema-preview-tab', { hasText: 'Data JSON' }).click();
+    // Click the sync button
+    await page.locator('.schema-preview-sync-btn').click();
     await page.waitForTimeout(300);
+
+    // Switch to Data tab to verify synced value
+    await page.locator('.schema-preview-tab', { hasText: 'Data JSON' }).click();
+    await page.waitForTimeout(200);
 
     const dataValue = await textarea.inputValue();
     expect(dataValue).toContain('王五');

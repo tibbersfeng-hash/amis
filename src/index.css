@@ -1356,6 +1356,18 @@ body {
   font-family: var(--font-family);
 }
 .schema-preview-render-btn:hover { opacity: 0.9; }
+.schema-preview-sync-btn {
+  padding: 6px 16px;
+  background: #fff;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-family);
+}
+.schema-preview-sync-btn:hover { opacity: 0.85; }
 .schema-preview-textarea {
   width: 100%;
   min-height: 280px;

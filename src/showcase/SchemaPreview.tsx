@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { AmisLivePreview } from './AmisLivePreview';
+import React, { useRef, useState, useCallback } from 'react';
+import { AmisLivePreview, type AmisLivePreviewRef } from './AmisLivePreview';
 
 const DEFAULT_SCHEMA = JSON.stringify({
   type: 'form',
@@ -26,6 +26,7 @@ export const SchemaPreview: React.FC = () => {
   const [schema, setSchema] = useState<Record<string, unknown>>(() => JSON.parse(DEFAULT_SCHEMA));
   const [data, setData] = useState<Record<string, unknown>>(() => JSON.parse(DEFAULT_DATA));
   const [renderKey, setRenderKey] = useState(0);
+  const previewRef = useRef<AmisLivePreviewRef>(null);
 
   const handleRender = useCallback(() => {
     try {
@@ -47,6 +48,10 @@ export const SchemaPreview: React.FC = () => {
 
     setRenderKey(k => k + 1);
   }, [schemaJson, dataJson]);
+
+  const handleSyncData = useCallback(() => {
+    previewRef.current?.syncData();
+  }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -83,6 +88,9 @@ export const SchemaPreview: React.FC = () => {
           <span className="schema-preview-toolbar-title">{activeLabel}</span>
           <div className="schema-preview-toolbar-actions">
             <span className="schema-preview-hint">Ctrl+Enter 渲染</span>
+            <button className="schema-preview-sync-btn" onClick={handleSyncData}>
+              同步数据
+            </button>
             <button className="schema-preview-render-btn" onClick={handleRender}>
               渲染
             </button>
@@ -107,6 +115,7 @@ export const SchemaPreview: React.FC = () => {
         </div>
         <div className="schema-preview-ami-container">
           <AmisLivePreview
+            ref={previewRef}
             key={renderKey}
             schema={schema}
             data={data}
