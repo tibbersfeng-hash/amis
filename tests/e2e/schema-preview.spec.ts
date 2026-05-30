@@ -22,14 +22,14 @@ test.describe('Schema Preview', () => {
   });
 
   test('default schema renders in preview area', async ({ page }) => {
-    // Preview container should have Amis form content
+    // Preview container should have Amis content
     const previewContainer = page.locator('.schema-preview-ami-container');
     await expect(previewContainer).toBeVisible();
 
-    // Default form fields should be visible
-    await expect(page.getByText('姓名').first()).toBeVisible();
-    await expect(page.getByText('邮箱').first()).toBeVisible();
-    await expect(page.getByText('备注').first()).toBeVisible();
+    // Default tabs should be visible
+    await expect(page.getByText('Mission Rule').first()).toBeVisible();
+    await expect(page.getByText('Registration Rule').first()).toBeVisible();
+    await expect(page.getByText('Sub Mission Rule').first()).toBeVisible();
   });
 
   test('JSON editor is editable and shows user input', async ({ page }) => {
@@ -193,7 +193,8 @@ test.describe('Schema Preview', () => {
     // Textarea should contain default data
     const textarea = page.locator('.schema-preview-textarea');
     const value = await textarea.inputValue();
-    expect(value).toContain('张三');
+    expect(value).toContain('每日签到');
+    expect(value).toContain('DAILY_CHECKIN');
   });
 
   test('data JSON edits are independent of schema JSON', async ({ page }) => {
