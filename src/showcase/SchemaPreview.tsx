@@ -20,8 +20,8 @@ const DEFAULT_SCHEMA = JSON.stringify({
                 type: 'form',
                 wrapWithPanel: false,
                 body: [
-                  { type: 'input-text', name: 'missionName', label: 'Mission Name' },
-                  { type: 'input-text', name: 'missionCode', label: 'Mission Code' },
+                  { type: 'input-text', name: 'missionName', label: 'Mission Name', value: '每日签到' },
+                  { type: 'input-text', name: 'missionCode', label: 'Mission Code', value: 'DAILY_CHECKIN' },
                 ],
               },
             },
@@ -31,8 +31,8 @@ const DEFAULT_SCHEMA = JSON.stringify({
                 type: 'form',
                 wrapWithPanel: false,
                 body: [
-                  { type: 'input-text', name: 'missionDesc', label: 'Mission Description' },
-                  { type: 'input-text', name: 'missionImage', label: 'Mission Image URL' },
+                  { type: 'input-text', name: 'missionDesc', label: 'Mission Description', value: '完成每日签到可获得积分奖励' },
+                  { type: 'input-text', name: 'missionImage', label: 'Mission Image URL', value: 'https://cdn.example.com/images/daily-checkin.png' },
                 ],
               },
             },
@@ -51,8 +51,8 @@ const DEFAULT_SCHEMA = JSON.stringify({
                 type: 'form',
                 wrapWithPanel: false,
                 body: [
-                  { type: 'input-text', name: 'registerKeyWord', label: 'Registration Key Word' },
-                  { type: 'input-text', name: 'limitionKeyWord', label: 'Limitation Key Word' },
+                  { type: 'input-text', name: 'registerKeyWord', label: 'Registration Key Word', value: '签到' },
+                  { type: 'input-text', name: 'limitionKeyWord', label: 'Limitation Key Word', value: '每日限1次' },
                 ],
               },
             },
@@ -62,8 +62,8 @@ const DEFAULT_SCHEMA = JSON.stringify({
                 type: 'form',
                 wrapWithPanel: false,
                 body: [
-                  { type: 'input-text', name: 'registerSuccessMsg', label: 'Registration Success Message' },
-                  { type: 'input-text', name: 'registerFailMsg', label: 'Registration Failure Message' },
+                  { type: 'input-text', name: 'registerSuccessMsg', label: 'Registration Success Message', value: '签到成功，获得积分' },
+                  { type: 'input-text', name: 'registerFailMsg', label: 'Registration Failure Message', value: '今日已签到，请勿重复' },
                 ],
               },
             },
@@ -91,8 +91,8 @@ const DEFAULT_SCHEMA = JSON.stringify({
                       type: 'form',
                       wrapWithPanel: false,
                       body: [
-                        { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name' },
-                        { type: 'input-text', name: 'currency', label: 'Currency' },
+                        { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name', value: '连续签到7天' },
+                        { type: 'input-text', name: 'currency', label: 'Currency', value: '积分' },
                       ],
                     },
                   },
@@ -102,9 +102,9 @@ const DEFAULT_SCHEMA = JSON.stringify({
                       type: 'form',
                       wrapWithPanel: false,
                       body: [
-                        { type: 'input-text', name: 'awardName', label: 'Award name' },
-                        { type: 'input-text', name: 'ctaText', label: 'cta Text' },
-                        { type: 'input-text', name: 'ctaLink', label: 'cta Link' },
+                        { type: 'input-text', name: 'awardName', label: 'Award name', value: '宝箱钥匙' },
+                        { type: 'input-text', name: 'ctaText', label: 'cta Text', value: '立即签到' },
+                        { type: 'input-text', name: 'ctaLink', label: 'cta Link', value: '/mission/daily-checkin' },
                       ],
                     },
                   },
@@ -127,22 +127,11 @@ const DEFAULT_DATA = JSON.stringify({
   limitionKeyWord: '每日限1次',
   registerSuccessMsg: '签到成功，获得积分',
   registerFailMsg: '今日已签到，请勿重复',
-  subMissions: [
-    {
-      subMissionName: '连续签到7天',
-      currency: '积分',
-      awardName: '宝箱钥匙',
-      ctaText: '立即签到',
-      ctaLink: '/mission/daily-checkin',
-    },
-    {
-      subMissionName: '连续签到30天',
-      currency: '钻石',
-      awardName: '限定头像框',
-      ctaText: '查看详情',
-      ctaLink: '/mission/monthly-checkin',
-    },
-  ],
+  subMissionName: '连续签到7天',
+  currency: '积分',
+  awardName: '宝箱钥匙',
+  ctaText: '立即签到',
+  ctaLink: '/mission/daily-checkin',
 }, null, 2);
 
 type EditorTab = 'schema' | 'data';
