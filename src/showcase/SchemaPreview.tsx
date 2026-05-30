@@ -2,18 +2,147 @@ import React, { useRef, useState, useCallback } from 'react';
 import { AmisLivePreview, type AmisLivePreviewRef } from './AmisLivePreview';
 
 const DEFAULT_SCHEMA = JSON.stringify({
-  type: 'form',
-  body: [
-    { type: 'input-text', name: 'name', label: '姓名', required: true },
-    { type: 'input-email', name: 'email', label: '邮箱' },
-    { type: 'textarea', name: 'remarks', label: '备注' },
-  ],
+  type: 'page',
+  body: {
+    type: 'tabs',
+    tabsMode: 'line',
+    className: 'custom-underline-tabs',
+    tabs: [
+      {
+        title: 'Mission Rule',
+        body: {
+          type: 'tabs',
+          className: 'custom-solid-fill-tabs',
+          tabs: [
+            {
+              title: 'Rule Setup',
+              body: {
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'missionName', label: 'Mission Name' },
+                  { type: 'input-text', name: 'missionCode', label: 'Mission Code' },
+                ],
+              },
+            },
+            {
+              title: 'Display',
+              body: {
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'missionDesc', label: 'Mission Description' },
+                  { type: 'input-text', name: 'missionImage', label: 'Mission Image URL' },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      {
+        title: 'Registration Rule',
+        body: {
+          type: 'tabs',
+          className: 'custom-solid-fill-tabs',
+          tabs: [
+            {
+              title: 'Rule Setup',
+              body: {
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'registerKeyWord', label: 'Registration Key Word' },
+                  { type: 'input-text', name: 'limitionKeyWord', label: 'Limitation Key Word' },
+                ],
+              },
+            },
+            {
+              title: 'Display',
+              body: {
+                type: 'form',
+                wrapWithPanel: false,
+                body: [
+                  { type: 'input-text', name: 'registerSuccessMsg', label: 'Registration Success Message' },
+                  { type: 'input-text', name: 'registerFailMsg', label: 'Registration Failure Message' },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      {
+        title: 'Sub Mission Rule',
+        body: {
+          type: 'tabs',
+          className: 'custom-closable-tabs',
+          maxTabs: 10,
+          addBtnText: '+ Add',
+          tabs: [
+            {
+              title: 'Sub Mission 1',
+              closable: true,
+              body: {
+                type: 'tabs',
+                className: 'custom-solid-fill-tabs',
+                tabs: [
+                  {
+                    title: 'Rule Setup',
+                    body: {
+                      type: 'form',
+                      wrapWithPanel: false,
+                      body: [
+                        { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name' },
+                        { type: 'input-text', name: 'currency', label: 'Currency' },
+                      ],
+                    },
+                  },
+                  {
+                    title: 'Display',
+                    body: {
+                      type: 'form',
+                      wrapWithPanel: false,
+                      body: [
+                        { type: 'input-text', name: 'awardName', label: 'Award name' },
+                        { type: 'input-text', name: 'ctaText', label: 'cta Text' },
+                        { type: 'input-text', name: 'ctaLink', label: 'cta Link' },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
 }, null, 2);
 
 const DEFAULT_DATA = JSON.stringify({
-  name: '张三',
-  email: 'zhangsan@example.com',
-  remarks: '这是备注信息',
+  missionName: '每日签到',
+  missionCode: 'DAILY_CHECKIN',
+  missionDesc: '完成每日签到可获得积分奖励',
+  missionImage: 'https://cdn.example.com/images/daily-checkin.png',
+  registerKeyWord: '签到',
+  limitionKeyWord: '每日限1次',
+  registerSuccessMsg: '签到成功，获得积分',
+  registerFailMsg: '今日已签到，请勿重复',
+  subMissions: [
+    {
+      subMissionName: '连续签到7天',
+      currency: '积分',
+      awardName: '宝箱钥匙',
+      ctaText: '立即签到',
+      ctaLink: '/mission/daily-checkin',
+    },
+    {
+      subMissionName: '连续签到30天',
+      currency: '钻石',
+      awardName: '限定头像框',
+      ctaText: '查看详情',
+      ctaLink: '/mission/monthly-checkin',
+    },
+  ],
 }, null, 2);
 
 type EditorTab = 'schema' | 'data';

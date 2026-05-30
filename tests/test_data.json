@@ -1,0 +1,26 @@
+{
+  "missionName": "每日签到",
+  "missionCode": "DAILY_CHECKIN",
+  "missionDesc": "完成每日签到可获得积分奖励",
+  "missionImage": "https://cdn.example.com/images/daily-checkin.png",
+  "registerKeyWord": "签到",
+  "limitionKeyWord": "每日限1次",
+  "registerSuccessMsg": "签到成功，获得积分",
+  "registerFailMsg": "今日已签到，请勿重复",
+  "subMissions": [
+    {
+      "subMissionName": "连续签到7天",
+      "currency": "积分",
+      "awardName": "宝箱钥匙",
+      "ctaText": "立即签到",
+      "ctaLink": "/mission/daily-checkin"
+    },
+    {
+      "subMissionName": "连续签到30天",
+      "currency": "钻石",
+      "awardName": "限定头像框",
+      "ctaText": "查看详情",
+      "ctaLink": "/mission/monthly-checkin"
+    }
+  ]
+}
