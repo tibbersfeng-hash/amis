@@ -40,12 +40,12 @@ const FORM_TEMPLATE = {
 };
 
 /** Build tabs schema with N items, each containing the form template */
-function buildSchema(itemCount: number, itemData: Record<string, unknown>[]) {
+export function buildSchema(items: Record<string, unknown>[]) {
   const tabs: Record<string, unknown>[] = [];
-  for (let i = 0; i < itemCount; i++) {
-    const formData = { title: `Sub Mission ${i + 1}`, ...FORM_TEMPLATE.data };
-    if (itemData[i]) {
-      Object.assign(formData, itemData[i]);
+  for (let i = 0; i < items.length; i++) {
+    const formData = { ...FORM_TEMPLATE.data };
+    if (items[i]) {
+      Object.assign(formData, items[i]);
     }
     tabs.push({
       title: `Sub Mission ${i + 1}`,
@@ -65,12 +65,8 @@ function buildSchema(itemCount: number, itemData: Record<string, unknown>[]) {
   };
 }
 
-function createNewItemData(): Record<string, unknown> {
-  return {};
-}
-
 /** Read form data from a single tab pane */
-function readTabFormData(scope: Element): Record<string, unknown> {
+export function readTabFormData(scope: Element): Record<string, unknown> {
   const formData: Record<string, unknown> = {};
   const formItems = scope.querySelectorAll('.cxd-Form-item');
   const fieldNameMap: Record<string, string> = {
@@ -101,20 +97,7 @@ function readTabFormData(scope: Element): Record<string, unknown> {
     if (select) {
       const valueText = select.textContent?.trim();
       if (valueText && valueText !== '请选择') {
-        const valueMap: Record<string, string> = {
-          'Room Stay Prepaid Booking': 'Room Stay Prepaid Booking',
-          'Direct Booking': 'Direct Booking',
-          'BU1': 'BU1', 'BU2': 'BU2', 'BU3': 'BU3',
-          '积分': '积分', '钻石': '钻石', '金币': '金币',
-          'Credit Card': 'Credit Card', 'Cash': 'Cash',
-          'Code A': 'A', 'Code B': 'B',
-          'Rate 1': 'R1', 'Rate 2': 'R2',
-          'Web': 'Web', 'App': 'App', 'Mini Program': 'MiniProgram',
-          'Standard': 'Standard', 'Deluxe': 'Deluxe', 'Suite': 'Suite',
-          'Cat A': 'A', 'Cat B': 'B',
-          'BC-001': 'BC-001', 'BC-002': 'BC-002',
-        };
-        formData[fieldName] = valueMap[valueText] || valueText;
+        formData[fieldName] = valueText;
       }
       return;
     }
@@ -144,38 +127,36 @@ function readTabFormData(scope: Element): Record<string, unknown> {
 
 export const ComboShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [itemCount, setItemCount] = useState(2);
-  const [itemData, setItemData] = useState<Record<string, unknown>[]>([{}, {}]);
+  const [items, setItems] = useState<Record<string, unknown>[]>([{}, {}]);
 
   const handleAddItem = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Sync active tab data from DOM before adding
     const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
-    if (activePane) {
-      const activeData = readTabFormData(activePane);
-      const activeLink = container.querySelector('.cxd-Tabs-links .cxd-Tabs-link.is-active a');
-      let activeIndex = 0;
-      const tabLinks = container.querySelectorAll('.cxd-Tabs-links .cxd-Tabs-link');
-      tabLinks.forEach((link, idx) => {
-        if (link.querySelector('a') === activeLink) activeIndex = idx;
-      });
-
-      setItemData((prev) => {
-        const updated = [...prev];
-        if (Object.keys(activeData).length > 0) {
-          updated[activeIndex] = { ...(prev[activeIndex] || {}), ...activeData };
-        }
-        return [...updated, createNewItemData()];
-      });
-    } else {
-      setItemData((prev) => [...prev, createNewItemData()]);
+    if (!activePane) {
+      setItems((prev) => [...prev, {}]);
+      return;
     }
-    setItemCount((prev) => prev + 1);
+
+    // Read current active tab data from DOM
+    const activeData = readTabFormData(activePane);
+    const activeLink = container.querySelector('.cxd-Tabs-links .cxd-Tabs-link.is-active a');
+    let activeIndex = 0;
+    container.querySelectorAll('.cxd-Tabs-links .cxd-Tabs-link').forEach((link, idx) => {
+      if (link.querySelector('a') === activeLink) activeIndex = idx;
+    });
+
+    setItems((prev) => {
+      const updated = [...prev];
+      if (Object.keys(activeData).length > 0) {
+        updated[activeIndex] = { ...(prev[activeIndex] || {}), ...activeData };
+      }
+      return [...updated, {}];
+    });
   }, []);
 
-  // Watch for item removal — sync when Amis removes an item
+  // Watch for tab removal — sync when Amis removes a tab
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -184,11 +165,9 @@ export const ComboShowcase: React.FC = () => {
     const observer = new MutationObserver(() => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        const tabs = container.querySelectorAll('.custom-combo-tabs .cxd-Tabs-linksContainer .cxd-Tabs-link');
-        const currentItemCount = tabs.length;
-        if (currentItemCount < itemCount && currentItemCount > 0) {
-          setItemCount(currentItemCount);
-          setItemData((prev) => prev.slice(0, currentItemCount));
+        const tabLinks = container.querySelectorAll('.custom-combo-tabs .cxd-Tabs-linksContainer .cxd-Tabs-link');
+        if (tabLinks.length > 0 && tabLinks.length < items.length) {
+          setItems((prev) => prev.slice(0, tabLinks.length));
         }
       }, 200);
     });
@@ -198,15 +177,15 @@ export const ComboShowcase: React.FC = () => {
       observer.disconnect();
       clearTimeout(timer);
     };
-  }, [itemCount]);
+  }, [items.length]);
 
-  const currentSchema = buildSchema(itemCount, itemData);
+  const currentSchema = buildSchema(items);
 
   return (
     <div className="combo-showcase">
       <div className="combo-preview" ref={containerRef}>
         <AmisLivePreview schema={currentSchema} />
-        {itemCount < 10 && (
+        {items.length < 10 && (
           <button className="closable-tabs-add-btn" onClick={handleAddItem} type="button">
             <span className="add-icon">+</span>
             <span>Add Sub Mission</span>
