@@ -70,15 +70,111 @@ function createNewItemData(): Record<string, unknown> {
   return {};
 }
 
+/** Read form data from a single tab pane */
+function readTabFormData(scope: Element): Record<string, unknown> {
+  const formData: Record<string, unknown> = {};
+  const formItems = scope.querySelectorAll('.cxd-Form-item');
+  const fieldNameMap: Record<string, string> = {
+    'Sub Mission Type': 'subMissionType',
+    'Business Unit': 'businessUnit',
+    'Currency': 'currency',
+    'Payment Method': 'paymentMethod',
+    'Target Spending': 'targetSpending',
+    'Market Code': 'marketCode',
+    'Rate Code': 'rateCode',
+    'Source': 'source',
+    'Room Type': 'roomType',
+    'Room Category': 'roomCategory',
+    'Registration Award': 'awardType',
+    'Award Points': 'awardPoints',
+    'Billing Code': 'billingCode',
+    '库存数': 'stockQty',
+    'Transaction Note': 'transactionNote',
+  };
+  formItems.forEach((item: Element) => {
+    const label = item.querySelector('.cxd-FieldLabel');
+    const labelText = label?.textContent?.trim().replace(/\*$/, '') || '';
+    const fieldName = fieldNameMap[labelText];
+    if (!fieldName) return;
+
+    // Select component
+    const select = item.querySelector('.cxd-Select-value');
+    if (select) {
+      const valueText = select.textContent?.trim();
+      if (valueText && valueText !== '请选择') {
+        const valueMap: Record<string, string> = {
+          'Room Stay Prepaid Booking': 'Room Stay Prepaid Booking',
+          'Direct Booking': 'Direct Booking',
+          'BU1': 'BU1', 'BU2': 'BU2', 'BU3': 'BU3',
+          '积分': '积分', '钻石': '钻石', '金币': '金币',
+          'Credit Card': 'Credit Card', 'Cash': 'Cash',
+          'Code A': 'A', 'Code B': 'B',
+          'Rate 1': 'R1', 'Rate 2': 'R2',
+          'Web': 'Web', 'App': 'App', 'Mini Program': 'MiniProgram',
+          'Standard': 'Standard', 'Deluxe': 'Deluxe', 'Suite': 'Suite',
+          'Cat A': 'A', 'Cat B': 'B',
+          'BC-001': 'BC-001', 'BC-002': 'BC-002',
+        };
+        formData[fieldName] = valueMap[valueText] || valueText;
+      }
+      return;
+    }
+
+    // Radio component
+    const radios = item.querySelector('.cxd-Radios');
+    if (radios) {
+      const checked = radios.querySelector('.cxd-Radio.is-checked');
+      if (checked) {
+        const valueText = checked.textContent?.trim();
+        const valueMap: Record<string, string> = {
+          'Award Points': 'points', 'Voucher': 'voucher', 'No Award': 'none',
+        };
+        formData[fieldName] = valueMap[valueText || ''] || valueText;
+      }
+      return;
+    }
+
+    // Native input
+    const input = item.querySelector('input, textarea');
+    if (input && (input as HTMLInputElement).value !== undefined && (input as HTMLInputElement).value !== '') {
+      formData[fieldName] = (input as HTMLInputElement).value;
+    }
+  });
+  return formData;
+}
+
 export const ComboShowcase: React.FC<{ schema: Record<string, unknown> }> = ({ schema }) => {
   const previewRef = useRef<AmisLivePreviewRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [itemCount, setItemCount] = useState(2);
   const [itemData, setItemData] = useState<Record<string, unknown>[]>([{}, {}]);
 
-  const handleAddItem = useCallback(() => {
+  const handleAddItem = useCallback(async () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Sync active tab data from DOM before adding
+    const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
+    if (activePane) {
+      const activeData = readTabFormData(activePane);
+      const activeLink = container.querySelector('.cxd-Tabs-links .cxd-Tabs-link.is-active a');
+      let activeIndex = 0;
+      const tabLinks = container.querySelectorAll('.cxd-Tabs-links .cxd-Tabs-link');
+      tabLinks.forEach((link, idx) => {
+        if (link.querySelector('a') === activeLink) activeIndex = idx;
+      });
+
+      setItemData((prev) => {
+        const updated = [...prev];
+        if (Object.keys(activeData).length > 0) {
+          updated[activeIndex] = { ...(prev[activeIndex] || {}), ...activeData };
+        }
+        return [...updated, createNewItemData()];
+      });
+    } else {
+      setItemData((prev) => [...prev, createNewItemData()]);
+    }
     setItemCount((prev) => prev + 1);
-    setItemData((prev) => [...prev, createNewItemData()]);
   }, []);
 
   // Watch for item removal — sync when Amis removes an item
