@@ -1,344 +1,323 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { AmisLivePreview } from './AmisLivePreview';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AmisLivePreview, AmisLivePreviewRef } from './AmisLivePreview';
 
 /**
- * Closable Tabs — config read from Amis JSON schema.
- *
- * Schema format:
- * {
- *   "type": "tabs",
- *   "className": "custom-closable-tabs",
- *   "addable": true,
- *   "addBtnText": "+ Add",
- *   "maxTabs": 10,
- *   "titlePrefix": "Sub Mission",
- *   "tabs": [
- *     { "title": "Sub Mission 1", "closable": true, "body": "..." },
- *     { "title": "Sub Mission 2", "closable": true, "body": "..." }
- *   ]
- * }
- *
- * titlePrefix: prefix for newly added tabs (default: "Tab")
- * maxTabs: maximum number of tabs allowed (default: 10)
- * tabs: initial tab definitions
+ * Base form schema template — reused for each tab.
  */
+const FORM_TEMPLATE = {
+  type: 'form',
+  data: {
+    subMissionType: 'Room Stay Prepaid Booking',
+    businessUnit: '',
+    currency: '',
+    paymentMethod: '',
+    targetSpending: '',
+    marketCode: '',
+    rateCode: '',
+    source: '',
+    roomType: '',
+    roomCategory: '',
+    awardType: 'points',
+    awardPoints: '',
+    billingCode: '',
+    stockQty: '',
+    transactionNote: '',
+  },
+  body: [
+    { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
+    { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
+    { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
+    { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
+    { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
+    { type: 'select', name: 'marketCode', label: 'Market Code', options: [{ label: 'Code A', value: 'A' }, { label: 'Code B', value: 'B' }] },
+    { type: 'select', name: 'rateCode', label: 'Rate Code', options: [{ label: 'Rate 1', value: 'R1' }, { label: 'Rate 2', value: 'R2' }] },
+    { type: 'select', name: 'source', label: 'Source', options: [{ label: 'Web', value: 'Web' }, { label: 'App', value: 'App' }, { label: 'Mini Program', value: 'MiniProgram' }] },
+    { type: 'select', name: 'roomType', label: 'Room Type', options: [{ label: 'Standard', value: 'Standard' }, { label: 'Deluxe', value: 'Deluxe' }, { label: 'Suite', value: 'Suite' }] },
+    { type: 'select', name: 'roomCategory', label: 'Room Category', options: [{ label: 'Cat A', value: 'A' }, { label: 'Cat B', value: 'B' }] },
+    { type: 'radios', name: 'awardType', label: 'Registration Award', options: [{ label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' }] },
+    { type: 'input-text', name: 'awardPoints', label: 'Award Points' },
+    { type: 'select', name: 'billingCode', label: 'Billing Code', options: [{ label: 'BC-001', value: 'BC-001' }, { label: 'BC-002', value: 'BC-002' }] },
+    { type: 'input-text', name: 'stockQty', label: '库存数' },
+    { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
+  ],
+  actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+};
 
-interface TabDef {
-  title: string;
-  closable?: boolean;
-  body?: unknown;
-}
-
-interface ClosableTabsSchema {
-  type: string;
-  className: string;
-  addable?: boolean;
-  addBtnText?: string;
-  maxTabs?: number;
-  titlePrefix?: string;
-  tabs?: TabDef[];
-}
-
-const DEFAULT_PREFIX = 'Tab';
-const DEFAULT_MAX_TABS = 10;
-const DEFAULT_TABS: TabDef[] = [
-  { title: 'Tab 1', body: 'Tab 1 content' },
-  { title: 'Tab 2', body: 'Tab 2 content' },
-];
-
-let nextIndex = 3;
-
-export function resetNextIndex(val: number) {
-  nextIndex = val;
-}
-
-export const ClosableTabsShowcase: React.FC<{ schema: ClosableTabsSchema }> = ({ schema }) => {
-  const titlePrefix = schema?.titlePrefix ?? DEFAULT_PREFIX;
-  const maxTabs = schema?.maxTabs ?? DEFAULT_MAX_TABS;
-  const initialTabs: TabDef[] = schema?.tabs ?? DEFAULT_TABS;
-
-  const [tabs, setTabs] = useState<TabDef[]>(initialTabs);
-  const [activeTab, setActiveTab] = useState<TabDef>(initialTabs[0]);
-  const [showScrollHint, setShowScrollHint] = useState({ left: false, right: false });
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const ulRef = useRef<HTMLUListElement>(null);
-  const rafRef = useRef<number>(0);
-
-  // Reset nextIndex when schema changes
-  useEffect(() => {
-    nextIndex = initialTabs.length + 1;
-  }, [initialTabs.length]);
-
-  const addTab = useCallback(() => {
-    setTabs(prev => {
-      if (prev.length >= maxTabs) return prev;
-      const idx = nextIndex++;
-      const title = `${titlePrefix} ${idx}`;
-      const newTab: TabDef = {
-        title,
-        closable: true,
-        body: { type: 'tpl', tpl: `<div style="padding:12px;">${title} content area</div>` },
-      };
-      setActiveTab(newTab);
-      return [...prev, newTab];
+/** Build schema with N tabs, each containing the form template */
+function buildSchema(tabCount: number, tabData: Record<string, unknown>[]) {
+  const tabs: Record<string, unknown>[] = [];
+  for (let i = 0; i < tabCount; i++) {
+    const formData = { ...FORM_TEMPLATE.data };
+    if (tabData[i]) {
+      Object.assign(formData, tabData[i]);
+    }
+    tabs.push({
+      title: `Sub Mission ${i + 1}`,
+      closable: true,
+      body: {
+        type: 'form',
+        data: formData,
+        body: FORM_TEMPLATE.body,
+        actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+      },
     });
-  }, [maxTabs, titlePrefix]);
+  }
+  return {
+    type: 'tabs',
+    className: 'custom-closable-tabs',
+    tabs,
+  };
+}
 
-  const removeTab = useCallback((title: string) => {
-    setTabs(prev => {
-      const next = prev.filter(t => t.title !== title);
-      if (title === activeTab.title && next.length > 0) {
-        setActiveTab(next[next.length - 1]);
+/** Create fresh data for a new tab */
+function createNewTabData(): Record<string, unknown> {
+  return {};
+}
+
+/** Read form data from a single tab pane */
+function readTabFormData(scope: Element): Record<string, unknown> {
+  const formData: Record<string, unknown> = {};
+
+  // Native inputs
+  const nativeInputs = scope.querySelectorAll('input[name], select[name], textarea[name]');
+  nativeInputs.forEach((el: Element) => {
+    const input = el as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const name = input.getAttribute('name');
+    if (name && input.value !== undefined && input.value !== '') {
+      formData[name] = input.value;
+    }
+  });
+
+  // Amis select components
+  const formItems = scope.querySelectorAll('.cxd-Form-item');
+  const fieldNameMap: Record<string, string> = {
+    'Sub Mission Type': 'subMissionType',
+    'Business Unit': 'businessUnit',
+    'Currency': 'currency',
+    'Payment Method': 'paymentMethod',
+    'Market Code': 'marketCode',
+    'Rate Code': 'rateCode',
+    'Source': 'source',
+    'Room Type': 'roomType',
+    'Room Category': 'roomCategory',
+    'Billing Code': 'billingCode',
+  };
+  formItems.forEach((item: Element) => {
+    const select = item.querySelector('.cxd-Select');
+    if (!select) return;
+    const valueEl = select.querySelector('.cxd-Select-value');
+    const displayValue = valueEl?.textContent?.trim();
+    if (!displayValue || displayValue === '请选择') return;
+
+    const children = Array.from(item.children);
+    for (const child of children) {
+      if (child.classList.contains('cxd-Select')) continue;
+      const text = child.textContent?.trim().replace(/\*$/, '');
+      if (text && fieldNameMap[text]) {
+        const fieldName = fieldNameMap[text];
+        if (!formData[fieldName]) {
+          formData[fieldName] = displayValue;
+        }
+        break;
       }
-      return next;
-    });
-  }, [activeTab.title]);
+    }
+  });
 
-  const scroll = useCallback((direction: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const step = direction === 'left' ? -200 : 200;
-    el.scrollBy({ left: step, behavior: 'smooth' });
+  // Amis radio components
+  const radioGroups = scope.querySelectorAll('.cxd-Radios');
+  radioGroups.forEach((radiosEl: Element) => {
+    const checkedRadio = radiosEl.querySelector('.cxd-Radio.is-checked');
+    if (checkedRadio) {
+      const valueText = checkedRadio.textContent?.trim();
+      const valueMap: Record<string, string> = {
+        'Award Points': 'points',
+        'Voucher': 'voucher',
+        'No Award': 'none',
+      };
+      formData['awardType'] = valueMap[valueText || ''] || valueText;
+    }
+  });
+
+  return formData;
+}
+
+export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }> = ({ schema }) => {
+  const previewRef = useRef<AmisLivePreviewRef>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [submissions, setSubmissions] = useState<Record<string, unknown>[][]>([]);
+  const [tabCount, setTabCount] = useState(2);
+  const [tabData, setTabData] = useState<Record<string, unknown>[]>([{}, {}]);
+
+  const handleSubmit = useCallback((rows: Record<string, unknown>[]) => {
+    setSubmissions((prev) => {
+      const exists = prev.some((p) => JSON.stringify(p) === JSON.stringify(rows));
+      if (!exists) return [...prev, rows];
+      return prev;
+    });
   }, []);
 
-  // Detect overflow and update scroll hint visibility
+  const handleAddTab = useCallback(() => {
+    setTabCount((prev) => prev + 1);
+    setTabData((prev) => [...prev, createNewTabData()]);
+  }, []);
+
+  // Watch for tab close (closable) — sync when Amis removes a tab
   useEffect(() => {
-    const check = () => {
-      const el = scrollRef.current;
-      const ul = ulRef.current;
-      if (!el || !ul) return;
-      const { scrollLeft, scrollWidth, clientWidth } = el;
-      setShowScrollHint({
-        left: scrollLeft > 2,
-        right: scrollWidth > clientWidth + scrollLeft + 2,
-      });
-    };
+    const container = containerRef.current;
+    if (!container) return;
 
-    check();
-    const observer = new ResizeObserver(check);
-    if (ulRef.current) observer.observe(ulRef.current);
-    if (scrollRef.current) observer.observe(scrollRef.current);
+    let timer: ReturnType<typeof setTimeout>;
+    const observer = new MutationObserver(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const closableTabs = container.querySelectorAll('.custom-closable-tabs > .cxd-Tabs-linksContainer .cxd-Tabs-link');
+        const currentTabCount = closableTabs.length;
+        if (currentTabCount < tabCount && currentTabCount > 0) {
+          setTabCount(currentTabCount);
+          setTabData((prev) => prev.slice(0, currentTabCount));
+        }
+      }, 200);
+    });
 
+    observer.observe(container, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(timer);
     };
-  }, [tabs]);
+  }, [tabCount]);
 
-  const isMaxReached = tabs.length >= maxTabs;
+  // Listen for form submit button clicks and capture ALL tab data as array
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  const containerStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: 0,
-    margin: 0,
-    background: '#F9FAFA',
-    border: 'none',
-    boxShadow: 'none',
-  };
+    let isProcessing = false;
 
-  const ulStyle: React.CSSProperties = {
-    gap: 0,
-    border: 'none',
-    background: '#F9FAFA',
-    padding: 0,
-    margin: 0,
-    listStyle: 'none',
-    display: 'flex',
-    whiteSpace: 'nowrap',
-  };
+    const handleClick = async (e: Event) => {
+      const target = e.target as HTMLElement;
+      const submitBtn = target.closest('button[type="submit"]');
+      if (!submitBtn || !container.contains(submitBtn)) return;
 
-  const renderScrollButton = (direction: 'left' | 'right') => (
-    <button
-      className={`closable-scroll-btn closable-scroll-btn--${direction}`}
-      onClick={() => scroll(direction)}
-      style={{
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        [direction]: 0,
-        width: '32px',
-        background: direction === 'left'
-          ? 'linear-gradient(to right, #F9FAFA 60%, transparent)'
-          : 'linear-gradient(to left, #F9FAFA 60%, transparent)',
-        border: 'none',
-        cursor: 'pointer',
-        zIndex: 2,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '16px',
-        color: '#394DB9',
-      }}
-    >
-      {direction === 'left' ? '‹' : '›'}
-    </button>
-  );
+      // Prevent Amis's own form submission from firing
+      e.stopImmediatePropagation();
 
-  const renderTab = (tab: TabDef, isAdd: boolean) => {
-    if (isAdd) {
-      return (
-        <li
-          key="__add__"
-          onClick={addTab}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '10px 10px 10px 20px',
-            gap: '10px',
-            height: '40px',
-            color: isMaxReached ? '#ccc' : '#394DB9',
-            fontWeight: 500,
-            fontSize: '18px',
-            cursor: isMaxReached ? 'not-allowed' : 'pointer',
-            background: '#F9FAFA',
-            boxSizing: 'border-box',
-            flex: 'none',
-            lineHeight: 1,
-            position: 'relative',
-          }}
-        >
-          {!isMaxReached && (
-            <span
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '1px',
-                height: '24px',
-                background: '#e0e0e0',
-              }}
-            />
-          )}
-          + Add
-        </li>
-      );
-    }
+      // Avoid double-processing if click fires multiple times
+      if (isProcessing) return;
+      isProcessing = true;
 
-    return (
-      <li
-        key={tab.title}
-        className={`cxd-Tabs-link ${tab.title === activeTab.title ? 'is-active' : ''}`}
-        onClick={() => setActiveTab(tab)}
-        style={{
-          display: 'inline-flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          padding: '10px 10px 10px 20px',
-          gap: '10px',
-          height: '40px',
-          margin: 0,
-          background: tab.title === activeTab.title ? '#fff' : '#F9FAFA',
-          border: 'none',
-          borderTop: tab.title === activeTab.title ? '4px solid #394DB9' : '4px solid transparent',
-          borderRadius: 0,
-          boxSizing: 'border-box',
-          flex: 'none',
-          cursor: 'pointer',
-          transition: 'none',
-        }}
-      >
-        <a
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            position: 'static',
-            width: 'auto',
-            flexShrink: 0,
-            padding: 0,
-            margin: 0,
-            fontSize: '18px',
-            fontWeight: tab.title === activeTab.title ? 500 : 400,
-            color: tab.title === activeTab.title ? '#394DB9' : '#555',
-            background: 'transparent',
-            border: 'none',
-            textDecoration: 'none',
-            lineHeight: 1,
-          }}
-        >
-          {tab.title}
-        </a>
-        <span
-          className="cxd-Tabs-link-close"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeTab(tab.title);
-          }}
-          style={{
-            width: '10px',
-            height: '10px',
-            margin: 0,
-            padding: 0,
-            position: 'static',
-            color: '#9CA3AF',
-            cursor: 'pointer',
-            fontSize: '10px',
-            lineHeight: 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.6,
-            flexShrink: 0,
-          }}
-        >
-          ×
-        </span>
-      </li>
-    );
-  };
+      const tabLinks = container.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
+      const totalCount = tabLinks.length;
 
-  // Build content schema from active tab's body
-  const contentSchema = activeTab?.body ?? {
-    type: 'tpl',
-    tpl: `<div style="padding:12px;">${activeTab?.title ?? 'Tab'} content area</div>`,
-  };
+      // Find the originally active tab index
+      const activeLink = container.querySelector('.custom-closable-tabs .cxd-Tabs-link.is-active a');
+      let originalIndex = 0;
+      tabLinks.forEach((link, idx) => {
+        if (link === activeLink) originalIndex = idx;
+      });
+
+      const allRows: Record<string, unknown>[] = [];
+
+      // IMPORTANT: Read the CURRENT active tab FIRST before any tab switching.
+      // Switching tabs causes Amis to unmount the current pane's DOM, losing
+      // any user-entered values that haven't been synced to Amis form state.
+      // By reading the active tab first, we capture the data while it's in the DOM.
+      const currentActivePane = container.querySelector('.cxd-Tabs-pane.is-active');
+      if (currentActivePane) {
+        const rowData = readTabFormData(currentActivePane);
+        if (Object.keys(rowData).length > 0) {
+          allRows[originalIndex] = rowData;
+        }
+      }
+
+      // Now switch to and read the remaining tabs
+      for (let i = 0; i < totalCount; i++) {
+        if (i === originalIndex) continue; // Already read above
+
+        tabLinks[i].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        tabLinks[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+        // Wait for the pane to become active
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(() => { observer.disconnect(); resolve(); }, 3000);
+          const observer = new MutationObserver(() => {
+            const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
+            if (activePane && activePane.querySelectorAll('.cxd-Form-item').length > 0) {
+              clearTimeout(timeout);
+              observer.disconnect();
+              resolve();
+            }
+          });
+          observer.observe(container, { childList: true, subtree: true, attributes: true });
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
+        if (activePane) {
+          const rowData = readTabFormData(activePane);
+          if (Object.keys(rowData).length > 0) {
+            allRows[i] = rowData;
+          }
+        }
+      }
+
+      // Restore original active tab
+      if (tabLinks[originalIndex]) {
+        tabLinks[originalIndex].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        tabLinks[originalIndex].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      }
+
+      isProcessing = false;
+
+      // Filter out any undefined entries and submit
+      const filteredRows = allRows.filter(Boolean);
+      if (filteredRows.length > 0) {
+        handleSubmit(filteredRows);
+      }
+    };
+
+    container.addEventListener('click', handleClick, true);
+    return () => container.removeEventListener('click', handleClick, true);
+  }, [handleSubmit]);
+
+  const currentSchema = buildSchema(tabCount, tabData);
 
   return (
-    <div className="custom-closable-tabs" style={{ margin: 0 }}>
-      {/* Max tabs indicator */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 0 4px 0',
-        fontSize: '12px',
-        color: '#999',
-      }}>
-        <span>{tabs.length} / {maxTabs} tabs</span>
-      </div>
-
-      {/* Tab bar with scroll */}
-      <div style={containerStyle}>
-        {tabs.length === 0 ? (
-          <ul style={ulStyle}>
-            {renderTab({ title: '', body: null }, true)}
-          </ul>
-        ) : (
-          <>
-            {showScrollHint.left && renderScrollButton('left')}
-            {showScrollHint.right && renderScrollButton('right')}
-
-            <div
-              ref={scrollRef}
-              className="closable-scroll-container"
-              style={{
-                overflowX: 'auto',
-                overflowY: 'hidden',
-              }}
-            >
-              <ul ref={ulRef} style={ulStyle}>
-                {tabs.map(tab => renderTab(tab, false))}
-                {renderTab({ title: '', body: null }, true)}
-              </ul>
-            </div>
-          </>
+    <div className="closable-tabs-showcase">
+      {/* Preview area */}
+      <div className="closable-tabs-preview" ref={containerRef}>
+        <AmisLivePreview ref={previewRef} schema={currentSchema as Record<string, unknown>} />
+        {tabCount < 10 && (
+          <button className="closable-tabs-add-btn" onClick={handleAddTab} type="button">
+            <span className="add-icon">+</span>
+            <span>Add Sub Mission</span>
+          </button>
         )}
       </div>
 
-      {/* Tab content — rendered via Amis */}
-      <div style={{ background: '#fff', padding: '20px', paddingBottom: 0 }}>
-        <AmisLivePreview schema={contentSchema} />
+      {/* Form submission data display */}
+      <div className="closable-tabs-submissions">
+        <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#3F476A' }}>
+          表单提交记录 ({submissions.length})
+        </h3>
+        {submissions.length === 0 ? (
+          <div style={{ color: '#999', fontSize: '13px', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
+            暂无提交记录，请在上方表单中填写并提交
+          </div>
+        ) : (
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {submissions.map((rows, idx) => (
+              <div key={idx} style={{ marginBottom: '8px', border: '1px solid #e0e0e0', borderRadius: '4px' }}>
+                <div style={{ background: '#f5f5f5', padding: '6px 12px', fontSize: '12px', color: '#666', borderBottom: '1px solid #e0e0e0' }}>
+                  提交 #{idx + 1}（{rows.length} 条）
+                </div>
+                <pre style={{ margin: 0, padding: '12px', fontSize: '12px', background: '#fafafa' }}>
+                  {JSON.stringify(rows, null, 2)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

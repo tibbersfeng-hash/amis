@@ -282,22 +282,96 @@ const customShowcasePages: ShowcasePage[] = [
     id: 'closable-tabs',
     category: '布局组件',
     title: 'Closable Tabs',
-    description: '可关闭 Tab + 添加按钮。选中=顶部蓝条+蓝字粗体+白底，未选中=灰字+浅灰底。支持滚动、最大数量限制。所有配置均在 JSON schema 中：titlePrefix 控制新 tab 名称前缀。',
+    description: '可关闭 Tab + 添加按钮，每个 tab 内嵌表单。新增 tab 时自动生成相同表单结构。支持表单提交并显示提交数据。',
     jsonSchema: JSON.stringify({
       type: 'tabs',
       className: 'custom-closable-tabs',
       addable: true,
       addBtnText: '+ Add',
-      maxTabs: 10,
-      titlePrefix: 'Sub Mission',
+      max: 10,
       tabs: [
-        { title: 'Sub Mission 1', closable: true, body: { type: 'tpl', tpl: '<div style="padding:12px;">Sub Mission 1 content area</div>' } },
-        { title: 'Sub Mission 2', closable: true, body: { type: 'tpl', tpl: '<div style="padding:12px;">Sub Mission 2 content area</div>' } },
+        {
+          title: 'Sub Mission 1',
+          closable: true,
+          body: {
+            type: 'form',
+            wrapWithPanel: false,
+            data: { subMissionType: 'Room Stay Prepaid Booking', businessUnit: '', currency: '', paymentMethod: '', targetSpending: '', marketCode: '', rateCode: '', source: '', roomType: '', roomCategory: '', awardType: 'points', awardPoints: '', billingCode: '', stockQty: '', transactionNote: '' },
+            body: [
+              { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
+              { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
+              { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
+              { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
+              { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
+              { type: 'select', name: 'marketCode', label: 'Market Code', options: [{ label: 'Code A', value: 'A' }, { label: 'Code B', value: 'B' }] },
+              { type: 'select', name: 'rateCode', label: 'Rate Code', options: [{ label: 'Rate 1', value: 'R1' }, { label: 'Rate 2', value: 'R2' }] },
+              { type: 'select', name: 'source', label: 'Source', options: [{ label: 'Web', value: 'Web' }, { label: 'App', value: 'App' }, { label: 'Mini Program', value: 'MiniProgram' }] },
+              { type: 'select', name: 'roomType', label: 'Room Type', options: [{ label: 'Standard', value: 'Standard' }, { label: 'Deluxe', value: 'Deluxe' }, { label: 'Suite', value: 'Suite' }] },
+              { type: 'select', name: 'roomCategory', label: 'Room Category', options: [{ label: 'Cat A', value: 'A' }, { label: 'Cat B', value: 'B' }] },
+              { type: 'radios', name: 'awardType', label: 'Registration Award', options: [{ label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' }] },
+              { type: 'input-text', name: 'awardPoints', label: 'Award Points' },
+              { type: 'select', name: 'billingCode', label: 'Billing Code', options: [{ label: 'BC-001', value: 'BC-001' }, { label: 'BC-002', value: 'BC-002' }] },
+              { type: 'input-text', name: 'stockQty', label: '库存数' },
+              { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
+            ],
+            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+          },
+        },
+        {
+          title: 'Sub Mission 2',
+          closable: true,
+          body: {
+            type: 'form',
+            wrapWithPanel: false,
+            data: { subMissionType: 'Direct Booking', businessUnit: 'BU2', currency: '钻石', paymentMethod: 'Credit Card', targetSpending: '', marketCode: '', rateCode: '', source: '', roomType: '', roomCategory: '', awardType: 'voucher', awardPoints: '', billingCode: '', stockQty: '', transactionNote: '' },
+            body: [
+              { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
+              { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
+              { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
+              { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
+              { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
+              { type: 'select', name: 'marketCode', label: 'Market Code', options: [{ label: 'Code A', value: 'A' }, { label: 'Code B', value: 'B' }] },
+              { type: 'select', name: 'rateCode', label: 'Rate Code', options: [{ label: 'Rate 1', value: 'R1' }, { label: 'Rate 2', value: 'R2' }] },
+              { type: 'select', name: 'source', label: 'Source', options: [{ label: 'Web', value: 'Web' }, { label: 'App', value: 'App' }, { label: 'Mini Program', value: 'MiniProgram' }] },
+              { type: 'select', name: 'roomType', label: 'Room Type', options: [{ label: 'Standard', value: 'Standard' }, { label: 'Deluxe', value: 'Deluxe' }, { label: 'Suite', value: 'Suite' }] },
+              { type: 'select', name: 'roomCategory', label: 'Room Category', options: [{ label: 'Cat A', value: 'A' }, { label: 'Cat B', value: 'B' }] },
+              { type: 'radios', name: 'awardType', label: 'Registration Award', options: [{ label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' }] },
+              { type: 'input-text', name: 'awardPoints', label: 'Award Points' },
+              { type: 'select', name: 'billingCode', label: 'Billing Code', options: [{ label: 'BC-001', value: 'BC-001' }, { label: 'BC-002', value: 'BC-002' }] },
+              { type: 'input-text', name: 'stockQty', label: '库存数' },
+              { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
+            ],
+            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+          },
+        },
       ],
     }, null, 2),
     component: () => {
       const ClosableTabsShowcase = React.lazy(() => import('./ClosableTabsShowcase'));
-      return <ClosableTabsShowcase />;
+      return <ClosableTabsShowcase schema={JSON.parse(`{}`)} />;
+    },
+  },
+  {
+    id: 'combo',
+    category: '布局组件',
+    title: 'Combo Tabs',
+    description: '使用 Amis Combo 组件，通过纯 CSS 样式实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌表单。',
+    jsonSchema: JSON.stringify({
+      type: 'combo',
+      className: 'custom-combo-tabs',
+      labelField: 'title',
+      multiple: true,
+      removable: true,
+      max: 10,
+      items: [
+        { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true },
+        { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
+        { type: 'select', name: 'currency', label: 'Currency' },
+      ],
+    }, null, 2),
+    component: () => {
+      const ComboShowcase = React.lazy(() => import('./ComboShowcase'));
+      return <ComboShowcase schema={JSON.parse('{}')} />;
     },
   },
 ];

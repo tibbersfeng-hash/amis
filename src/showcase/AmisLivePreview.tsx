@@ -11,6 +11,8 @@ export interface AmisLivePreviewRef {
   getData: () => Record<string, unknown>;
   /** Reads DOM input values and calls onDataChange */
   syncData: () => void;
+  /** Resets tracked user modifications so new data from props takes effect */
+  resetModifications: () => void;
 }
 
 interface AmisLivePreviewProps {
@@ -26,6 +28,33 @@ interface AmisLivePreviewProps {
   label?: string;
   /** Called with merged form data whenever form values change */
   onDataChange?: (data: Record<string, unknown>) => void;
+}
+
+/**
+ * Recursively extracts combo names from the schema.
+ * Returns a Set of combo `name` values found in the schema tree.
+ */
+function extractComboNames(schema: Record<string, unknown>): Set<string> {
+  const names = new Set<string>();
+  for (const [key, value] of Object.entries(schema)) {
+    if (key === 'type' && value === 'combo' && typeof schema.name === 'string') {
+      names.add(schema.name);
+    }
+    if (Array.isArray(value)) {
+      value.forEach(item => {
+        if (typeof item === 'object' && item !== null) {
+          for (const n of extractComboNames(item as Record<string, unknown>)) {
+            names.add(n);
+          }
+        }
+      });
+    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      for (const n of extractComboNames(value as Record<string, unknown>)) {
+        names.add(n);
+      }
+    }
+  }
+  return names;
 }
 
 /**
@@ -68,15 +97,79 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
     syncData: () => {
       if (!containerRef.current) return;
       const result: Record<string, unknown> = { ...modifiedValues.current };
-      // Read all form input values from DOM
+
+      // Read combo names from schema
+      const comboNames = extractComboNames(schema);
+
+      // Handle tabsMode combos (.cxd-ComboControl with .cxd-ComboTabs inside)
+      const allComboCtrls = containerRef.current.querySelectorAll('.cxd-ComboControl');
+      const tabsModeCombos: Element[] = [];
+      allComboCtrls.forEach(ctrl => {
+        if (ctrl.querySelector('.cxd-ComboTabs')) tabsModeCombos.push(ctrl);
+      });
+      const comboFieldNames = new Set<string>();
+      tabsModeCombos.forEach((comboCtrl, idx) => {
+        const comboKey = comboNames.size > 0 ? [...comboNames][idx] : `combo_${idx}`;
+        const comboTabs = comboCtrl.querySelector('.cxd-ComboTabs');
+        if (!comboTabs) return;
+        // Click through all tabs to mount all panes
+        const tabLinks = comboTabs.querySelectorAll('.cxd-Tabs-link:not(.cxd-ComboTabs-addLink) a');
+        tabLinks.forEach(link => (link as HTMLElement).click());
+        // Read all .cxd-Combo-itemInner elements
+        const inners = comboCtrl.querySelectorAll('.cxd-Combo-itemInner');
+        const rows: Record<string, unknown>[] = [];
+        inners.forEach((inner) => {
+          const inputs = inner.querySelectorAll('input[name], textarea[name], select[name]');
+          const rowData: Record<string, unknown> = {};
+          inputs.forEach((el: Element) => {
+            const name = el.getAttribute('name');
+            if (name) {
+              comboFieldNames.add(name);
+              const value = 'value' in el ? (el as HTMLInputElement).value : undefined;
+              if (value !== undefined) rowData[name] = value;
+            }
+          });
+          if (Object.keys(rowData).length > 0) rows.push(rowData);
+        });
+        if (rows.length > 0) result[comboKey] = rows;
+      });
+
+      // Read classic combos (.cxd-Combo not inside a tabsMode combo control)
+      const classicCombos = containerRef.current.querySelectorAll('.cxd-Combo');
+      classicCombos.forEach((comboEl) => {
+        const comboControl = comboEl.closest('.cxd-ComboControl');
+        if (comboControl && comboControl.querySelector('.cxd-ComboTabs')) return;
+        const items = comboEl.querySelectorAll('.cxd-Combo-item');
+        const rows: Record<string, unknown>[] = [];
+        items.forEach((row) => {
+          const inputs = row.querySelectorAll('input[name], textarea[name], select[name]');
+          const rowData: Record<string, unknown> = {};
+          inputs.forEach((el: Element) => {
+            const name = el.getAttribute('name');
+            if (name) {
+              comboFieldNames.add(name);
+              const value = 'value' in el ? (el as HTMLInputElement).value : undefined;
+              if (value !== undefined) rowData[name] = value;
+            }
+          });
+          if (Object.keys(rowData).length > 0) rows.push(rowData);
+        });
+        const comboNamesArr = [...comboNames];
+        const idx = tabsModeCombos.length + Array.from(classicCombos).indexOf(comboEl);
+        const comboKey = comboNamesArr[idx] || `combo_${idx}`;
+        if (rows.length > 0) result[comboKey] = rows;
+      });
+
+      // Read non-combo inputs (dot-notation names preserved)
       const inputs = containerRef.current.querySelectorAll('input[name], textarea[name], select[name]');
       inputs.forEach((el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
         const name = el.getAttribute('name');
-        if (name) {
+        if (name && !comboFieldNames.has(name)) {
           const value = 'value' in el ? el.value : undefined;
           if (value !== undefined) result[name] = value;
         }
       });
+
       // Also read data-field-data divs
       try {
         const dataEls = containerRef.current.querySelectorAll('[data-field-data]');
@@ -86,11 +179,21 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
           } catch { /* ignore */ }
         });
       } catch { /* ignore */ }
+
+      // Only update state if values actually changed — prevents unnecessary re-renders
+      const snapshot = JSON.stringify(result);
+      if (snapshot === lastSyncedRef.current) return;
+      lastSyncedRef.current = snapshot;
+
       modifiedValues.current = result;
       setUserValues(result);
       onDataChange?.(result);
     },
-  }), [onDataChange]);
+    resetModifications: () => {
+      modifiedValues.current = {};
+      setUserValues(null);
+    },
+  }), [onDataChange, schema]);
 
   useEffect(() => {
     if (!containerRef.current || !schema) return;
@@ -177,7 +280,7 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema, data, lang, userValues]);
+  }, [schema, data, lang]);
 
   return (
     <div className="amis-live-preview-wrapper">

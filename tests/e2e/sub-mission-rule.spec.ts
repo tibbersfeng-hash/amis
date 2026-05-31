@@ -7,30 +7,30 @@ test.describe('Sub Mission Rule', () => {
     await page.waitForTimeout(500);
   });
 
-  test('Sub Mission Rule tab renders forms with values', async ({ page }) => {
+  test('Sub Mission Rule tab renders combo with values', async ({ page }) => {
     // Click Sub Mission Rule tab
     const subMissionTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').filter({ hasText: 'Sub Mission Rule' });
     await subMissionTab.click();
     await page.waitForTimeout(500);
 
-    // Both sub tabs should be visible
-    await expect(page.getByText('Sub Mission 1').first()).toBeVisible();
-    await expect(page.getByText('Sub Mission 2').first()).toBeVisible();
+    // Both combo items should be visible
+    const comboItems = page.locator('.cxd-Combo-item');
+    await expect(comboItems).toHaveCount(2);
 
-    // Check Sub Mission 1 form values (all fields in one form)
-    const subMissionName = await page.locator('.schema-preview-ami-container input[name="subMissionName"]').inputValue();
-    expect(subMissionName).toBe('连续签到7天');
+    // Check first combo item form values
+    const firstItem = comboItems.first();
+    expect(await firstItem.locator('input[name="subMissionName"]').inputValue()).toBe('连续签到7天');
+    expect(await firstItem.locator('input[name="currency"]').inputValue()).toBe('积分');
+    expect(await firstItem.locator('input[name="awardName"]').inputValue()).toBe('宝箱钥匙');
+    expect(await firstItem.locator('input[name="ctaText"]').inputValue()).toBe('立即签到');
+    expect(await firstItem.locator('input[name="ctaLink"]').inputValue()).toBe('/mission/daily-checkin');
 
-    const currency = await page.locator('.schema-preview-ami-container input[name="currency"]').inputValue();
-    expect(currency).toBe('积分');
-
-    const awardName = await page.locator('.schema-preview-ami-container input[name="awardName"]').inputValue();
-    expect(awardName).toBe('宝箱钥匙');
-
-    const ctaText = await page.locator('.schema-preview-ami-container input[name="ctaText"]').inputValue();
-    expect(ctaText).toBe('立即签到');
-
-    const ctaLink = await page.locator('.schema-preview-ami-container input[name="ctaLink"]').inputValue();
-    expect(ctaLink).toBe('/mission/daily-checkin');
+    // Check second combo item form values
+    const secondItem = comboItems.last();
+    expect(await secondItem.locator('input[name="subMissionName"]').inputValue()).toBe('连续签到30天');
+    expect(await secondItem.locator('input[name="currency"]').inputValue()).toBe('钻石');
+    expect(await secondItem.locator('input[name="awardName"]').inputValue()).toBe('限定头像框');
+    expect(await secondItem.locator('input[name="ctaText"]').inputValue()).toBe('查看详情');
+    expect(await secondItem.locator('input[name="ctaLink"]').inputValue()).toBe('/mission/monthly-checkin');
   });
 });

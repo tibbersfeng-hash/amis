@@ -1,0 +1,25 @@
+{
+  "type": "tabs",
+  "className": "custom-closable-tabs",
+  "addable": true,
+  "addBtnText": "+ Add",
+  "max": 10,
+  "tabs": [
+    {
+      "title": "Sub Mission 1",
+      "closable": true,
+      "body": {
+        "type": "tpl",
+        "tpl": "<div style=\"padding:12px;\">Sub Mission 1 content area</div>"
+      }
+    },
+    {
+      "title": "Sub Mission 2",
+      "closable": true,
+      "body": {
+        "type": "tpl",
+        "tpl": "<div style=\"padding:12px;\">Sub Mission 2 content area</div>"
+      }
+    }
+  ]
+}
