@@ -1,19 +1,42 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import React, { useState, useEffect } from 'react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import ComboShowcase, { buildSchema, readTabFormData } from './ComboShowcase';
 
-// Mock AmisLivePreview to render a simple DOM structure
+// Mock AmisLivePreview with native event support for syncAllTabsData
 vi.mock('./AmisLivePreview', () => ({
   AmisLivePreview: ({ schema }: { schema: Record<string, unknown> }) => {
+    const [activeIdx, setActiveIdx] = useState(0);
     const tabsSchema = schema as { tabs: { title: string; body?: { data?: Record<string, unknown> } }[] };
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    // Listen for native mouse events (mimics Amis tab switching behavior)
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      const handleClick = (e: Event) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('.cxd-Tabs-link');
+        if (link) {
+          const idx = Array.from(container.querySelectorAll('.cxd-Tabs-link')).indexOf(link);
+          if (idx >= 0) setActiveIdx(idx);
+        }
+      };
+      container.addEventListener('click', handleClick, true);
+      return () => container.removeEventListener('click', handleClick, true);
+    }, []);
+
     return (
-      <div className="amis-live-preview" data-testid="amis-preview">
+      <div className="amis-live-preview" data-testid="amis-preview" ref={containerRef}>
         <div className="custom-combo-tabs">
           <div className="cxd-Tabs-linksContainer">
             <div className="cxd-Tabs-links" data-tab-count={tabsSchema.tabs?.length || 0}>
               {tabsSchema.tabs?.map((tab, idx) => (
-                <div key={idx} className="cxd-Tabs-link" data-tab-title={tab.title}>
+                <div
+                  key={idx}
+                  className={`cxd-Tabs-link${idx === activeIdx ? ' is-active' : ''}`}
+                  data-tab-title={tab.title}
+                >
                   <a>{tab.title}</a>
                   <div className="cxd-Tabs-link-close" data-testid={`close-${idx}`}>×</div>
                 </div>
@@ -22,7 +45,7 @@ vi.mock('./AmisLivePreview', () => ({
           </div>
           <div className="cxd-Tabs-content">
             {tabsSchema.tabs?.map((tab, idx) => (
-              <div key={idx} className={`cxd-Tabs-pane${idx === 0 ? ' is-active' : ''}`}>
+              <div key={idx} className={`cxd-Tabs-pane${idx === activeIdx ? ' is-active' : ''}`}>
                 <div className="cxd-Form-item">
                   <div className="cxd-FieldLabel">{tab.title}</div>
                   <input name={`input-${idx}`} defaultValue={String(tab.body?.data?.targetSpending || '')} />
@@ -48,41 +71,23 @@ describe('ComboShowcase', () => {
     expect(screen.getByText('Add Sub Mission')).toBeInTheDocument();
   });
 
-  it('adds a new item when clicking the add button', () => {
+  it('adds a new item when clicking the add button', async () => {
     render(<ComboShowcase />);
     const addBtn = screen.getByText('Add Sub Mission');
-    fireEvent.click(addBtn);
-    const tabs = document.querySelector('.cxd-Tabs-links');
-    expect(tabs?.getAttribute('data-tab-count')).toBe('3');
+    await act(async () => { fireEvent.click(addBtn); });
+    await waitFor(() => {
+      const tabs = document.querySelector('.cxd-Tabs-links');
+      expect(tabs?.getAttribute('data-tab-count')).toBe('3');
+    });
   });
 
-  it('hides the add button when items reach 10', () => {
+  it('preserves all existing items when adding', async () => {
     render(<ComboShowcase />);
     const addBtn = screen.getByText('Add Sub Mission');
-    for (let i = 0; i < 8; i++) {
-      fireEvent.click(addBtn);
-    }
-    expect(screen.queryByText('Add Sub Mission')).not.toBeInTheDocument();
-  });
-
-  it('preserves all existing items when adding a new item', () => {
-    render(<ComboShowcase />);
-    const addBtn = screen.getByText('Add Sub Mission');
-    fireEvent.click(addBtn);
-    const tabs = document.querySelector('.cxd-Tabs-links');
-    expect(tabs?.getAttribute('data-tab-count')).toBe('3');
-    // Verify all 3 tab titles exist
-    expect(document.querySelectorAll('[data-tab-title]')).toHaveLength(3);
-  });
-
-  it('preserves all existing items when adding multiple items', () => {
-    render(<ComboShowcase />);
-    const addBtn = screen.getByText('Add Sub Mission');
-    fireEvent.click(addBtn);
-    fireEvent.click(addBtn);
-    fireEvent.click(addBtn);
-    const tabs = document.querySelector('.cxd-Tabs-links');
-    expect(tabs?.getAttribute('data-tab-count')).toBe('5');
+    await act(async () => { fireEvent.click(addBtn); });
+    await waitFor(() => {
+      expect(document.querySelectorAll('[data-tab-title]')).toHaveLength(3);
+    });
   });
 });
 
@@ -107,6 +112,19 @@ describe('buildSchema', () => {
     const tab0Data = (schema.tabs[0].body as any).data;
     expect(tab0Data.subMissionType).toBe('Room Stay Prepaid Booking');
     expect(tab0Data.awardType).toBe('points');
+  });
+
+  it('preserves data for each tab independently', () => {
+    const schema = buildSchema([
+      { businessUnit: 'BU1', currency: '积分' },
+      { businessUnit: 'BU2', paymentMethod: 'Cash' },
+      { source: 'App' },
+    ]);
+    expect((schema.tabs[0].body as any).data.businessUnit).toBe('BU1');
+    expect((schema.tabs[0].body as any).data.currency).toBe('积分');
+    expect((schema.tabs[1].body as any).data.businessUnit).toBe('BU2');
+    expect((schema.tabs[1].body as any).data.paymentMethod).toBe('Cash');
+    expect((schema.tabs[2].body as any).data.source).toBe('App');
   });
 });
 

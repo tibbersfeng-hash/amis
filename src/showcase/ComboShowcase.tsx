@@ -125,36 +125,82 @@ export function readTabFormData(scope: Element): Record<string, unknown> {
   return formData;
 }
 
+/**
+ * Sync ALL tab data from DOM.
+ * Amis only mounts the active tab pane, so we must click through each tab
+ * to mount its DOM, read the data, then restore the original active tab.
+ */
+async function syncAllTabsData(container: Element, items: Record<string, unknown>[]): Promise<Record<string, unknown>[]> {
+  const tabLinks = container.querySelectorAll('.custom-combo-tabs .cxd-Tabs-links .cxd-Tabs-link');
+  const totalCount = tabLinks.length;
+  if (totalCount === 0) return items;
+
+  // Find originally active tab index
+  const activeLink = container.querySelector('.custom-combo-tabs .cxd-Tabs-links .cxd-Tabs-link.is-active a');
+  let originalIndex = 0;
+  tabLinks.forEach((link, idx) => {
+    if (link.querySelector('a') === activeLink) originalIndex = idx;
+  });
+
+  const allData: Record<string, unknown>[] = [];
+
+  // Read CURRENT active tab FIRST (its DOM is already mounted)
+  const currentActivePane = container.querySelector('.cxd-Tabs-pane.is-active');
+  if (currentActivePane) {
+    allData[originalIndex] = readTabFormData(currentActivePane);
+  }
+
+  // Click through remaining tabs to mount their DOM
+  for (let i = 0; i < totalCount; i++) {
+    if (i === originalIndex) continue;
+
+    tabLinks[i].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    tabLinks[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    // Wait for pane to become active
+    await new Promise<void>((resolve) => {
+      const timeout = setTimeout(() => { resolve(); }, 3000);
+      const observer = new MutationObserver(() => {
+        const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
+        if (activePane && activePane.querySelectorAll('.cxd-Form-item').length > 0) {
+          clearTimeout(timeout);
+          observer.disconnect();
+          resolve();
+        }
+      });
+      observer.observe(container, { childList: true, subtree: true, attributes: true });
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
+    if (activePane) {
+      allData[i] = readTabFormData(activePane);
+    }
+  }
+
+  // Restore original active tab
+  if (tabLinks[originalIndex]) {
+    tabLinks[originalIndex].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    tabLinks[originalIndex].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  }
+
+  // Merge with existing items (fallback for tabs that couldn't be read)
+  return allData.map((d, i) => d ?? items[i] ?? {});
+}
+
 export const ComboShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<Record<string, unknown>[]>([{}, {}]);
 
-  const handleAddItem = useCallback(() => {
+  const handleAddItem = useCallback(async () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
-    if (!activePane) {
-      setItems((prev) => [...prev, {}]);
-      return;
-    }
-
-    // Read current active tab data from DOM
-    const activeData = readTabFormData(activePane);
-    const activeLink = container.querySelector('.cxd-Tabs-links .cxd-Tabs-link.is-active a');
-    let activeIndex = 0;
-    container.querySelectorAll('.cxd-Tabs-links .cxd-Tabs-link').forEach((link, idx) => {
-      if (link.querySelector('a') === activeLink) activeIndex = idx;
-    });
-
-    setItems((prev) => {
-      const updated = [...prev];
-      if (Object.keys(activeData).length > 0) {
-        updated[activeIndex] = { ...(prev[activeIndex] || {}), ...activeData };
-      }
-      return [...updated, {}];
-    });
-  }, []);
+    // Sync ALL tabs data from DOM before adding new item
+    const syncedData = await syncAllTabsData(container, items);
+    setItems([...syncedData, {}]);
+  }, [items]);
 
   // Watch for tab removal — sync when Amis removes a tab
   useEffect(() => {
