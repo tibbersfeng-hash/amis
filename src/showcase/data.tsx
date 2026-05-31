@@ -352,51 +352,28 @@ const customShowcasePages: ShowcasePage[] = [
     },
   },
   {
-    id: 'combo',
+    id: 'combo-tab',
     category: '布局组件',
-    title: 'Combo Tabs',
-    description: '使用 Amis tabs 组件，通过纯 CSS 样式实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌表单。',
+    title: 'Combo Tab',
+    description: '使用 Amis combo 组件，通过纯 CSS 样式实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌表单。',
     jsonSchema: JSON.stringify({
-      type: 'tabs',
+      type: 'combo',
       className: 'custom-combo-tabs',
-      tabs: [
-        {
-          title: 'Sub Mission 1',
-          closable: true,
-          body: {
-            type: 'form',
-            data: { subMissionType: 'Room Stay Prepaid Booking', businessUnit: '', currency: '', paymentMethod: '' },
-            body: [
-              { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
-              { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
-              { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
-              { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
-              { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
-            ],
-            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
-          },
-        },
-        {
-          title: 'Sub Mission 2',
-          closable: true,
-          body: {
-            type: 'form',
-            data: { subMissionType: 'Direct Booking', businessUnit: 'BU2', currency: '钻石', paymentMethod: 'Credit Card' },
-            body: [
-              { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
-              { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
-              { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
-              { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
-              { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
-            ],
-            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
-          },
-        },
+      labelField: 'title',
+      multiple: true,
+      multiLine: true,
+      removable: true,
+      max: 10,
+      addButtonText: '+ Add Sub Mission',
+      items: [
+        { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true },
+        { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
+        { type: 'select', name: 'currency', label: 'Currency' },
       ],
     }, null, 2),
     component: () => {
-      const ComboShowcase = React.lazy(() => import('./ComboShowcase'));
-      return <ComboShowcase />;
+      const ComboTabShowcase = React.lazy(() => import('./ComboShowcase'));
+      return <ComboTabShowcase />;
     },
   },
 ];

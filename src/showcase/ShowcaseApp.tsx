@@ -109,7 +109,7 @@ const customImports: Record<string, () => Promise<{ default: React.FC }>> = {
   'amis-drawer': () => import('../components/DrawerShowcase'),
   'solid-fill-tabs': () => import('./SolidFillTabsShowcase'),
   'closable-tabs': () => import('./ClosableTabsShowcase'),
-  'combo': () => import('./ComboShowcase'),
+  'combo-tab': () => import('./ComboShowcase'),
 };
 
 for (const [id, importFn] of Object.entries(customImports)) {

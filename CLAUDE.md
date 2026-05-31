@@ -204,6 +204,14 @@ Save 按钮 → 输出 zh/en 双版本 JSON
 - **基础设施**：StickyFooter, Loading, LanguageSwitcher, I18nConfigPanel
 - **预览组件**：PhoneMockup, DateRangePicker, PreviewPanel
 
+### Showcase 自定义组件
+
+| 组件 | ID | 分类 | 说明 |
+|------|----|------|------|
+| SchemaPreview | `schema-preview` | 工具 | 输入任意 Amis JSON Schema，实时渲染预览 |
+| ClosableTabs | `closable-tabs` | 布局组件 | 可关闭 Tab + 添加按钮，每个 tab 内嵌表单，支持表单提交并记录 |
+| **ComboTab** | `combo-tab` | 布局组件 | **使用 Amis combo 组件，通过纯 CSS 实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌表单。必须使用 `type: 'combo'`，不能用 tabs 替代，只通过 CSS 改造外观，添加新 item 时不影响已有 item 的表单数据（combo 自带状态管理，不需要 React state 驱动）** |
+
 ### Amis 组件多语言展示
 Amis 内置组件（如 InputText, Select, Form 等）每个展示 6 个区块：
 

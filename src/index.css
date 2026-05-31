@@ -2750,127 +2750,78 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* ===== Combo styled as Tabs — same visual style as closable-tabs ===== */
+/* Amis combo DOM: .custom-class > .cxd-ComboControl > .cxd-Combo > .cxd-Combo-items > .cxd-Combo-item > .cxd-Combo-itemInner > .cxd-Combo-form */
 
 .custom-combo-tabs {
   margin: 0 !important;
 }
 
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
-  gap: 0 !important;
-  border: none !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-  background: #F9FAFA !important;
+/* Combo container reset */
+.custom-combo-tabs.cxd-Combo {
   padding: 0 !important;
-  margin: 0 !important;
 }
 
-/* Kill pseudo-elements */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after,
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::before,
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
-  content: none !important;
+.custom-combo-tabs .cxd-Combo-items {
+  margin: 0 !important;
+  padding: 0 !important;
   border: none !important;
-  display: none !important;
+  background: transparent !important;
 }
 
-/* Tab link container (li) */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  padding: 10px 10px 10px 20px !important;
-  gap: 10px !important;
-  height: 40px !important;
-  margin: 0 !important;
-  background: #F9FAFA !important;
+/* Each combo item: make it look like a tab header + body */
+.custom-combo-tabs .cxd-Combo-item {
+  padding: 0 !important;
+  margin: 0 0 1px 0 !important;
   border: none !important;
-  border-top: 4px solid transparent !important;
   border-radius: 0 !important;
-  box-sizing: border-box !important;
-  transition: none !important;
-  flex: none !important;
-  cursor: pointer !important;
+  background: transparent !important;
 }
 
-/* Active tab: white bg, blue top bar */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
-  background: #fff !important;
-  border-top: 4px solid #394DB9 !important;
+.custom-combo-tabs .cxd-Combo-itemInner {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
 }
 
-/* No hover effect */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
-  background: #F9FAFA !important;
-  border-top-color: transparent !important;
-}
-
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
-  background: #fff !important;
-  border-top: 4px solid #394DB9 !important;
-}
-
-/* Tab text (<a> tag) */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
-  display: inline-flex !important;
-  align-items: center !important;
-  position: static !important;
-  width: auto !important;
-  flex-shrink: 0 !important;
+.custom-combo-tabs .cxd-Combo-form {
   padding: 0 !important;
   margin: 0 !important;
+  border: none !important;
+  background: #fff !important;
+}
+
+/* Item header: use labelField rendered text as tab-like header */
+.custom-combo-tabs .cxd-Combo-form > .cxd-FormItem {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* Hide default label field rendering, style as tab header */
+.custom-combo-tabs .cxd-FormItem--comboItemLabel {
+  padding: 10px 20px !important;
+  height: 40px !important;
+  background: #F9FAFA !important;
+  border-top: 4px solid transparent !important;
   font-size: 18px !important;
   font-weight: 400 !important;
   color: #555 !important;
-  background: transparent !important;
-  border: none !important;
-  text-decoration: none !important;
-  border-radius: 0 !important;
-  transition: none !important;
-  cursor: inherit !important;
   line-height: 1 !important;
 }
 
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
-  color: #394DB9 !important;
-  font-weight: 500 !important;
-}
-
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
-  color: #555 !important;
-}
-
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
-  color: #394DB9 !important;
-  font-weight: 500 !important;
-}
-
-/* Content area */
-.custom-combo-tabs > .cxd-Tabs-content {
+/* Form items inside combo body */
+.custom-combo-tabs .cxd-Combo-form .cxd-FormItem {
+  padding: 12px 20px !important;
   background: #fff !important;
-  margin-top: 0 !important;
-  padding-bottom: 20px !important;
-  border: none !important;
-  box-shadow: none !important;
+  margin: 0 !important;
 }
 
-.custom-combo-tabs > .cxd-Tabs-pane {
-  padding: 20px !important;
-  background: #fff !important;
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-}
-
-/* Close button (×) inside tab */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close {
+/* Delete button — styled like closable-tabs close button */
+.custom-combo-tabs .cxd-Combo-item > .cxd-Combo-delBtn {
   width: 10px !important;
   height: 10px !important;
   margin: 0 !important;
   padding: 0 !important;
-  position: static !important;
   color: #9CA3AF !important;
   cursor: pointer !important;
   font-size: 10px !important;
@@ -2881,27 +2832,26 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   opacity: 0.6 !important;
   transition: none !important;
   flex-shrink: 0 !important;
+  position: static !important;
 }
 
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close:hover {
+.custom-combo-tabs .cxd-Combo-item > .cxd-Combo-delBtn:hover {
   color: #9CA3AF !important;
   opacity: 0.6 !important;
 }
 
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close-icon {
-  font-size: 10px !important;
+.custom-combo-tabs .cxd-Combo-item > .cxd-Combo-delBtn > svg {
   width: 10px !important;
   height: 10px !important;
 }
 
-/* Hide tab navigation arrows */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer-arrow {
+/* Hide combo toolbar */
+.custom-combo-tabs .cxd-Combo-toolbar {
   display: none !important;
 }
 
-/* Add right padding to wrapper so tabs don't overlap the React add button */
-.custom-combo-tabs > .cxd-Tabs-linksContainer-wrapper {
-  padding-right: 170px !important;
+.custom-combo-tabs .cxd-Combo-addBtn {
+  display: none !important;
 }
 
 /* ===== Combo Showcase ===== */
