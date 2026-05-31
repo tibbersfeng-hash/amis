@@ -396,7 +396,7 @@ const customShowcasePages: ShowcasePage[] = [
     }, null, 2),
     component: () => {
       const ComboShowcase = React.lazy(() => import('./ComboShowcase'));
-      return <ComboShowcase schema={JSON.parse('{}')} />;
+      return <ComboShowcase />;
     },
   },
 ];

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AmisLivePreview, AmisLivePreviewRef } from './AmisLivePreview';
+import { AmisLivePreview } from './AmisLivePreview';
 
 const FORM_TEMPLATE = {
   type: 'form',
@@ -37,7 +37,6 @@ const FORM_TEMPLATE = {
     { type: 'input-text', name: 'stockQty', label: '库存数' },
     { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
   ],
-  actions: [{ type: 'submit', label: '提交', level: 'primary' }],
 };
 
 /** Build tabs schema with N items, each containing the form template */
@@ -55,7 +54,7 @@ function buildSchema(itemCount: number, itemData: Record<string, unknown>[]) {
         type: 'form',
         data: formData,
         body: FORM_TEMPLATE.body,
-        actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+        actions: [],
       },
     });
   }
@@ -143,13 +142,12 @@ function readTabFormData(scope: Element): Record<string, unknown> {
   return formData;
 }
 
-export const ComboShowcase: React.FC<{ schema: Record<string, unknown> }> = ({ schema }) => {
-  const previewRef = useRef<AmisLivePreviewRef>(null);
+export const ComboShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [itemCount, setItemCount] = useState(2);
   const [itemData, setItemData] = useState<Record<string, unknown>[]>([{}, {}]);
 
-  const handleAddItem = useCallback(async () => {
+  const handleAddItem = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -207,7 +205,7 @@ export const ComboShowcase: React.FC<{ schema: Record<string, unknown> }> = ({ s
   return (
     <div className="combo-showcase">
       <div className="combo-preview" ref={containerRef}>
-        <AmisLivePreview ref={previewRef} schema={currentSchema as Record<string, unknown>} />
+        <AmisLivePreview schema={currentSchema} />
         {itemCount < 10 && (
           <button className="closable-tabs-add-btn" onClick={handleAddItem} type="button">
             <span className="add-icon">+</span>
