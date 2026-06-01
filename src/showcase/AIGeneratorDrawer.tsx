@@ -180,7 +180,37 @@ const styles = {
       case 'apply': return { ...base, background: COLORS.success, color: '#fff' };
     }
   },
+  suggestionLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  suggestionChips: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: 8,
+    marginBottom: 8,
+  },
+  suggestionChip: (active: boolean): React.CSSProperties => ({
+    padding: '6px 12px',
+    fontSize: 12,
+    color: active ? COLORS.primary : COLORS.textSecondary,
+    background: active ? COLORS.formBg : COLORS.cardBg,
+    border: `1px solid ${active ? COLORS.inputBorderFocus : COLORS.inputBorder}`,
+    borderRadius: 16,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    whiteSpace: 'nowrap' as const,
+  }),
 };
+
+/**
+ * Default prompt suggestions shown when the drawer is opened with empty input.
+ */
+const DEFAULT_PROMPTS = [
+  '创建新页面，使用amis-table-search组件，内容是酒店信息，设置酒店名称与code的检索',
+  '在当前表单增加一个日期选择器和下拉选择框',
+];
 
 export const AIGeneratorDrawer: React.FC<AIGeneratorDrawerProps> = ({
   visible,
@@ -286,10 +316,28 @@ export const AIGeneratorDrawer: React.FC<AIGeneratorDrawerProps> = ({
               style={styles.textarea(loading || !!result)}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="例如：添加一个 mission type 下拉选择框，包含 Daily Check-in、Cumulative Spend、Room Stay Nights 三个选项"
+              placeholder="输入你的修改需求或点击下方快捷示例..."
               disabled={loading || !!result}
               rows={6}
             />
+            {!prompt && !loading && !result && (
+              <div style={{ marginTop: 12 }}>
+                <div style={styles.suggestionLabel}>快捷示例：</div>
+                <div style={styles.suggestionChips}>
+                  {DEFAULT_PROMPTS.map((p, i) => (
+                    <button
+                      key={i}
+                      style={styles.suggestionChip(false)}
+                      onClick={() => setPrompt(p)}
+                      onMouseEnter={(e) => { (e.target as HTMLElement).style.borderColor = COLORS.inputBorderFocus; (e.target as HTMLElement).style.color = COLORS.primary; }}
+                      onMouseLeave={(e) => { (e.target as HTMLElement).style.borderColor = COLORS.inputBorder; (e.target as HTMLElement).style.color = COLORS.textSecondary; }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Error display */}

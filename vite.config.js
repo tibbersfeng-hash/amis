@@ -20,27 +20,71 @@ function loadComponentsGuide() {
 
 /**
  * Parse Claude output to extract schema and data JSON.
+ * Supports: SCHEMA_START/SCHEMA_END markers, markdown code blocks,
+ * and fallback to extracting any JSON objects from raw text.
  */
 function parseClaudeOutput(output) {
-  const schemaMatch = output.match(/\/\/ SCHEMA_START\s*\n([\s\S]*?)\n\s*\/\/ SCHEMA_END/);
-  const dataMatch = output.match(/\/\/ DATA_START\s*\n([\s\S]*?)\n\s*\/\/ DATA_END/);
+  // Strategy 1: Try SCHEMA_START/SCHEMA_END markers (inside or outside code blocks)
+  const schemaMarkerMatch = output.match(/\/\/ SCHEMA_START\s*\n([\s\S]*?)\n\s*\/\/ SCHEMA_END/);
+  const dataMarkerMatch = output.match(/\/\/ DATA_START\s*\n([\s\S]*?)\n\s*\/\/ DATA_END/);
 
-  if (!schemaMatch && !dataMatch) {
-    const codeBlocks = output.match(/```(?:json)?\s*\n([\s\S]*?)\n```/g);
-    if (codeBlocks && codeBlocks.length >= 1) {
-      const cleanBlock = (block) => block.replace(/```(?:json)?\s*\n/, '').replace(/\n```$/, '');
-      return {
-        schema: cleanBlock(codeBlocks[0]),
-        data: codeBlocks.length >= 2 ? cleanBlock(codeBlocks[1]) : null,
-      };
-    }
-    return { schema: null, data: null, error: '无法解析生成结果：未找到 SCHEMA_START/SCHEMA_END 或 DATA_START/DATA_END 标记' };
+  if (schemaMarkerMatch || dataMarkerMatch) {
+    return {
+      schema: schemaMarkerMatch ? schemaMarkerMatch[1].trim() : null,
+      data: dataMarkerMatch ? dataMarkerMatch[1].trim() : null,
+    };
   }
 
-  return {
-    schema: schemaMatch ? schemaMatch[1].trim() : null,
-    data: dataMatch ? dataMatch[1].trim() : null,
-  };
+  // Strategy 2: Try markdown code blocks — first block = schema, second = data
+  const codeBlocks = output.match(/```(?:json)?\s*\n([\s\S]*?)\n```/g);
+  if (codeBlocks && codeBlocks.length >= 1) {
+    const cleanBlock = (block) => block.replace(/^```(?:json)?\s*\n/, '').replace(/\n```$/, '').trim();
+    const first = cleanBlock(codeBlocks[0]);
+    const second = codeBlocks.length >= 2 ? cleanBlock(codeBlocks[1]) : null;
+
+    // Validate first block is JSON
+    try {
+      JSON.parse(first);
+      if (second) JSON.parse(second);
+      return { schema: first, data: second };
+    } catch {
+      // First block not valid JSON — continue to strategy 3
+    }
+  }
+
+  // Strategy 3: Find JSON objects in raw text using brace matching
+  const jsonObjects = [];
+  const lines = output.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line === '{') {
+      let depth = 1;
+      let json = '{';
+      for (let j = i + 1; j < lines.length && depth > 0; j++) {
+        json += '\n' + lines[j];
+        for (const ch of lines[j]) {
+          if (ch === '{') depth++;
+          if (ch === '}') depth--;
+        }
+      }
+      jsonObjects.push(json);
+    }
+  }
+
+  if (jsonObjects.length >= 1) {
+    try {
+      JSON.parse(jsonObjects[0]);
+      const schema = jsonObjects[0];
+      const data = jsonObjects.length >= 2 ? (function() {
+        try { JSON.parse(jsonObjects[1]); return jsonObjects[1]; } catch { return null; }
+      })() : null;
+      return { schema, data };
+    } catch { /* continue */ }
+  }
+
+  // All strategies failed
+  const preview = output.slice(0, 300).replace(/\n/g, '\\n');
+  return { schema: null, data: null, error: `无法解析 Claude 输出。原始输出前300字符: ${preview}` };
 }
 
 /**
@@ -71,22 +115,11 @@ ${userPrompt}
 1. Based on the user's request, modify the above schema and data.
 2. You MUST output the COMPLETE schema JSON and data JSON, not just the changes.
 3. Preserve ALL existing details that the user did not mention changing.
-4. Output format: use the markers below to wrap each JSON:
-
-\`\`\`json
-// SCHEMA_START
-{complete schema JSON here}
-// SCHEMA_END
-\`\`\`
-
-\`\`\`json
-// DATA_START
-{complete data JSON here}
-// DATA_END
-\`\`\`
-
-5. Do NOT output anything before or after the code blocks.
-6. The schema must be valid JSON. Do not use trailing commas or comments inside the JSON.`;
+4. CRITICAL: Output exactly TWO JSON code blocks in this order:
+   - First block: the complete modified schema JSON
+   - Second block: the complete data JSON (use "{}" if no data changes)
+5. Do NOT output any text, explanation, or markdown before or after the code blocks.
+6. The JSON must be valid — no trailing commas, no comments.`;
 
     const TIMEOUT_MS = 120_000;
     let output = '';
