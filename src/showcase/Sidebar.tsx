@@ -1,9 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { getCategories, getPagesByCategory } from './data';
 
-/**
- * Preferred category order: custom first, then Amis built-in.
- */
 const CATEGORY_ORDER = [
   '工具',
   '配置系统',
@@ -22,10 +19,12 @@ const CATEGORY_ORDER = [
 interface SidebarProps {
   activeId: string;
   onSelect: (id: string) => void;
+  collapsed: boolean;
+  onToggle: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeId, onSelect }) => {
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+export const Sidebar: React.FC<SidebarProps> = ({ activeId, onSelect, collapsed, onToggle }) => {
+  const [catCollapsed, setCatCollapsed] = useState<Record<string, boolean>>({});
 
   const categories = getCategories().sort((a, b) => {
     const ia = CATEGORY_ORDER.indexOf(a);
@@ -34,18 +33,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeId, onSelect }) => {
   });
 
   const toggleCategory = useCallback((cat: string) => {
-    setCollapsed(prev => ({ ...prev, [cat]: !prev[cat] }));
+    setCatCollapsed(prev => ({ ...prev, [cat]: !prev[cat] }));
   }, []);
 
-  // Expand all by default
   useEffect(() => {
     const initial: Record<string, boolean> = {};
     categories.forEach(c => { initial[c] = false; });
-    setCollapsed(initial);
+    setCatCollapsed(initial);
   }, [categories.length]);
+
+  if (collapsed) return null;
 
   return (
     <div className="showcase-sidebar">
+      <button className="showcase-sidebar-collapse-btn" onClick={onToggle} title="收起菜单">
+        <span className="collapse-icon">◀</span>
+      </button>
       <div className="showcase-sidebar-header">
         <div className="showcase-logo">CMS</div>
         <div className="showcase-sidebar-title">Component Showcase</div>
@@ -57,10 +60,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeId, onSelect }) => {
               className="showcase-nav-category"
               onClick={() => toggleCategory(cat)}
             >
-              <span className={`showcase-nav-arrow ${collapsed[cat] ? '' : 'open'}`}>▸</span>
+              <span className={`showcase-nav-arrow ${catCollapsed[cat] ? '' : 'open'}`}>▸</span>
               {cat}
             </button>
-            {!collapsed[cat] && (
+            {!catCollapsed[cat] && (
               <div className="showcase-nav-items">
                 {getPagesByCategory(cat).map(page => (
                   <button

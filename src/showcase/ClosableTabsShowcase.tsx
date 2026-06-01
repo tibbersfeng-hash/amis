@@ -1,28 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AmisLivePreview, AmisLivePreviewRef } from './AmisLivePreview';
+import { AmisLivePreview } from './AmisLivePreview';
 
 /**
- * Base form schema template — reused for each tab.
+ * Base form schema template — the ONLY source of form structure.
+ * All tabs share this same schema. Data (initial values) are separate.
  */
-const FORM_TEMPLATE = {
+const FORM_SCHEMA = {
   type: 'form',
-  data: {
-    subMissionType: 'Room Stay Prepaid Booking',
-    businessUnit: '',
-    currency: '',
-    paymentMethod: '',
-    targetSpending: '',
-    marketCode: '',
-    rateCode: '',
-    source: '',
-    roomType: '',
-    roomCategory: '',
-    awardType: 'points',
-    awardPoints: '',
-    billingCode: '',
-    stockQty: '',
-    transactionNote: '',
-  },
+  wrapWithPanel: false,
   body: [
     { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
     { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
@@ -43,22 +28,36 @@ const FORM_TEMPLATE = {
   actions: [{ type: 'submit', label: '提交', level: 'primary' }],
 };
 
-/** Build schema with N tabs, each containing the form template */
-function buildSchema(tabCount: number, tabData: Record<string, unknown>[]) {
+/** Default initial data for a new tab. */
+const DEFAULT_TAB_DATA = {
+  subMissionType: 'Room Stay Prepaid Booking',
+  businessUnit: '',
+  currency: '',
+  paymentMethod: '',
+  targetSpending: '',
+  marketCode: '',
+  rateCode: '',
+  source: '',
+  roomType: '',
+  roomCategory: '',
+  awardType: 'points',
+  awardPoints: '',
+  billingCode: '',
+  stockQty: '',
+  transactionNote: '',
+};
+
+/** Build tabs schema with N tabs. Each tab gets the SAME form schema + its own initial data. */
+function buildTabsSchema(tabCount: number, tabData: Record<string, unknown>[]) {
   const tabs: Record<string, unknown>[] = [];
   for (let i = 0; i < tabCount; i++) {
-    const formData = { ...FORM_TEMPLATE.data };
-    if (tabData[i]) {
-      Object.assign(formData, tabData[i]);
-    }
+    const data = { ...DEFAULT_TAB_DATA, ...(tabData[i] || {}) };
     tabs.push({
       title: `Sub Mission ${i + 1}`,
       closable: true,
       body: {
-        type: 'form',
-        data: formData,
-        body: FORM_TEMPLATE.body,
-        actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+        ...FORM_SCHEMA,
+        data,
       },
     });
   }
@@ -67,11 +66,6 @@ function buildSchema(tabCount: number, tabData: Record<string, unknown>[]) {
     className: 'custom-closable-tabs',
     tabs,
   };
-}
-
-/** Create fresh data for a new tab */
-function createNewTabData(): Record<string, unknown> {
-  return {};
 }
 
 /** Read form data from a single tab pane */
@@ -88,7 +82,7 @@ function readTabFormData(scope: Element): Record<string, unknown> {
     }
   });
 
-  // Amis select components
+  // Amis select components — map label to field name
   const formItems = scope.querySelectorAll('.cxd-Form-item');
   const fieldNameMap: Record<string, string> = {
     'Sub Mission Type': 'subMissionType',
@@ -123,30 +117,44 @@ function readTabFormData(scope: Element): Record<string, unknown> {
     }
   });
 
-  // Amis radio components
+  // Amis radio components — derive field name from label
   const radioGroups = scope.querySelectorAll('.cxd-Radios');
   radioGroups.forEach((radiosEl: Element) => {
     const checkedRadio = radiosEl.querySelector('.cxd-Radio.is-checked');
-    if (checkedRadio) {
-      const valueText = checkedRadio.textContent?.trim();
-      const valueMap: Record<string, string> = {
-        'Award Points': 'points',
-        'Voucher': 'voucher',
-        'No Award': 'none',
-      };
-      formData['awardType'] = valueMap[valueText || ''] || valueText;
+    if (!checkedRadio) return;
+
+    const valueText = checkedRadio.textContent?.trim() || '';
+    const valueMap: Record<string, string> = {
+      'Award Points': 'points',
+      'Voucher': 'voucher',
+      'No Award': 'none',
+    };
+
+    const labelEl = radiosEl.querySelector('.cxd-FieldLabel');
+    let fieldName = 'awardType';
+    if (labelEl) {
+      const labelText = labelEl.textContent?.trim().replace(/\*$/, '');
+      if (labelText === 'Registration Award') {
+        fieldName = 'awardType';
+      } else if (labelText && fieldNameMap[labelText]) {
+        fieldName = fieldNameMap[labelText];
+      } else if (labelText) {
+        fieldName = labelText.toLowerCase().replace(/[^a-zA-Z]/g, '').replace(/ ([a-z])/g, (_, c) => c.toUpperCase());
+      }
     }
+
+    formData[fieldName] = valueMap[valueText] || valueText;
   });
 
   return formData;
 }
 
-export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }> = ({ schema }) => {
-  const previewRef = useRef<AmisLivePreviewRef>(null);
+export const ClosableTabsShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [submissions, setSubmissions] = useState<Record<string, unknown>[][]>([]);
   const [tabCount, setTabCount] = useState(2);
-  const [tabData, setTabData] = useState<Record<string, unknown>[]>([{}, {}]);
+  const [submissions, setSubmissions] = useState<Record<string, unknown>[][]>([]);
+  // Store latest form data from each tab index — survives schema rebuilds
+  const tabDataRef = useRef<Record<string, unknown>[]>([]);
 
   const handleSubmit = useCallback((rows: Record<string, unknown>[]) => {
     setSubmissions((prev) => {
@@ -156,27 +164,40 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
     });
   }, []);
 
-  const handleAddTab = useCallback(() => {
-    setTabCount((prev) => prev + 1);
-    setTabData((prev) => [...prev, createNewTabData()]);
-  }, []);
+  // Watch for tab add/close via Amis DOM mutations.
+  // Use a ref for tabCount to avoid stale closures in the observer callback.
+  const tabCountRef = useRef(tabCount);
+  tabCountRef.current = tabCount;
 
-  // Watch for tab close (closable) — sync when Amis removes a tab
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Capture form data from all current tab panes before any DOM change
+    const captureFormData = () => {
+      const panes = container.querySelectorAll('.cxd-Tabs-pane');
+      const newTabData: Record<string, unknown>[] = [];
+      panes.forEach((pane) => {
+        const data = readTabFormData(pane);
+        if (Object.keys(data).length > 0) newTabData.push(data);
+      });
+      if (newTabData.length > 0) {
+        tabDataRef.current = newTabData;
+      }
+    };
 
     let timer: ReturnType<typeof setTimeout>;
     const observer = new MutationObserver(() => {
       clearTimeout(timer);
       timer = setTimeout(() => {
         const closableTabs = container.querySelectorAll('.custom-closable-tabs > .cxd-Tabs-linksContainer .cxd-Tabs-link');
-        const currentTabCount = closableTabs.length;
-        if (currentTabCount < tabCount && currentTabCount > 0) {
-          setTabCount(currentTabCount);
-          setTabData((prev) => prev.slice(0, currentTabCount));
+        const count = closableTabs.length;
+        if (count > 0 && count !== tabCountRef.current) {
+          // Capture data before updating count
+          captureFormData();
+          setTabCount(count);
         }
-      }, 200);
+      }, 300);
     });
 
     observer.observe(container, { childList: true, subtree: true });
@@ -184,9 +205,9 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
       observer.disconnect();
       clearTimeout(timer);
     };
-  }, [tabCount]);
+  }, []);
 
-  // Listen for form submit button clicks and capture ALL tab data as array
+  // Listen for form submit button clicks — read ALL tabs' data at submit time
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -198,17 +219,13 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
       const submitBtn = target.closest('button[type="submit"]');
       if (!submitBtn || !container.contains(submitBtn)) return;
 
-      // Prevent Amis's own form submission from firing
       e.stopImmediatePropagation();
-
-      // Avoid double-processing if click fires multiple times
       if (isProcessing) return;
       isProcessing = true;
 
       const tabLinks = container.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
       const totalCount = tabLinks.length;
 
-      // Find the originally active tab index
       const activeLink = container.querySelector('.custom-closable-tabs .cxd-Tabs-link.is-active a');
       let originalIndex = 0;
       tabLinks.forEach((link, idx) => {
@@ -217,10 +234,7 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
 
       const allRows: Record<string, unknown>[] = [];
 
-      // IMPORTANT: Read the CURRENT active tab FIRST before any tab switching.
-      // Switching tabs causes Amis to unmount the current pane's DOM, losing
-      // any user-entered values that haven't been synced to Amis form state.
-      // By reading the active tab first, we capture the data while it's in the DOM.
+      // Read current active tab first (DOM is already mounted)
       const currentActivePane = container.querySelector('.cxd-Tabs-pane.is-active');
       if (currentActivePane) {
         const rowData = readTabFormData(currentActivePane);
@@ -229,25 +243,24 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
         }
       }
 
-      // Now switch to and read the remaining tabs
+      // Switch to and read remaining tabs
       for (let i = 0; i < totalCount; i++) {
-        if (i === originalIndex) continue; // Already read above
+        if (i === originalIndex) continue;
 
         tabLinks[i].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
         tabLinks[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-        // Wait for the pane to become active
         await new Promise<void>((resolve) => {
-          const timeout = setTimeout(() => { observer.disconnect(); resolve(); }, 3000);
-          const observer = new MutationObserver(() => {
+          const timeout = setTimeout(() => { resolve(); }, 3000);
+          const paneObserver = new MutationObserver(() => {
             const activePane = container.querySelector('.cxd-Tabs-pane.is-active');
             if (activePane && activePane.querySelectorAll('.cxd-Form-item').length > 0) {
               clearTimeout(timeout);
-              observer.disconnect();
+              paneObserver.disconnect();
               resolve();
             }
           });
-          observer.observe(container, { childList: true, subtree: true, attributes: true });
+          paneObserver.observe(container, { childList: true, subtree: true, attributes: true });
         });
 
         await new Promise((resolve) => setTimeout(resolve, 200));
@@ -269,7 +282,6 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
 
       isProcessing = false;
 
-      // Filter out any undefined entries and submit
       const filteredRows = allRows.filter(Boolean);
       if (filteredRows.length > 0) {
         handleSubmit(filteredRows);
@@ -280,15 +292,17 @@ export const ClosableTabsShowcase: React.FC<{ schema: Record<string, unknown> }>
     return () => container.removeEventListener('click', handleClick, true);
   }, [handleSubmit]);
 
-  const currentSchema = buildSchema(tabCount, tabData);
+  // Schema is built from tabCount + captured tab data.
+  // Use stored tab data so user-entered values survive schema rebuilds.
+  const currentSchema = buildTabsSchema(tabCount, tabDataRef.current);
 
   return (
     <div className="closable-tabs-showcase">
       {/* Preview area */}
       <div className="closable-tabs-preview" ref={containerRef}>
-        <AmisLivePreview ref={previewRef} schema={currentSchema as Record<string, unknown>} />
+        <AmisLivePreview schema={currentSchema as Record<string, unknown>} />
         {tabCount < 10 && (
-          <button className="closable-tabs-add-btn" onClick={handleAddTab} type="button">
+          <button className="closable-tabs-add-btn" onClick={() => setTabCount((prev) => prev + 1)} type="button">
             <span className="add-icon">+</span>
             <span>Add Sub Mission</span>
           </button>

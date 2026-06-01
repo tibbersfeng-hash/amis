@@ -1,5 +1,6 @@
 import React, { forwardRef, useRef, useState, useCallback, useImperativeHandle, useEffect } from 'react';
 import { AmisLivePreview, type AmisLivePreviewRef } from './AmisLivePreview';
+import { AIGeneratorDrawer, type AIGeneratorResult } from './AIGeneratorDrawer';
 
 const DEFAULT_SCHEMA = JSON.stringify({
   type: 'page',
@@ -90,21 +91,278 @@ const DEFAULT_SCHEMA = JSON.stringify({
         body: {
           type: 'combo',
           name: 'subMissions',
+          className: 'custom-combo-tabs',
           label: false,
+          labelField: 'title',
+          tabsLabelTpl: '${title}',
           multiple: true,
-          addable: true,
+          multiLine: false,
           removable: true,
-          tabsMode: false,
+          tabsMode: true,
+          max: 10,
+          addButtonText: '+ Add Sub Mission',
+          scaffold: {
+            title: '',
+            subMissionType: '',
+            businessUnit: '',
+            targetSpending: '',
+            currency: '',
+            noOfNights: '',
+            minimumSpending: '',
+            paymentMethod: '',
+            source: '',
+            marketCode: '',
+            rateCode: '',
+            roomCategory: '',
+            roomType: '',
+            awardType: 'points',
+            awardPoints: '',
+            billingCode: '',
+            stockQty: '',
+            transactionNote: '',
+          },
           items: [
-            { type: 'input-text', name: 'subMissionName', label: 'Sub Mission Name' },
-            { type: 'input-text', name: 'currency', label: 'Currency' },
-            { type: 'input-text', name: 'awardName', label: 'Award name' },
-            { type: 'input-text', name: 'ctaText', label: 'cta Text' },
-            { type: 'input-text', name: 'ctaLink', label: 'cta Link' },
+            {
+              type: 'select',
+              name: 'subMissionType',
+              label: 'Sub Mission Type*',
+              required: true,
+              options: [
+                { label: 'F&B Spending', value: 'FNB_SPENDING' },
+                { label: 'F&B Frequency', value: 'FNB_FREQUENCY' },
+                { label: 'Room Stay Nights', value: 'ROOM_STAY_NIGHTS' },
+                { label: 'Room Spending', value: 'ROOM_SPENDING' },
+                { label: 'Room Stay Prepaid Booking', value: 'ROOM_STAY_PREPAID' },
+                { label: 'Direct Booking', value: 'Direct Booking' },
+                { label: 'Group Booking', value: 'Group Booking' },
+              ],
+            },
+            {
+              type: 'select',
+              name: 'businessUnit',
+              label: 'Business Unit*',
+              required: true,
+              options: [
+                { label: 'Room', value: 'ROOM' },
+                { label: 'F&B', value: 'FNB' },
+                { label: 'Health', value: 'HEALTH' },
+              ],
+            },
+            {
+              type: 'group',
+              body: [
+                {
+                  type: 'input-number',
+                  name: 'targetSpending',
+                  label: 'Target Spending',
+                  placeholder: 'Please input',
+                },
+                {
+                  type: 'select',
+                  name: 'currency',
+                  label: 'Currency',
+                  options: [
+                    { label: 'HKD', value: 'HKD' },
+                    { label: 'USD', value: 'USD' },
+                    { label: 'CNY', value: 'CNY' },
+                    { label: '积分', value: '积分' },
+                    { label: '钻石', value: '钻石' },
+                    { label: '金币', value: '金币' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'group',
+              body: [
+                {
+                  type: 'input-number',
+                  name: 'noOfNights',
+                  label: 'No. of Nights',
+                  placeholder: 'Please input',
+                },
+                {
+                  type: 'input-number',
+                  name: 'minimumSpending',
+                  label: 'Minimum Spending',
+                  placeholder: 'Please input',
+                },
+              ],
+            },
+            {
+              type: 'group',
+              body: [
+                {
+                  type: 'select',
+                  name: 'paymentMethod',
+                  label: 'Payment Method',
+                  options: [
+                    { label: 'Credit Card', value: 'Credit Card' },
+                    { label: 'Cash', value: 'Cash' },
+                    { label: 'Wire Transfer', value: 'Wire Transfer' },
+                  ],
+                },
+                {
+                  type: 'select',
+                  name: 'source',
+                  label: 'Source',
+                  options: [
+                    { label: 'Web', value: 'Web' },
+                    { label: 'App', value: 'App' },
+                    { label: 'Mini Program', value: 'MiniProgram' },
+                    { label: 'Direct', value: 'DIRECT' },
+                    { label: 'OTA', value: 'OTA' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'group',
+              body: [
+                {
+                  type: 'select',
+                  name: 'marketCode',
+                  label: 'Market Code',
+                  options: [
+                    { label: 'GDS', value: 'GDS' },
+                    { label: 'CORPORATE', value: 'CORPORATE' },
+                    { label: 'Code A', value: 'A' },
+                    { label: 'Code B', value: 'B' },
+                  ],
+                },
+                {
+                  type: 'select',
+                  name: 'rateCode',
+                  label: 'Rate Code',
+                  options: [
+                    { label: 'RACK', value: 'RACK' },
+                    { label: 'BAR', value: 'BAR' },
+                    { label: 'Rate 1', value: 'R1' },
+                    { label: 'Rate 2', value: 'R2' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'group',
+              body: [
+                {
+                  type: 'select',
+                  name: 'roomCategory',
+                  label: 'Room Category',
+                  options: [
+                    { label: 'Deluxe', value: 'DELUXE' },
+                    { label: 'Premier', value: 'PREMIER' },
+                    { label: 'Cat A', value: 'A' },
+                    { label: 'Cat B', value: 'B' },
+                  ],
+                },
+                {
+                  type: 'select',
+                  name: 'roomType',
+                  label: 'Room Type',
+                  options: [
+                    { label: 'King', value: 'KING' },
+                    { label: 'Twin', value: 'TWIN' },
+                    { label: 'Standard', value: 'Standard' },
+                    { label: 'Deluxe', value: 'Deluxe' },
+                    { label: 'Suite', value: 'Suite' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'tpl',
+              tpl: '<div class="section-title-sm">Registration Award</div>',
+              inline: false,
+            },
+            {
+              type: 'radios',
+              name: 'awardType',
+              label: '',
+              options: [
+                { label: 'Award Points', value: 'points' },
+                { label: 'Voucher', value: 'voucher' },
+                { label: 'No Award', value: 'none' },
+              ],
+            },
+            {
+              type: 'wrapper',
+              className: 'award-panel',
+              body: [
+                {
+                  type: 'input-number',
+                  name: 'awardPoints',
+                  label: 'Award Points',
+                  placeholder: 'Please input',
+                },
+                {
+                  type: 'select',
+                  name: 'billingCode',
+                  label: 'Billing Code',
+                  options: [
+                    { label: 'BCODE_ROOM_001', value: 'BCODE_ROOM_001' },
+                    { label: 'BCODE_FNB_001', value: 'BCODE_FNB_001' },
+                    { label: 'BC-001', value: 'BC-001' },
+                    { label: 'BC-002', value: 'BC-002' },
+                  ],
+                },
+                {
+                  type: 'input-number',
+                  name: 'stockQty',
+                  label: '库存数',
+                  placeholder: 'Please input',
+                },
+                {
+                  type: 'input-text',
+                  name: 'transactionNote',
+                  label: 'Transaction Note',
+                  placeholder: 'Please input',
+                },
+              ],
+            },
           ],
           value: [
-            { subMissionName: '连续签到7天', currency: '积分', awardName: '宝箱钥匙', ctaText: '立即签到', ctaLink: '/mission/daily-checkin' },
-            { subMissionName: '连续签到30天', currency: '钻石', awardName: '限定头像框', ctaText: '查看详情', ctaLink: '/mission/monthly-checkin' },
+            {
+              title: '连续签到7天',
+              subMissionType: 'Direct Booking',
+              businessUnit: 'ROOM',
+              targetSpending: 1000,
+              currency: '积分',
+              noOfNights: 7,
+              minimumSpending: 200,
+              paymentMethod: 'Credit Card',
+              source: 'Web',
+              marketCode: 'GDS',
+              rateCode: 'RACK',
+              roomCategory: 'DELUXE',
+              roomType: 'King',
+              awardType: 'points',
+              awardPoints: 500,
+              billingCode: 'BCODE_ROOM_001',
+              stockQty: 100,
+              transactionNote: '连续7天签到奖励',
+            },
+            {
+              title: '连续签到30天',
+              subMissionType: 'Room Stay Nights',
+              businessUnit: 'ROOM',
+              targetSpending: 5000,
+              currency: '钻石',
+              noOfNights: 30,
+              minimumSpending: 500,
+              paymentMethod: 'Wire Transfer',
+              source: 'App',
+              marketCode: 'CORPORATE',
+              rateCode: 'BAR',
+              roomCategory: 'PREMIER',
+              roomType: 'Suite',
+              awardType: 'voucher',
+              awardPoints: 2000,
+              billingCode: 'BCODE_FNB_001',
+              stockQty: 50,
+              transactionNote: '连续30天签到奖励',
+            },
           ],
         },
       },
@@ -134,8 +392,46 @@ const DEFAULT_DATA = JSON.stringify({
     },
   },
   subMissions: [
-    { subMissionName: '连续签到7天', currency: '积分', awardName: '宝箱钥匙', ctaText: '立即签到', ctaLink: '/mission/daily-checkin' },
-    { subMissionName: '连续签到30天', currency: '钻石', awardName: '限定头像框', ctaText: '查看详情', ctaLink: '/mission/monthly-checkin' },
+    {
+      title: '连续签到7天',
+      subMissionType: 'Direct Booking',
+      businessUnit: 'ROOM',
+      targetSpending: 1000,
+      currency: '积分',
+      noOfNights: 7,
+      minimumSpending: 200,
+      paymentMethod: 'Credit Card',
+      source: 'Web',
+      marketCode: 'GDS',
+      rateCode: 'RACK',
+      roomCategory: 'DELUXE',
+      roomType: 'King',
+      awardType: 'points',
+      awardPoints: 500,
+      billingCode: 'BCODE_ROOM_001',
+      stockQty: 100,
+      transactionNote: '连续7天签到奖励',
+    },
+    {
+      title: '连续签到30天',
+      subMissionType: 'Room Stay Nights',
+      businessUnit: 'ROOM',
+      targetSpending: 5000,
+      currency: '钻石',
+      noOfNights: 30,
+      minimumSpending: 500,
+      paymentMethod: 'Wire Transfer',
+      source: 'App',
+      marketCode: 'CORPORATE',
+      rateCode: 'BAR',
+      roomCategory: 'PREMIER',
+      roomType: 'Suite',
+      awardType: 'voucher',
+      awardPoints: 2000,
+      billingCode: 'BCODE_FNB_001',
+      stockQty: 50,
+      transactionNote: '连续30天签到奖励',
+    },
   ],
 }, null, 2);
 
@@ -169,6 +465,13 @@ function setByPath(target: Record<string, unknown>, path: string, value: unknown
  */
 function injectFormData(schema: Record<string, unknown>, data: Record<string, unknown>): Record<string, unknown> {
   const result = { ...schema };
+
+  // If this is a form without a data property, create one from the provided data.
+  // Amis uses form.data as the initial values for fields.
+  if (result.type === 'form' && !('data' in result)) {
+    result.data = { ...data };
+  }
+
   for (const key of Object.keys(result)) {
     const value = result[key];
     if (key === 'data' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
@@ -356,24 +659,77 @@ export const SchemaPreview = forwardRef<SchemaPreviewRef, {}>((_props, ref) => {
   const previewRef = useRef<AmisLivePreviewRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // AI Generator state
+  const [aiDrawerVisible, setAiDrawerVisible] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleAIDrawerOpen = useCallback(() => {
+    setAiDrawerVisible(true);
+    setAiError(null);
+  }, []);
+
+  const handleAIDrawerClose = useCallback(() => {
+    setAiDrawerVisible(false);
+  }, []);
+
+  const handleAIApply = useCallback((result: AIGeneratorResult) => {
+    if (result.schema) {
+      try {
+        const parsedSchema = JSON.parse(result.schema);
+        setSchemaJson(result.schema);
+        if (result.data) {
+          try {
+            const parsedData = JSON.parse(result.data);
+            setDataJson(result.data);
+            setData(parsedData);
+            const injected = injectFormData(parsedSchema, parsedData);
+            setSchema(injected);
+            setError(null);
+            setRenderKey(k => k + 1);
+
+            // Check for Vite error overlay after hot update
+            setTimeout(() => {
+              const overlay = document.querySelector('vite-error-overlay');
+              if (overlay) {
+                const message = overlay.shadowRoot?.querySelector('.message')?.textContent || '编译错误';
+                setAiError(`生成成功但存在编译错误: ${message}`);
+              }
+            }, 1500);
+          } catch (e) {
+            setAiError(`Data JSON 解析失败: ${(e as Error).message}`);
+          }
+        } else {
+          setSchema(parsedSchema);
+          setError(null);
+          setRenderKey(k => k + 1);
+        }
+      } catch (e) {
+        setAiError(`Schema JSON 解析失败: ${(e as Error).message}`);
+      }
+    }
+  }, []);
+
   const handleRender = useCallback(() => {
+    let parsedSchema: Record<string, unknown>;
     try {
-      const parsedSchema = JSON.parse(schemaJson);
-      setSchema(parsedSchema);
-      setError(null);
+      parsedSchema = JSON.parse(schemaJson);
     } catch (e: unknown) {
       setError(`Schema: ${(e as Error).message}`);
       return;
     }
 
+    let parsedData: Record<string, unknown>;
     try {
-      const parsedData = JSON.parse(dataJson);
-      setData(parsedData);
+      parsedData = JSON.parse(dataJson);
     } catch (e: unknown) {
       setError(`Data: ${(e as Error).message}`);
       return;
     }
 
+    setData(parsedData);
+    parsedSchema = injectFormData(parsedSchema, parsedData);
+    setSchema(parsedSchema);
+    setError(null);
     setRenderKey(k => k + 1);
   }, [schemaJson, dataJson]);
 
@@ -479,6 +835,23 @@ export const SchemaPreview = forwardRef<SchemaPreviewRef, {}>((_props, ref) => {
             <button className="schema-preview-sync-btn" onClick={handleSyncData}>
               同步数据
             </button>
+            <button
+              data-testid="ai-generate-btn"
+              style={{
+                padding: '6px 16px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba1 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: 'var(--font-family)',
+              }}
+              onClick={handleAIDrawerOpen}
+            >
+              AI 生成
+            </button>
             <button className="schema-preview-render-btn" onClick={handleRender}>
               渲染
             </button>
@@ -522,6 +895,39 @@ export const SchemaPreview = forwardRef<SchemaPreviewRef, {}>((_props, ref) => {
           />
         </div>
       </div>
+
+      {/* AI Generator Drawer */}
+      <AIGeneratorDrawer
+        visible={aiDrawerVisible}
+        onClose={handleAIDrawerClose}
+        onApply={handleAIApply}
+        currentSchema={schemaJson}
+        currentData={dataJson}
+      />
+
+      {/* AI Error toast */}
+      {aiError && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 80,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: '12px 24px',
+            background: 'var(--danger)',
+            color: '#fff',
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 500,
+            zIndex: 1001,
+            cursor: 'pointer',
+            maxWidth: '90vw',
+          }}
+          onClick={() => setAiError(null)}
+        >
+          {aiError}
+        </div>
+      )}
     </div>
   );
 });

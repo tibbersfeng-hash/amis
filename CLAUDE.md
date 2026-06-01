@@ -471,6 +471,22 @@ config.missionRule.ruleSetup.missionCode → formData.missionCode
         └── dateFields.ts       # 日期字段类型定义
 ```
 
+## 测试策略
+
+### E2E 测试（Playwright）
+
+**默认只跑修改组件相关的测试**，不跑全部测试：
+
+- 修改 `combo-tab` showcase → 只跑 `npx playwright test tests/e2e/combo-tab.spec.ts`
+- 修改某个 Amis 内置组件 showcase → 只跑 `npx playwright test --grep "<组件名>"`
+- 修改 `ShowcaseApp` / `Sidebar` / 全局结构 → 跑全量 `npx playwright test`
+- 只有在 CI 或用户明确要求时才跑全量测试
+
+### 单元测试（Vitest）
+
+- 修改某个组件 → 只跑 `npx vitest run src/components/<组件名>/test.tsx`
+- 修改 utils/hooks → 只跑对应文件测试
+
 ## 开发规则
 
 1. **新增页面**：创建 `{name}-schema.json` + `{name}-config.json` 放在 `public/api/`，无需新建组件
