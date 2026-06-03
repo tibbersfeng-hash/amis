@@ -6,8 +6,14 @@ import type { FormControlProps, RenderSchema } from 'amis';
  * ClosableTab — Amis custom renderer with `schema_format` support.
  *
  * Custom add button injected into Amis tab bar DOM. No Amis native `addable`.
- * Single MutationObserver handles both add button re-injection and deletion tracking.
- * The Observer effect has NO state dependencies to prevent re-render loops.
+ * Uses direct child selectors (>) to avoid matching nested tab links.
+ *
+ * DOM chain for Amis tabs:
+ * .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper
+ *   > .cxd-Tabs-linksContainer
+ *     > .cxd-Tabs-linksContainer-main
+ *       > .cxd-Tabs-links
+ *         > .cxd-Tabs-link (tab link li elements)
  */
 interface ClosableTabProps extends FormControlProps {
   schema_format?: Record<string, unknown>;
@@ -32,6 +38,10 @@ function buildTabFromSchema(
 }
 
 const ADD_BTN_CLASS = 'closable-custom-add';
+
+// Direct child selector to avoid matching nested tabs
+const TAB_LINK_SELECTOR = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link';
+const LINKS_CONTAINER_SELECTOR = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links';
 
 const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   const {
@@ -91,23 +101,22 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     setTabs(prev => [...prev, newTab]);
   }, []);
   handleAddRef.current = handleAdd;
+
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
     const syncAddBtn = () => {
-      const linksContainer = wrapper.querySelector('.custom-closable-tabs .cxd-Tabs-links');
+      const linksContainer = wrapper.querySelector(LINKS_CONTAINER_SELECTOR);
       if (!linksContainer) return;
 
       const existingBtn = linksContainer.querySelector(`.${ADD_BTN_CLASS}`);
 
       if (!canAddRef.current) {
-        // Remove button if it exists but shouldn't
         if (existingBtn) existingBtn.remove();
         return;
       }
 
-      // Skip if button already exists (prevents infinite loop)
       if (existingBtn) return;
 
       const addBtn = document.createElement('li');
@@ -127,7 +136,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     const observer = new MutationObserver(() => {
       syncAddBtn();
 
-      const tabLinks = wrapper.querySelectorAll(`.custom-closable-tabs .cxd-Tabs-links > .cxd-Tabs-link:not(.${ADD_BTN_CLASS})`);
+      const tabLinks = wrapper.querySelectorAll(`${TAB_LINK_SELECTOR}:not(.${ADD_BTN_CLASS})`);
       const currentTitles = new Set<string>();
       tabLinks.forEach(link => {
         const title = (link as HTMLElement).querySelector('a')?.textContent?.trim();
@@ -149,7 +158,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     requestAnimationFrame(syncAddBtn);
     observer.observe(wrapper, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, []); // Empty deps — runs once on mount only
+  }, []);
 
   const nativeTabsSchema: RenderSchema = {
     type: 'tabs',

@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 const ADD_BTN = '.closable-custom-add';
-const TAB_LINKS = '.custom-closable-tabs .cxd-Tabs-link:not(.closable-custom-add) a';
+const TAB_LINK = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
+const CLOSE_BTN = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
 
 test.describe('Nested Closable Tabs - Multi-level', () => {
   async function setupSchemaPreview(page: ReturnType<typeof test>, schema: Record<string, unknown>) {
@@ -25,7 +26,7 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(1);
     await page.locator(ADD_BTN).first().click();
     await page.waitForTimeout(1000);
@@ -57,7 +58,7 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(1);
     await page.locator(ADD_BTN).first().click();
     await page.waitForTimeout(1000);
@@ -121,9 +122,9 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(3);
-    const closeBtns = page.locator('.custom-closable-tabs .cxd-Tabs-link-close');
+    const closeBtns = page.locator(CLOSE_BTN);
     await expect(closeBtns).toHaveCount(3);
     await closeBtns.nth(1).click();
     await page.waitForTimeout(500);

@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+// Direct child selectors to avoid matching nested tabs
 const ADD_BTN = '.custom-closable-tabs .closable-custom-add';
-const TAB_LINKS = '.custom-closable-tabs .cxd-Tabs-link:not(.closable-custom-add) a';
+const TAB_LINK = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
+const TAB_LINK_A = `${TAB_LINK} a`;
+const CLOSE_BTN = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
 
 async function setupSchemaPreview(page: ReturnType<typeof test>, schema: Record<string, unknown>) {
   await page.goto('http://localhost:5173/showcase#schema-preview');
@@ -37,7 +40,7 @@ test.describe('Closable Tabs Component', () => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
     await expect(page.locator('.closable-tab-wrapper')).toBeVisible();
     await expect(page.locator('.custom-closable-tabs')).toBeVisible();
-    await expect(page.locator(TAB_LINKS)).toHaveCount(2);
+    await expect(page.locator(TAB_LINK)).toHaveCount(2);
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-basic.png', fullPage: true });
   });
 
@@ -74,7 +77,7 @@ test.describe('Closable Tabs Component', () => {
 
   test('+ button creates new tab with schema_format template', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const initialTabs = page.locator(TAB_LINKS);
+    const initialTabs = page.locator(TAB_LINK);
     await expect(initialTabs).toHaveCount(2);
     await page.locator(ADD_BTN).click();
     await page.waitForTimeout(1000);
@@ -86,15 +89,14 @@ test.describe('Closable Tabs Component', () => {
 
   test('deleted tabs do not reappear when adding new tabs', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(2);
     await page.locator(ADD_BTN).click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-before-delete.png', fullPage: true });
 
-    const closeBtns = page.locator('.custom-closable-tabs .cxd-Tabs-link-close');
-    await closeBtns.nth(1).click();
+    await page.locator(CLOSE_BTN).nth(1).click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
     const titlesAfterDelete = await tabLinks.allTextContents();
@@ -121,7 +123,7 @@ test.describe('Closable Tabs Component', () => {
       ]
     };
     await setupSchemaPreview(page, maxSchema);
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(1);
     const addBtn = page.locator(ADD_BTN);
     await expect(addBtn).toBeVisible();
@@ -137,22 +139,19 @@ test.describe('Closable Tabs Component', () => {
 
   test('custom-closable-tabs CSS styles are applied', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link');
-    const firstTab = tabLinks.first();
+    const firstTab = page.locator(TAB_LINK).first();
     const tabStyle = await firstTab.getAttribute('class');
     expect(tabStyle).toContain('cxd-Tabs-link');
-    const activeTab = page.locator('.custom-closable-tabs .cxd-Tabs-link.is-active');
+    const activeTab = page.locator('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active');
     await expect(activeTab).toBeVisible();
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-css-styles.png', fullPage: true });
   });
 
   test('add → delete → add results in correct tab count', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     const addBtn = page.locator(ADD_BTN);
 
-    // Start: 2 tabs
     await expect(tabLinks).toHaveCount(2);
 
     // Add one → 3 tabs
@@ -160,25 +159,21 @@ test.describe('Closable Tabs Component', () => {
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
 
-    // Delete one → 2 tabs (close Tab 2)
-    const closeBtns = page.locator('.custom-closable-tabs .cxd-Tabs-link-close');
-    await closeBtns.nth(1).click();
+    // Delete one → 2 tabs
+    await page.locator(CLOSE_BTN).nth(1).click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
 
-    // Add one again → should be 3 tabs
+    // Add again → 3 tabs
     await addBtn.click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
 
-    // Verify tab titles — Tab 2 should not reappear
+    // Tab 2 should not reappear
     const titles = await tabLinks.allTextContents();
     expect(titles).toEqual(['Tab 1', 'Tab 3', 'Tab 4']);
 
-    await page.screenshot({
-      path: 'tests/e2e/screenshots/closable-tabs-add-delete-add.png',
-      fullPage: true,
-    });
+    await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-add-delete-add.png', fullPage: true });
   });
 
   test('modifying tab content is preserved after adding new tab', async ({ page }) => {
@@ -202,7 +197,7 @@ test.describe('Closable Tabs Component', () => {
 
     await setupSchemaPreview(page, schema);
 
-    const tabLinks = page.locator(TAB_LINKS);
+    const tabLinks = page.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(2);
 
     // Tab 1 is active by default — fill "AAA"
@@ -231,9 +226,6 @@ test.describe('Closable Tabs Component', () => {
     await expect(inputAfterAdd).toBeVisible();
     await expect(inputAfterAdd).toHaveValue('AAA');
 
-    await page.screenshot({
-      path: 'tests/e2e/screenshots/closable-tabs-content-preserved.png',
-      fullPage: true,
-    });
+    await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-content-preserved.png', fullPage: true });
   });
 });
