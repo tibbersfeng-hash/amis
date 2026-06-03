@@ -1,55 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRemotePage } from '../hooks/useRemotePage';
 import { AmisPage } from '../components/AmisPage';
 import { Loading, ErrorDisplay } from '../components/Loading';
 import { getLocale } from '../utils/locale';
 
-interface RemotePageParams {
-  schemaUrl: string;
-  dataUrl: string;
-}
-
 /**
- * Parse URL query params for schema and data URLs.
- * Example: /remote?page=schema.json&data=data.json
- * Resolves to: /api/schema.json and /api/data.json
+ * Parse URL query params: ?dataType=xxx&dataId=xxx
+ *
+ * Example: /remote?dataType=remote&dataId=remote
+ *   → schema: public/api/remote-schema.json
+ *   → data:   public/api/remote-data.json
  */
-function parseRemoteParams(): RemotePageParams {
+function parseRemoteParams(): { dataType: string; dataId: string } {
   const params = new URLSearchParams(window.location.search);
-  const schemaParam = params.get('schema') || 'schema.json';
-  const dataParam = params.get('data') || 'data.json';
+  const dataType = params.get('dataType') || '';
+  const dataId = params.get('dataId') || '';
 
-  const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
-
-  // Support both absolute URLs and relative paths
-  const schemaUrl = schemaParam.startsWith('http')
-    ? schemaParam
-    : `${apiBase}/${schemaParam}`;
-
-  const dataUrl = dataParam.startsWith('http')
-    ? dataParam
-    : `${apiBase}/${dataParam}`;
-
-  return { schemaUrl, dataUrl };
+  return { dataType, dataId };
 }
 
 /**
- * RemotePage — renders an Amis page from remotely fetched schema + data.
+ * RemotePage — renders an Amis page from server-loaded schema + data.
  *
- * URL format: /remote?schema=schema.json&data=data.json
+ * URL format: /remote?dataType=xxx&dataId=xxx
  *
- * Schema URL: /api/schema.json (configurable via ?schema= param)
- * Data URL:   /api/data.json   (configurable via ?data= param)
+ * Server reads files dynamically from public/api/:
+ *   - schema: {dataType}-schema.json
+ *   - data:   {dataId}-data.json
  *
- * Schema format:
- *   { "type": "form", "body": [...] }
- *   or any valid Amis schema
- *
- * Data format:
- *   { "name": "Alice", "email": "alice@example.com" }
+ * Files are read fresh on every request — modify JSON files,
+ * then refresh the page to see changes. No server restart needed.
  */
 const RemotePage: React.FC = () => {
-  const [params] = useState<RemotePageParams>(() => parseRemoteParams());
+  const [params] = useState(() => parseRemoteParams());
   const { data, loading, error } = useRemotePage(params);
 
   if (loading) {

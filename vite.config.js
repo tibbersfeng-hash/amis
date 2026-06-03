@@ -999,6 +999,51 @@ export default defineConfig({
             return;
           }
 
+          // GET /api/page?dataType=xxx&dataId=xxx — load schema + data from JSON files
+          if (req.method === 'GET' && req.url && req.url.startsWith('/api/page')) {
+            const urlObj = new URL(req.url, `http://${req.headers.host}`);
+            const dataType = urlObj.searchParams.get('dataType');
+            const dataId = urlObj.searchParams.get('dataId');
+
+            if (!dataType || !dataId) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'dataType and dataId are required' }));
+              return;
+            }
+
+            // Read files dynamically from public/api/
+            const apiDir = path.resolve(__dirname, 'public', 'api');
+            const schemaFile = path.join(apiDir, `${dataType}-schema.json`);
+            const dataFile = path.join(apiDir, `${dataId}-data.json`);
+
+            try {
+              // Schema file — read fresh every request (no caching)
+              if (!fs.existsSync(schemaFile)) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: `Schema not found: ${dataType}-schema.json` }));
+                return;
+              }
+              const schema = JSON.parse(fs.readFileSync(schemaFile, 'utf-8'));
+
+              // Data file — read fresh every request (no caching)
+              let data = {};
+              if (fs.existsSync(dataFile)) {
+                data = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+              }
+
+              res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+              });
+              res.end(JSON.stringify({ schema, data }));
+            } catch (err) {
+              console.error(`[API] Error loading page: ${err.message}`);
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: err.message }));
+            }
+            return;
+          }
+
           return next();
         });
       },

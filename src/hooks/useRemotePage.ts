@@ -6,20 +6,29 @@ export interface RemotePageData {
 }
 
 export interface UseRemotePageOptions {
-  schemaUrl: string;
-  dataUrl: string;
+  dataType: string;
+  dataId: string;
 }
 
 /**
- * Fetches schema and data from remote API endpoints.
+ * Fetches schema and data from the single /api/page endpoint.
+ *
+ * Server reads JSON files dynamically from public/api/:
+ *   - schema: {dataType}-schema.json
+ *   - data:   {dataId}-data.json
+ *
+ * Files are read fresh on every request — no restart needed.
  *
  * Usage:
  *   const { data, loading, error } = useRemotePage({
- *     schemaUrl: '/api/schema.json',
- *     dataUrl: '/api/data.json',
+ *     dataType: 'remote',
+ *     dataId: 'remote',
  *   });
+ *
+ * → GET /api/page?dataType=remote&dataId=remote
+ * → reads public/api/remote-schema.json + remote-data.json
  */
-export function useRemotePage({ schemaUrl, dataUrl }: UseRemotePageOptions) {
+export function useRemotePage({ dataType, dataId }: UseRemotePageOptions) {
   const [data, setData] = useState<RemotePageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,19 +38,20 @@ export function useRemotePage({ schemaUrl, dataUrl }: UseRemotePageOptions) {
     setLoading(true);
     setError(null);
 
-    Promise.all([
-      fetch(schemaUrl).then(async (r) => {
-        if (!r.ok) throw new Error(`Failed to load schema from ${schemaUrl}: ${r.status}`);
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+    const url = `${apiBase}/page?dataType=${encodeURIComponent(dataType)}&dataId=${encodeURIComponent(dataId)}`;
+
+    fetch(url)
+      .then(async (r) => {
+        if (!r.ok) {
+          const errBody = await r.json().catch(() => ({}));
+          throw new Error(errBody.error || `API error: ${r.status}`);
+        }
         return r.json();
-      }),
-      fetch(dataUrl).then(async (r) => {
-        if (!r.ok) throw new Error(`Failed to load data from ${dataUrl}: ${r.status}`);
-        return r.json();
-      }),
-    ])
-      .then(([schema, data]) => {
+      })
+      .then((result) => {
         if (cancelled) return;
-        setData({ schema, data });
+        setData(result);
         setLoading(false);
       })
       .catch((err) => {
@@ -53,7 +63,7 @@ export function useRemotePage({ schemaUrl, dataUrl }: UseRemotePageOptions) {
     return () => {
       cancelled = true;
     };
-  }, [schemaUrl, dataUrl]);
+  }, [dataType, dataId]);
 
   return { data, loading, error };
 }
