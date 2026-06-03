@@ -5,9 +5,9 @@ import type { FormControlProps, RenderSchema } from 'amis';
 /**
  * ClosableTab — Amis custom renderer with `schema_format` support.
  *
- * Custom add button injected into Amis tab bar DOM with a unique ID per instance.
- * The ID is exposed via data-closable-tab-add-id attribute for easy E2E targeting
- * in nested scenarios.
+ * Custom add button injected into Amis tab bar DOM.
+ * Uses data attribute for E2E targeting — no global counter needed.
+ * Each instance's button is scoped to its own .closable-tab-wrapper.
  */
 interface ClosableTabProps extends FormControlProps {
   schema_format?: Record<string, unknown>;
@@ -31,9 +31,6 @@ function buildTabFromSchema(
   };
 }
 
-// Global counter for unique IDs per closable-tab instance
-let instanceCounter = 0;
-
 const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   const {
     schema_format,
@@ -48,8 +45,6 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   } = props;
 
   // Unique ID for this instance (set once at mount)
-  const instanceId = useRef(`closable-tab-${instanceCounter++}`);
-
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<Record<string, unknown>[]>([]);
   // Refs for config values used in Observer (no re-render needed)
@@ -100,14 +95,12 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
-    const addBtnId = `add-btn-${instanceId.current}`;
-
     const syncAddBtn = () => {
       const linksContainer = wrapper.querySelector('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links');
       if (!linksContainer) return;
 
-      // Find existing button by ID
-      const existingBtn = linksContainer.querySelector(`#${CSS.escape(addBtnId)}`);
+      // Find existing button by data attribute (scoped to this wrapper)
+      const existingBtn = linksContainer.querySelector('[data-closable-tab-add]');
 
       if (!canAddRef.current) {
         if (existingBtn) existingBtn.remove();
@@ -117,7 +110,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
       if (existingBtn) return;
 
       const addBtn = document.createElement('li');
-      addBtn.id = addBtnId;
+      addBtn.setAttribute('data-closable-tab-add', '');
       addBtn.className = 'cxd-Tabs-link closable-custom-add';
       addBtn.style.cssText = 'cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:10px 10px 10px 20px;height:40px;color:#394DB9;font-weight:500;font-size:18px;background:#F9FAFA;border-top:4px solid transparent;list-style:none;margin:0;border:none;border-radius:0;box-sizing:border-box;';
       addBtn.innerHTML = `<a style="padding:0;margin:0;font-size:18px;font-weight:500;color:#394DB9;background:transparent;border:none;text-decoration:none;line-height:1;">${addBtnTextRef.current || '+ Add Tab'}</a>`;
@@ -167,7 +160,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   };
 
   return (
-    <div className="closable-tab-wrapper" ref={wrapperRef} data-closable-tab-instance={instanceId.current}>
+    <div className="closable-tab-wrapper" ref={wrapperRef}>
       {render ? render('tabs', nativeTabsSchema, { data }) : (
         <div style={{ color: 'red' }}>ERROR: render function not available in closable-tab renderer</div>
       )}
