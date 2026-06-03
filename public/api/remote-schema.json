@@ -1,0 +1,59 @@
+{
+  "type": "form",
+  "title": "远程动态页面",
+  "api": "post:/api/remote/save",
+  "mode": "horizontal",
+  "body": [
+    {
+      "type": "input-text",
+      "name": "name",
+      "label": "姓名",
+      "placeholder": "请输入姓名",
+      "required": true
+    },
+    {
+      "type": "input-email",
+      "name": "email",
+      "label": "邮箱",
+      "placeholder": "请输入邮箱",
+      "required": true
+    },
+    {
+      "type": "input-number",
+      "name": "age",
+      "label": "年龄",
+      "placeholder": "请输入年龄",
+      "min": 0,
+      "max": 150
+    },
+    {
+      "type": "select",
+      "name": "role",
+      "label": "角色",
+      "options": [
+        { "label": "管理员", "value": "admin" },
+        { "label": "编辑者", "value": "editor" },
+        { "label": "观察者", "value": "viewer" }
+      ]
+    },
+    {
+      "type": "textarea",
+      "name": "description",
+      "label": "描述",
+      "placeholder": "请输入描述信息",
+      "minRows": 3,
+      "maxRows": 6
+    }
+  ],
+  "actions": [
+    {
+      "type": "submit",
+      "label": "提交",
+      "level": "primary"
+    },
+    {
+      "type": "reset",
+      "label": "重置"
+    }
+  ]
+}

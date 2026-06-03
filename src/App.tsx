@@ -10,6 +10,7 @@ import { getPageMeta } from './utils/pageRegistry';
 import { setComponentLanguage, initComponentI18n } from './utils/i18n-config';
 import type { Language } from './components/LanguageSwitcher';
 import ShowcaseApp from './showcase/ShowcaseApp';
+import RemotePage from './pages/RemotePage';
 
 const MISSION_PAGES = ['mission', 'promotion'];
 
@@ -162,6 +163,11 @@ function App() {
   // Showcase route — bypass page loading, render showcase directly
   if (window.location.pathname === '/showcase') {
     return <ShowcaseApp />;
+  }
+
+  // Remote page route — fetch schema + data from API URLs
+  if (window.location.pathname === '/remote') {
+    return <RemotePage />;
   }
 
   const [pageName, setPageName] = useState<string>('');
