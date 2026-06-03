@@ -5,15 +5,9 @@ import type { FormControlProps, RenderSchema } from 'amis';
 /**
  * ClosableTab — Amis custom renderer with `schema_format` support.
  *
- * Custom add button injected into Amis tab bar DOM. No Amis native `addable`.
- * Uses direct child selectors (>) to avoid matching nested tab links.
- *
- * DOM chain for Amis tabs:
- * .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper
- *   > .cxd-Tabs-linksContainer
- *     > .cxd-Tabs-linksContainer-main
- *       > .cxd-Tabs-links
- *         > .cxd-Tabs-link (tab link li elements)
+ * Custom add button injected into Amis tab bar DOM with a unique ID per instance.
+ * The ID is exposed via data-closable-tab-add-id attribute for easy E2E targeting
+ * in nested scenarios.
  */
 interface ClosableTabProps extends FormControlProps {
   schema_format?: Record<string, unknown>;
@@ -37,11 +31,8 @@ function buildTabFromSchema(
   };
 }
 
-const ADD_BTN_CLASS = 'closable-custom-add';
-
-// Direct child selector to avoid matching nested tabs
-const TAB_LINK_SELECTOR = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link';
-const LINKS_CONTAINER_SELECTOR = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links';
+// Global counter for unique IDs per closable-tab instance
+let instanceCounter = 0;
 
 const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   const {
@@ -55,6 +46,9 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     render,
     data,
   } = props;
+
+  // Unique ID for this instance (set once at mount)
+  const instanceId = useRef(`closable-tab-${instanceCounter++}`);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<Record<string, unknown>[]>([]);
@@ -106,11 +100,14 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
+    const addBtnId = `add-btn-${instanceId.current}`;
+
     const syncAddBtn = () => {
-      const linksContainer = wrapper.querySelector(LINKS_CONTAINER_SELECTOR);
+      const linksContainer = wrapper.querySelector('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links');
       if (!linksContainer) return;
 
-      const existingBtn = linksContainer.querySelector(`.${ADD_BTN_CLASS}`);
+      // Find existing button by ID
+      const existingBtn = linksContainer.querySelector(`#${CSS.escape(addBtnId)}`);
 
       if (!canAddRef.current) {
         if (existingBtn) existingBtn.remove();
@@ -120,7 +117,8 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
       if (existingBtn) return;
 
       const addBtn = document.createElement('li');
-      addBtn.className = `cxd-Tabs-link ${ADD_BTN_CLASS}`;
+      addBtn.id = addBtnId;
+      addBtn.className = 'cxd-Tabs-link closable-custom-add';
       addBtn.style.cssText = 'cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:10px 10px 10px 20px;height:40px;color:#394DB9;font-weight:500;font-size:18px;background:#F9FAFA;border-top:4px solid transparent;list-style:none;margin:0;border:none;border-radius:0;box-sizing:border-box;';
       addBtn.innerHTML = `<a style="padding:0;margin:0;font-size:18px;font-weight:500;color:#394DB9;background:transparent;border:none;text-decoration:none;line-height:1;">${addBtnTextRef.current || '+ Add Tab'}</a>`;
       addBtn.addEventListener('click', (e) => {
@@ -136,7 +134,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     const observer = new MutationObserver(() => {
       syncAddBtn();
 
-      const tabLinks = wrapper.querySelectorAll(`${TAB_LINK_SELECTOR}:not(.${ADD_BTN_CLASS})`);
+      const tabLinks = wrapper.querySelectorAll('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
       const currentTitles = new Set<string>();
       tabLinks.forEach(link => {
         const title = (link as HTMLElement).querySelector('a')?.textContent?.trim();
@@ -169,7 +167,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   };
 
   return (
-    <div className="closable-tab-wrapper" ref={wrapperRef}>
+    <div className="closable-tab-wrapper" ref={wrapperRef} data-closable-tab-instance={instanceId.current}>
       {render ? render('tabs', nativeTabsSchema, { data }) : (
         <div style={{ color: 'red' }}>ERROR: render function not available in closable-tab renderer</div>
       )}

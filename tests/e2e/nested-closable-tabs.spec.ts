@@ -1,8 +1,14 @@
 import { test, expect } from '@playwright/test';
 
-const ADD_BTN = '.closable-custom-add';
-const TAB_LINK = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
-const CLOSE_BTN = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
+// Scoped selectors — first closable-tab wrapper, then find elements inside
+const CLOSABLE_WRAPPER = '.closable-tab-wrapper';
+
+function firstClosable(page: ReturnType<typeof test>['page']) {
+  return page.locator(CLOSABLE_WRAPPER).first();
+}
+
+const TAB_LINK = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
+const CLOSE_BTN = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
 
 test.describe('Nested Closable Tabs - Multi-level', () => {
   async function setupSchemaPreview(page: ReturnType<typeof test>, schema: Record<string, unknown>) {
@@ -26,9 +32,10 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(1);
-    await page.locator(ADD_BTN).first().click();
+    await wrapper.locator('[id^="add-btn-"]').first().click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
     const titles = await tabLinks.allTextContents();
@@ -58,9 +65,10 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(1);
-    await page.locator(ADD_BTN).first().click();
+    await wrapper.locator('[id^="add-btn-"]').click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
     const titles = await tabLinks.allTextContents();
@@ -100,12 +108,17 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
     };
     await setupSchemaPreview(page, schema);
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-closable-two-level-before.png', fullPage: true });
-    const allAddBtns = page.locator(ADD_BTN);
+
+    // Find all add buttons by ID
+    const allAddBtns = page.locator('[id^="add-btn-"]');
     await expect(allAddBtns).toHaveCount(2);
+
+    // Click the OUTER add button (first wrapper)
     await allAddBtns.first().click();
     await page.waitForTimeout(1000);
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-closable-two-level-after-outer-add.png', fullPage: true });
-    const totalAddBtns = await page.locator(ADD_BTN).count();
+
+    const totalAddBtns = await page.locator('[id^="add-btn-"]').count();
     expect(totalAddBtns).toBeLessThanOrEqual(5);
   });
 
@@ -122,9 +135,10 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
       ]
     };
     await setupSchemaPreview(page, schema);
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(3);
-    const closeBtns = page.locator(CLOSE_BTN);
+    const closeBtns = wrapper.locator(CLOSE_BTN);
     await expect(closeBtns).toHaveCount(3);
     await closeBtns.nth(1).click();
     await page.waitForTimeout(500);

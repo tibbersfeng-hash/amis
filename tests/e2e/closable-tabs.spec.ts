@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
 
-// Direct child selectors to avoid matching nested tabs
-const ADD_BTN = '.custom-closable-tabs .closable-custom-add';
-const TAB_LINK = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
-const TAB_LINK_A = `${TAB_LINK} a`;
-const CLOSE_BTN = '.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
+// Scoped selectors — find the first closable-tab wrapper, then its add button/tab links
+const CLOSABLE_WRAPPER = '.closable-tab-wrapper';
+// Add button has auto-generated ID like "add-btn-closable-tab-0"
+// Use the data attribute on wrapper to scope: wrapper > ... > [id^="add-btn-"]
+const ADD_BTN = `${CLOSABLE_WRAPPER} [id^="add-btn-"]`;
+const TAB_LINK = `${CLOSABLE_WRAPPER} > .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)`;
+const CLOSE_BTN = `${CLOSABLE_WRAPPER} > .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close`;
+
+// Helper to get the first closable-tab scope (for simple single-instance tests)
+function firstClosable(page: ReturnType<typeof test>['page']) {
+  return page.locator(CLOSABLE_WRAPPER).first();
+}
 
 async function setupSchemaPreview(page: ReturnType<typeof test>, schema: Record<string, unknown>) {
   await page.goto('http://localhost:5173/showcase#schema-preview');
@@ -38,19 +45,19 @@ const DEFAULT_SCHEMA = {
 test.describe('Closable Tabs Component', () => {
   test('renders closable-tab component with correct type', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    await expect(page.locator('.closable-tab-wrapper')).toBeVisible();
+    await expect(firstClosable(page)).toBeVisible();
     await expect(page.locator('.custom-closable-tabs')).toBeVisible();
-    await expect(page.locator(TAB_LINK)).toHaveCount(2);
+    await expect(firstClosable(page).locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)')).toHaveCount(2);
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-basic.png', fullPage: true });
   });
 
   test('add button is positioned tightly after existing tabs', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const addBtn = page.locator(ADD_BTN);
+    const addBtn = firstClosable(page).locator('[id^="add-btn-"]');
     await expect(addBtn).toBeVisible();
     await expect(addBtn).toContainText('Add Tab');
 
-    const wrapperEl = page.locator('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper').first();
+    const wrapperEl = firstClosable(page).locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper').first();
     const wrapperPadding = await wrapperEl.evaluate(el => window.getComputedStyle(el).paddingRight);
     expect(parseInt(wrapperPadding, 10)).toBeLessThan(50);
 
@@ -70,40 +77,45 @@ test.describe('Closable Tabs Component', () => {
       ]
     };
     await setupSchemaPreview(page, customSchema);
-    const addBtn = page.locator(ADD_BTN);
+    const addBtn = firstClosable(page).locator('[id^="add-btn-"]');
     await expect(addBtn).toContainText('New Sub Mission');
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-custom-add-text.png', fullPage: true });
   });
 
   test('+ button creates new tab with schema_format template', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const initialTabs = page.locator(TAB_LINK);
-    await expect(initialTabs).toHaveCount(2);
-    await page.locator(ADD_BTN).click();
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
+    await expect(tabLinks).toHaveCount(2);
+    await wrapper.locator('[id^="add-btn-"]').click();
     await page.waitForTimeout(1000);
-    await expect(initialTabs).toHaveCount(3);
-    const titles = await initialTabs.allTextContents();
+    await expect(tabLinks).toHaveCount(3);
+    const titles = await tabLinks.allTextContents();
     expect(titles[2]).toBe('Tab 3');
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-new-tab.png', fullPage: true });
   });
 
   test('deleted tabs do not reappear when adding new tabs', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
+    const closeBtns = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close');
+    const addBtn = wrapper.locator('[id^="add-btn-"]');
+
     await expect(tabLinks).toHaveCount(2);
-    await page.locator(ADD_BTN).click();
+    await addBtn.click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-before-delete.png', fullPage: true });
 
-    await page.locator(CLOSE_BTN).nth(1).click();
+    await closeBtns.nth(1).click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
     const titlesAfterDelete = await tabLinks.allTextContents();
     expect(titlesAfterDelete).toEqual(['Tab 1', 'Tab 3']);
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-after-delete.png', fullPage: true });
 
-    await page.locator(ADD_BTN).click();
+    await addBtn.click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
     const titlesAfterAdd = await tabLinks.allTextContents();
@@ -123,9 +135,10 @@ test.describe('Closable Tabs Component', () => {
       ]
     };
     await setupSchemaPreview(page, maxSchema);
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
     await expect(tabLinks).toHaveCount(1);
-    const addBtn = page.locator(ADD_BTN);
+    const addBtn = wrapper.locator('[id^="add-btn-"]');
     await expect(addBtn).toBeVisible();
     await addBtn.click();
     await page.waitForTimeout(500);
@@ -139,40 +152,34 @@ test.describe('Closable Tabs Component', () => {
 
   test('custom-closable-tabs CSS styles are applied', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const firstTab = page.locator(TAB_LINK).first();
+    const wrapper = firstClosable(page);
+    const firstTab = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)').first();
     const tabStyle = await firstTab.getAttribute('class');
     expect(tabStyle).toContain('cxd-Tabs-link');
-    const activeTab = page.locator('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active');
+    const activeTab = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active');
     await expect(activeTab).toBeVisible();
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-css-styles.png', fullPage: true });
   });
 
   test('add → delete → add results in correct tab count', async ({ page }) => {
     await setupSchemaPreview(page, DEFAULT_SCHEMA);
-    const tabLinks = page.locator(TAB_LINK);
-    const addBtn = page.locator(ADD_BTN);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
+    const closeBtns = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close');
+    const addBtn = wrapper.locator('[id^="add-btn-"]');
 
     await expect(tabLinks).toHaveCount(2);
-
-    // Add one → 3 tabs
     await addBtn.click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
-
-    // Delete one → 2 tabs
-    await page.locator(CLOSE_BTN).nth(1).click();
+    await closeBtns.nth(1).click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(2);
-
-    // Add again → 3 tabs
     await addBtn.click();
     await page.waitForTimeout(1000);
     await expect(tabLinks).toHaveCount(3);
-
-    // Tab 2 should not reappear
     const titles = await tabLinks.allTextContents();
     expect(titles).toEqual(['Tab 1', 'Tab 3', 'Tab 4']);
-
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-add-delete-add.png', fullPage: true });
   });
 
@@ -196,32 +203,26 @@ test.describe('Closable Tabs Component', () => {
     };
 
     await setupSchemaPreview(page, schema);
-
-    const tabLinks = page.locator(TAB_LINK);
+    const wrapper = firstClosable(page);
+    const tabLinks = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)');
     await expect(tabLinks).toHaveCount(2);
 
-    // Tab 1 is active by default — fill "AAA"
     const activeInput = page.locator('.cxd-Tabs-pane.is-active input[name="name"]');
     await expect(activeInput).toBeVisible();
     await activeInput.fill('AAA');
     await page.waitForTimeout(500);
     await expect(activeInput).toHaveValue('AAA');
 
-    // Click add button
-    await page.locator(ADD_BTN).click();
+    await wrapper.locator('[id^="add-btn-"]').click();
     await page.waitForTimeout(1000);
-
-    // Should have 3 tabs
     await expect(tabLinks).toHaveCount(3);
 
-    // Switch to Tab 1 via dispatchEvent (avoids Amis pointer intercept)
     await tabLinks.first().evaluate(el => {
       el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
       el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     await page.waitForTimeout(1000);
 
-    // Verify content preserved
     const inputAfterAdd = page.locator('.cxd-Tabs-pane.is-active input[name="name"]');
     await expect(inputAfterAdd).toBeVisible();
     await expect(inputAfterAdd).toHaveValue('AAA');
