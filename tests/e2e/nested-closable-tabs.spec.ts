@@ -237,7 +237,7 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-outer-add.png', fullPage: true });
   });
 
-  test('2-level nested: delete outer tab also removes inner instance', async ({ page }) => {
+  test('2-level nested: delete outer tab does not affect remaining outer tab inner', async ({ page }) => {
     const schema = {
       type: 'closable-tab',
       addable: true,
@@ -285,6 +285,8 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-delete-outer-before.png', fullPage: true });
 
     const wrappers = page.locator('.closable-tab-wrapper');
+    await expect(wrappers).toHaveCount(2); // outer + inner(Mission 1, active)
+
     const outerWrapper = wrappers.nth(0);
     const outerTabs = outerWrapper.locator(TAB_LINK);
     const outerCloseBtns = outerWrapper.locator(CLOSE_BTN);
@@ -292,14 +294,32 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
     // Initially 2 missions
     await expect(outerTabs).toHaveCount(2);
 
-    // Delete Mission 2 (second close button on outer level)
+    // Add a sub tab to Mission 1 (inner)
+    const allAddBtns = page.locator('[id^="add-btn-"]');
+    await expect(allAddBtns).toHaveCount(2); // outer + inner(M1 active)
+
+    // Click Mission 1's inner add button
+    await allAddBtns.nth(1).click();
+    await page.waitForTimeout(1000);
+
+    // Verify Mission 1's inner now has 2 sub tabs
+    const innerTabsBefore = wrappers.nth(1).locator(TAB_LINK);
+    await expect(innerTabsBefore).toHaveCount(2);
+
+    // --- Delete Mission 2 (outer) ---
     await outerCloseBtns.nth(1).click();
     await page.waitForTimeout(1000);
 
-    // Should have 1 mission left
+    // Outer should have 1 mission left
     await expect(outerTabs).toHaveCount(1);
     const outerTitles = await outerTabs.allTextContents();
     expect(outerTitles).toEqual(['Mission 1']);
+
+    // Mission 1's inner tabs should still be 2 — NOT affected by deleting Mission 2
+    const innerTabsAfter = page.locator('.closable-tab-wrapper').nth(1).locator(TAB_LINK);
+    await expect(innerTabsAfter).toHaveCount(2);
+    const innerTitles = await innerTabsAfter.allTextContents();
+    expect(innerTitles).toEqual(['Sub 1', 'Tab 2']);
 
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-delete-outer-after.png', fullPage: true });
   });
