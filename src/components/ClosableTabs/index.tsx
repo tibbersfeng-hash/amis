@@ -1,9 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { registerRenderer } from 'amis';
 import type { FormControlProps, RenderSchema } from 'amis';
 
 /**
  * ClosableTab — Amis custom renderer with `schema_format` support.
+ *
+ * Strategy: fully control add via click interception (not Amis native addable).
+ * The MutationObserver only tracks deletions. This avoids the feedback loop where
+ * Observer → setTabs → React re-render → Amis DOM update → Observer again.
  */
 interface ClosableTabProps extends FormControlProps {
   schema_format?: Record<string, unknown>;
@@ -41,17 +45,9 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     ...restProps
   } = props;
 
-  console.log('[ClosableTabInner] Render called with props:', {
-    hasSchemaFormat: !!schema_format,
-    hasTabs: Array.isArray(initialTabs),
-    tabsLength: initialTabs?.length,
-    addable,
-    addBtnText,
-    hasRender: typeof render === 'function',
-  });
-
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<Record<string, unknown>[]>([]);
+  const renderRef = useRef(0);
 
   // Build initial tabs
   const hasInitialTabs = Array.isArray(initialTabs) && initialTabs.length > 0;
@@ -64,18 +60,12 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   // Keep ref in sync with state
   tabsRef.current = tabs;
 
-  // Guard: prevent MutationObserver from re-firing during our own setTabs → React re-render
-  const isSyncingRef = useRef(false);
-
-  // Effect to sync tabs state with actual DOM (detect deletions by Amis native close,
-  // and additions by Amis native addable — rebuilding new tabs with schema_format)
+  // MutationObserver: only track deletions (close buttons)
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
     const observer = new MutationObserver(() => {
-      if (isSyncingRef.current) return; // skip during our own re-render
-
       const tabLinks = wrapper.querySelectorAll('.cxd-Tabs-link:not(.cxd-Tabs-addable)');
       const currentTitles = new Set<string>();
 
@@ -84,44 +74,40 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
         if (title) currentTitles.add(title);
       });
 
-      // Compare current DOM with our state
       const currentTabs = tabsRef.current;
       const stateTitles = currentTabs.map(t => t.title as string).filter(Boolean);
-
       const removedTitles = stateTitles.filter(title => !currentTitles.has(title));
-      const newTitles = Array.from(currentTitles).filter(title => !stateTitles.includes(title));
 
-      if (removedTitles.length > 0 || newTitles.length > 0) {
-        isSyncingRef.current = true;
-        setTabs(prev => {
-          // Step 1: remove deleted tabs
-          let synced = prev.filter(tab => {
-            const title = tab.title as string;
-            return title && currentTitles.has(title);
-          });
-
-          // Step 2: rebuild new tabs with schema_format (proper body, not Amis bare tabs)
-          if (schema_format && newTitles.length > 0) {
-            for (const title of newTitles) {
-              // Find the index from the title (e.g. "Tab 3" → 3)
-              const match = title.match(/(\d+)$/);
-              const index = match ? parseInt(match[1], 10) : synced.length + 1;
-              synced.push(buildTabFromSchema(schema_format, index));
-            }
-          }
-
-          return synced;
-        });
-        // Release guard after React has flushed the update
-        requestAnimationFrame(() => { isSyncingRef.current = false; });
+      if (removedTitles.length > 0) {
+        setTabs(prev => prev.filter(tab => {
+          const title = tab.title as string;
+          return title && currentTitles.has(title);
+        }));
       }
     });
 
     observer.observe(wrapper, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, [schema_format]);
+  }, []);
 
-  // Intercept Amis add button clicks to enforce max limit
+  // Intercept Amis add button clicks: handle tab creation ourselves
+  const handleAddClick = useCallback(() => {
+    if (!schema_format) return;
+    const currentTabs = tabsRef.current;
+    if (max !== undefined && currentTabs.length >= max) return;
+
+    let nextIndex = currentTabs.length + 1;
+    const existingTitles = new Set(currentTabs.map(t => t.title));
+
+    while (existingTitles.has(`Tab ${nextIndex}`) || existingTitles.has(`Sub Mission ${nextIndex}`)) {
+      nextIndex++;
+    }
+
+    const newTab = buildTabFromSchema(schema_format, nextIndex);
+    setTabs(prev => [...prev, newTab]);
+  }, [schema_format, max]);
+
+  // Set up click interception for Amis addable button
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -131,30 +117,24 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
       const addBtn = target.closest('.cxd-Tabs-addable');
       if (!addBtn || !wrapper.contains(addBtn)) return;
 
-      if (max !== undefined && tabsRef.current.length >= max) {
-        e.preventDefault();
-        e.stopPropagation();
-        // Remove the bare tab Amis just created
-        requestAnimationFrame(() => {
-          const panes = wrapper.querySelectorAll('.cxd-Tabs-pane');
-          if (panes.length > tabsRef.current.length) {
-            panes[tabsRef.current.length]?.remove();
-          }
-          const tabLinks = wrapper.querySelectorAll('.cxd-Tabs-link:not(.cxd-Tabs-addable)');
-          if (tabLinks.length > tabsRef.current.length) {
-            tabLinks[tabsRef.current.length]?.remove();
-          }
-        });
-      }
+      // Intercept add click: prevent Amis native add, handle it ourselves
+      e.preventDefault();
+      e.stopPropagation();
+      handleAddClick();
     };
 
     wrapper.addEventListener('click', handleClick, true);
     return () => wrapper.removeEventListener('click', handleClick, true);
-  }, [max]);
+  }, [handleAddClick, max]);
+
+  // Force re-render key bump when tabs change (ensures Amis re-renders fully)
+  const currentKey = tabs.length;
+  const currentRenderKey = renderRef.current;
 
   const canAdd = addable !== false && schema_format && (max === undefined || tabs.length < max);
 
-  // Build native tabs schema with Amis native addable
+  // Build native tabs schema — addable is true so Amis renders the + button,
+  // but we intercept clicks to handle creation ourselves
   const nativeTabsSchema: RenderSchema = {
     type: 'tabs',
     className: className || 'custom-closable-tabs',
@@ -166,7 +146,6 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
 
   return (
     <div className="closable-tab-wrapper" ref={wrapperRef}>
-      {/* Render native tabs using Amis render function */}
       {render ? render('tabs', nativeTabsSchema, { data }) : (
         <div style={{ color: 'red' }}>ERROR: render function not available in closable-tab renderer</div>
       )}
