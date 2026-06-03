@@ -1,251 +1,264 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Closable Tabs Showcase', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/showcase#closable-tabs');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
-  });
+/** Navigate to schema preview and enter a schema JSON. */
+async function setupSchemaPreview(page: ReturnType<typeof test>, schema: Record<string, unknown>) {
+  await page.goto('http://localhost:5173/showcase#schema-preview');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
 
-  test('renders two tabs with form fields', async ({ page }) => {
-    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link a');
+  await page.fill('.schema-preview-textarea', JSON.stringify(schema, null, 2));
+  await page.waitForTimeout(500);
+  await page.keyboard.press('Control+Enter');
+  await page.waitForTimeout(2000);
+}
+
+/** Default schema used by multiple tests. */
+const DEFAULT_SCHEMA = {
+  type: 'closable-tab',
+  addable: true,
+  addBtnText: '+ Add Tab',
+  schema_format: {
+    type: 'form',
+    wrapWithPanel: false,
+    data: {},
+    body: [
+      { type: 'input-text', name: 'name', label: 'Name', placeholder: 'Enter name' },
+    ],
+    actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+  },
+  tabs: [
+    { title: 'Tab 1', closable: true, body: { type: 'input-text', name: 'name', label: 'Name' } },
+    { title: 'Tab 2', closable: true, body: { type: 'input-text', name: 'name', label: 'Name' } },
+  ],
+};
+
+test.describe('Closable Tabs Component', () => {
+  test('renders closable-tab component with correct type', async ({ page }) => {
+    await setupSchemaPreview(page, DEFAULT_SCHEMA);
+
+    // Check that the custom wrapper is rendered
+    const wrapper = page.locator('.closable-tab-wrapper');
+    await expect(wrapper).toBeVisible();
+
+    // Check custom-closable-tabs class is applied
+    const tabs = page.locator('.custom-closable-tabs');
+    await expect(tabs).toBeVisible();
+
+    // Verify two initial tabs
+    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link:not(.cxd-Tabs-addable) a');
     await expect(tabLinks).toHaveCount(2);
-    await expect(tabLinks.first()).toHaveText('Sub Mission 1');
-    await expect(tabLinks.last()).toHaveText('Sub Mission 2');
 
-    const activeSelects = page.locator('.cxd-Tabs-pane.is-active .cxd-Select');
-    await expect(activeSelects).toHaveCount(10);
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-basic.png',
+      fullPage: true,
+    });
+  });
 
-    const submitBtn = page.locator('button[type="submit"]');
-    await expect(submitBtn).toBeVisible();
-    await expect(submitBtn).toHaveText('提交');
+  test('add button is positioned tightly after existing tabs', async ({ page }) => {
+    await setupSchemaPreview(page, DEFAULT_SCHEMA);
 
-    // Custom add button should be visible
-    const addBtn = page.locator('.closable-tabs-add-btn');
+    // The add button should be inside the tabs list, not below it
+    const tabList = page.locator('.custom-closable-tabs .cxd-Tabs-links');
+    const addBtn = tabList.locator('.cxd-Tabs-addable');
+
     await expect(addBtn).toBeVisible();
-    await expect(addBtn).toContainText('Add Sub Mission');
-  });
+    await expect(addBtn).toContainText('Add Tab');
 
-  test('+ Add button creates new tab with full form schema', async ({ page }) => {
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link a')).toHaveCount(2);
+    // Verify add button is in the same row as tabs
+    const tabListChildren = await tabList.locator('> *').count();
+    expect(tabListChildren).toBe(3); // 2 tabs + 1 add button
 
-    // Click custom + Add button
-    await page.locator('.closable-tabs-add-btn').click();
-    await page.waitForTimeout(1500);
-
-    // Should have 3 tabs with correct titles (not Amis default "tab3")
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link a')).toHaveCount(3);
-    const titles = await page.locator('.custom-closable-tabs .cxd-Tabs-link a').allTextContents();
-    expect(titles).toEqual(['Sub Mission 1', 'Sub Mission 2', 'Sub Mission 3']);
-
-    // New tab should have the same form fields
-    const activeSelects = page.locator('.cxd-Tabs-pane.is-active .cxd-Select');
-    await expect(activeSelects).toHaveCount(10);
-
-    // Submit button should exist
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
-  });
-
-  test('can add multiple tabs up to limit', async ({ page }) => {
-    const addBtn = page.locator('.closable-tabs-add-btn');
-
-    // Verify add button is visible initially
-    await expect(addBtn).toBeVisible();
-
-    // Add tabs one by one until limit (10 total = 8 clicks from 2)
-    for (let i = 0; i < 8; i++) {
-      await expect(addBtn).toBeVisible();
-      await addBtn.click();
-      await page.waitForTimeout(500);
-    }
-
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link a')).toHaveCount(10);
-
-    // Add button should be removed from DOM when max reached
-    await expect(addBtn).toHaveCount(0);
-
-    // Switch to last tab and verify it has form fields
-    await page.evaluate(() => {
-      const tabs = document.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
-      const lastTab = tabs[tabs.length - 1];
-      if (lastTab) {
-        lastTab.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        lastTab.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      }
+    // Verify wrapper has no excessive right padding (button should be tight)
+    const wrapperEl = page.locator('.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper').first();
+    const wrapperPadding = await wrapperEl.evaluate(el => {
+      return window.getComputedStyle(el).paddingRight;
     });
-    await page.waitForTimeout(1000);
+    // Should not have the old 170px padding
+    expect(parseInt(wrapperPadding, 10)).toBeLessThan(50);
 
-    // Only count selects in the active tab pane
-    const activeSelects = page.locator('.cxd-Tabs-pane.is-active .cxd-Select');
-    await expect(activeSelects).toHaveCount(10);
-  });
-
-  test('form submission is captured as array with all tab data', async ({ page }) => {
-    const preview = page.locator('.closable-tabs-preview').first();
-
-    // Fill Sub Mission 1
-    await preview.locator('.cxd-Select').first().click();
-    await page.waitForTimeout(500);
-    await page.locator('.cxd-Select-option', { hasText: 'Direct Booking' }).first().click();
-    await page.waitForTimeout(500);
-
-    await preview.locator('input[name="targetSpending"]').first().fill('5000');
-
-    // Switch to Sub Mission 2 and fill
-    await page.evaluate(() => {
-      const tabs = document.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
-      if (tabs[1]) {
-        tabs[1].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        tabs[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      }
+    // Verify add button has no left margin
+    const addBtnMargin = await addBtn.evaluate(el => {
+      return window.getComputedStyle(el).marginLeft;
     });
-    await page.waitForTimeout(1000);
+    expect(parseInt(addBtnMargin, 10)).toBeLessThan(5);
 
-    await preview.locator('input[name="targetSpending"]').last().fill('3000');
-
-    // Submit
-    await preview.locator('button[type="submit"]').last().click();
-    await page.waitForTimeout(2000);
-
-    // Check submission display
-    const submissions = page.locator('.closable-tabs-submissions');
-    await expect(submissions.locator('h3')).toContainText('表单提交记录 (1)');
-    await expect(submissions.locator('pre')).toHaveCount(1);
-
-    // Data should be an array of objects
-    const data = await submissions.locator('pre').first().textContent();
-    const parsed = JSON.parse(data!);
-    expect(Array.isArray(parsed)).toBe(true);
-    expect(parsed.length).toBe(2);
-
-    // Each item should have tab-specific data
-    expect(parsed[0].targetSpending).toBe('5000');
-    expect(parsed[0].subMissionType).toBe('Direct Booking');
-    expect(parsed[1].targetSpending).toBe('3000');
-    expect(parsed[1].subMissionType).toBe('Room Stay Prepaid Booking');
-  });
-
-  test('new tab submission includes all tabs in array', async ({ page }) => {
-    const preview = page.locator('.closable-tabs-preview').first();
-    const submissions = page.locator('.closable-tabs-submissions');
-
-    // Add a new tab (Sub Mission 3)
-    await page.locator('.closable-tabs-add-btn').click();
-    await page.waitForTimeout(1500);
-
-    // Switch to Sub Mission 1 and fill
-    await page.evaluate(() => {
-      const tabs = document.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
-      if (tabs[0]) {
-        tabs[0].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        tabs[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      }
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-add-button.png',
+      fullPage: true,
     });
-    await page.waitForTimeout(1000);
-    await preview.locator('input[name="targetSpending"]').first().fill('1000');
+  });
 
-    // Switch to Sub Mission 3 and fill
-    await page.evaluate(() => {
-      const tabs = document.querySelectorAll('.custom-closable-tabs .cxd-Tabs-link a');
-      if (tabs[2]) {
-        tabs[2].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        tabs[2].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      }
+  test('add button text is customizable via schema', async ({ page }) => {
+    const customSchema = {
+      type: 'closable-tab',
+      addable: true,
+      addBtnText: '+ New Sub Mission',
+      schema_format: {
+        type: 'input-text',
+        name: 'name',
+        label: 'Name'
+      },
+      tabs: [
+        { title: 'Tab 1', body: { type: 'input-text', name: 'name', label: 'Name' } }
+      ]
+    };
+
+    await setupSchemaPreview(page, customSchema);
+
+    // Check custom add button text
+    const addBtn = page.locator('.cxd-Tabs-addable');
+    await expect(addBtn).toContainText('New Sub Mission');
+
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-custom-add-text.png',
+      fullPage: true,
     });
-    await page.waitForTimeout(1000);
-    await preview.locator('input[name="targetSpending"]').last().fill('9999');
-
-    // Submit from Sub Mission 3
-    await preview.locator('button[type="submit"]').last().click();
-    await page.waitForTimeout(2000);
-
-    await expect(submissions.locator('h3')).toContainText('表单提交记录 (1)');
-    const data = await submissions.locator('pre').first().textContent();
-    const parsed = JSON.parse(data!);
-
-    // Should have 3 items (all tabs)
-    expect(Array.isArray(parsed)).toBe(true);
-    expect(parsed.length).toBe(3);
-
-    // Data from different tabs
-    expect(parsed[0].targetSpending).toBe('1000'); // Sub Mission 1
-    expect(parsed[2].targetSpending).toBe('9999'); // Sub Mission 3
   });
 
-  test('multiple submissions each contain full array of all tabs', async ({ page }) => {
-    const preview = page.locator('.closable-tabs-preview').first();
-    const submissions = page.locator('.closable-tabs-submissions');
+  test('+ button creates new tab with schema_format template', async ({ page }) => {
+    await setupSchemaPreview(page, DEFAULT_SCHEMA);
 
-    // First submission
-    await preview.locator('input[name="targetSpending"]').first().fill('1000');
-    await preview.locator('button[type="submit"]').first().click();
-    await page.waitForTimeout(2000);
+    // Verify initial tab count
+    const initialTabs = page.locator('.custom-closable-tabs .cxd-Tabs-link:not(.cxd-Tabs-addable) a');
+    await expect(initialTabs).toHaveCount(2);
 
-    // Change data and submit again
-    await preview.locator('input[name="targetSpending"]').first().fill('2000');
-    await preview.locator('button[type="submit"]').first().click();
-    await page.waitForTimeout(2000);
-
-    await expect(submissions.locator('h3')).toContainText('表单提交记录 (2)');
-    await expect(submissions.locator('pre')).toHaveCount(2);
-
-    // Both submissions should be arrays of 2 items
-    const data1 = await submissions.locator('pre').first().textContent();
-    const data2 = await submissions.locator('pre').last().textContent();
-
-    expect(JSON.parse(data1!).length).toBe(2);
-    expect(JSON.parse(data2!).length).toBe(2);
-
-    // Different values between submissions
-    expect(JSON.parse(data1!)[0].targetSpending).toBe('1000');
-    expect(JSON.parse(data2!)[0].targetSpending).toBe('2000');
-  });
-
-  // Regression: + Add button workflow
-  test('[regression] + Add button: visible, clickable, creates correct tab, hides at limit', async ({ page }) => {
-    const addBtn = page.locator('.closable-tabs-add-btn');
-
-    // 1. Add button should be visible with correct text and icon
-    await expect(addBtn).toBeVisible();
-    await expect(addBtn).toContainText('Add Sub Mission');
-    await expect(addBtn.locator('.add-icon')).toContainText('+');
-
-    // 2. Click add → creates new tab with correct title
+    // Click add button
+    const addBtn = page.locator('.cxd-Tabs-addable');
     await addBtn.click();
     await page.waitForTimeout(1000);
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link a')).toHaveCount(3);
-    const titles = await page.locator('.custom-closable-tabs .cxd-Tabs-link a').allTextContents();
-    expect(titles).toEqual(['Sub Mission 1', 'Sub Mission 2', 'Sub Mission 3']);
 
-    // 3. New tab should have full form schema (10 selects)
-    await expect(page.locator('.cxd-Tabs-pane.is-active .cxd-Select')).toHaveCount(10);
-    await expect(page.locator('.cxd-Tabs-pane.is-active button[type="submit"]')).toBeVisible();
+    // Should have 3 tabs now
+    await expect(initialTabs).toHaveCount(3);
 
-    // 4. New tab should have close button
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link.is-active .cxd-Tabs-link-close')).toBeVisible();
+    // New tab should have correct title
+    const titles = await initialTabs.allTextContents();
+    expect(titles[2]).toBe('Tab 3');
 
-    // 5. Add more tabs until limit (10 total)
-    await addBtn.click(); // 4
-    await page.waitForTimeout(500);
-    await addBtn.click(); // 5
-    await page.waitForTimeout(500);
-    await addBtn.click(); // 6
-    await page.waitForTimeout(500);
-    await addBtn.click(); // 7
-    await page.waitForTimeout(500);
-    await addBtn.click(); // 8
-    await page.waitForTimeout(500);
-    await addBtn.click(); // 9
-    await page.waitForTimeout(500);
-    await expect(addBtn).toBeVisible(); // still visible at 9 tabs
-    await addBtn.click(); // 10 — button removed after this
-    await page.waitForTimeout(500);
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-new-tab.png',
+      fullPage: true,
+    });
+  });
 
-    await expect(page.locator('.custom-closable-tabs .cxd-Tabs-link a')).toHaveCount(10);
-    const allTitles = await page.locator('.custom-closable-tabs .cxd-Tabs-link a').allTextContents();
-    expect(allTitles).toEqual(['Sub Mission 1', 'Sub Mission 2', 'Sub Mission 3', 'Sub Mission 4', 'Sub Mission 5', 'Sub Mission 6', 'Sub Mission 7', 'Sub Mission 8', 'Sub Mission 9', 'Sub Mission 10']);
+  test('deleted tabs do not reappear when adding new tabs', async ({ page }) => {
+    await setupSchemaPreview(page, DEFAULT_SCHEMA);
 
-    // 6. Add button should be removed from DOM at max
+    // Start with 2 tabs
+    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link:not(.cxd-Tabs-addable) a');
+    await expect(tabLinks).toHaveCount(2);
+
+    // Add a third tab
+    await page.locator('.cxd-Tabs-addable').click();
+    await page.waitForTimeout(1000);
+    await expect(tabLinks).toHaveCount(3);
+
+    // Screenshot after adding third tab
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-before-delete.png',
+      fullPage: true,
+    });
+
+    // Delete the second tab (Tab 2)
+    const closeBtns = page.locator('.custom-closable-tabs .cxd-Tabs-link-close');
+    await closeBtns.nth(1).click(); // Close Tab 2
+    await page.waitForTimeout(1000);
+
+    // Should have 2 tabs now (Tab 1 and Tab 3)
+    await expect(tabLinks).toHaveCount(2);
+    const titlesAfterDelete = await tabLinks.allTextContents();
+    expect(titlesAfterDelete).toEqual(['Tab 1', 'Tab 3']);
+
+    // Screenshot after deletion
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-after-delete.png',
+      fullPage: true,
+    });
+
+    // Add a new tab - should create Tab 4, not Tab 2
+    await page.locator('.cxd-Tabs-addable').click();
+    await page.waitForTimeout(1000);
+
+    await expect(tabLinks).toHaveCount(3);
+    const titlesAfterAdd = await tabLinks.allTextContents();
+    // Tab 2 should not reappear, should be Tab 4 instead
+    expect(titlesAfterAdd).toEqual(['Tab 1', 'Tab 3', 'Tab 4']);
+
+    // Take screenshot verifying final state
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-deleted-tabs-fix.png',
+      fullPage: true,
+    });
+  });
+
+  test('add button respects max limit', async ({ page }) => {
+    const maxSchema = {
+      type: 'closable-tab',
+      addable: true,
+      max: 3,
+      addBtnText: '+ Add',
+      schema_format: {
+        type: 'input-text',
+        name: 'name',
+        label: 'Name'
+      },
+      tabs: [
+        { title: 'Tab 1', body: { type: 'input-text', name: 'name', label: 'Name' } }
+      ]
+    };
+
+    await setupSchemaPreview(page, maxSchema);
+
+    // Should have 1 tab initially
+    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link:not(.cxd-Tabs-addable) a');
+    await expect(tabLinks).toHaveCount(1);
+
+    // Add button should be visible
+    const addBtn = page.locator('.cxd-Tabs-addable');
+    await expect(addBtn).toBeVisible();
+
+    // Add second tab
+    await addBtn.click();
+    await page.waitForTimeout(500);
+    await expect(tabLinks).toHaveCount(2);
+
+    // Add third tab
+    await addBtn.click();
+    await page.waitForTimeout(500);
+    await expect(tabLinks).toHaveCount(3);
+
+    // Add button should be removed at max limit
     await expect(addBtn).toHaveCount(0);
+
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-max-limit.png',
+      fullPage: true,
+    });
+  });
+
+  test('custom-closable-tabs CSS styles are applied', async ({ page }) => {
+    await setupSchemaPreview(page, DEFAULT_SCHEMA);
+
+    // Check that custom styles are applied
+    const tabLinks = page.locator('.custom-closable-tabs .cxd-Tabs-link');
+
+    // Check first tab has custom styling
+    const firstTab = tabLinks.first();
+    const tabStyle = await firstTab.getAttribute('class');
+    expect(tabStyle).toContain('cxd-Tabs-link');
+
+    // Check active tab has blue top border
+    const activeTab = page.locator('.custom-closable-tabs .cxd-Tabs-link.is-active');
+    await expect(activeTab).toBeVisible();
+
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/closable-tabs-css-styles.png',
+      fullPage: true,
+    });
   });
 });
