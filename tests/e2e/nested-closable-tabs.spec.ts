@@ -147,4 +147,160 @@ test.describe('Nested Closable Tabs - Multi-level', () => {
     expect(titles).toEqual(['Tab 1', 'Tab 3']);
     await page.screenshot({ path: 'tests/e2e/screenshots/nested-closable-delete.png', fullPage: true });
   });
+
+  test('2-level nested: inner add/delete independent of outer', async ({ page }) => {
+    const schema = {
+      type: 'closable-tab',
+      addable: true,
+      addBtnText: '+ Add Mission',
+      schema_format: {
+        type: 'closable-tab',
+        addable: true,
+        addBtnText: '+ Add Sub',
+        schema_format: { type: 'input-text', name: 'item', label: 'Item' },
+        tabs: [
+          { title: 'Sub 1', closable: true, body: { type: 'input-text', name: 'item', label: 'Item' } }
+        ]
+      },
+      tabs: [
+        {
+          title: 'Mission 1',
+          closable: true,
+          body: {
+            type: 'closable-tab',
+            addable: true,
+            addBtnText: '+ Add Sub',
+            schema_format: { type: 'input-text', name: 'item', label: 'Item' },
+            tabs: [
+              { title: 'Sub 1', closable: true, body: { type: 'input-text', name: 'item', label: 'Item' } }
+            ]
+          }
+        }
+      ]
+    };
+
+    await setupSchemaPreview(page, schema);
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-initial.png', fullPage: true });
+
+    const wrappers = page.locator('.closable-tab-wrapper');
+    await expect(wrappers).toHaveCount(2); // outer + inner
+
+    // Get all add buttons by ID
+    const allAddBtns = page.locator('[id^="add-btn-"]');
+    await expect(allAddBtns).toHaveCount(2); // outer + inner
+
+    // --- Step 1: Add inner sub tab (inner button) ---
+    const innerAddBtn = allAddBtns.nth(1); // second button is the inner one
+    await innerAddBtn.click();
+    await page.waitForTimeout(1000);
+
+    // Inner wrapper should now have 2 sub tabs
+    const innerWrapper = wrappers.nth(1);
+    const innerTabs = innerWrapper.locator(TAB_LINK);
+    await expect(innerTabs).toHaveCount(2);
+    // Title comes from schema_format.index, not schema_format.title
+    const innerTitles = await innerTabs.allTextContents();
+    expect(innerTitles[0]).toBe('Sub 1');
+    expect(innerTitles[1]).toBe('Tab 2');
+
+    // Outer wrapper should still have 1 mission
+    const outerWrapper = wrappers.nth(0);
+    const outerTabs = outerWrapper.locator(TAB_LINK);
+    await expect(outerTabs).toHaveCount(1);
+
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-inner-add.png', fullPage: true });
+
+    // --- Step 2: Delete inner Sub 1 ---
+    const innerCloseBtns = innerWrapper.locator(CLOSE_BTN);
+    await expect(innerCloseBtns).toHaveCount(2);
+    await innerCloseBtns.nth(0).click(); // Close Sub 1
+    await page.waitForTimeout(500);
+
+    await expect(innerTabs).toHaveCount(1);
+    const afterDeleteTitles = await innerTabs.allTextContents();
+    expect(afterDeleteTitles).toEqual(['Tab 2']);
+
+    // Outer still unchanged
+    await expect(outerTabs).toHaveCount(1);
+
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-inner-delete.png', fullPage: true });
+
+    // --- Step 3: Add outer mission tab (outer button) ---
+    const outerAddBtn = allAddBtns.first();
+    await outerAddBtn.click();
+    await page.waitForTimeout(1000);
+
+    await expect(outerTabs).toHaveCount(2);
+    const outerTitles = await outerTabs.allTextContents();
+    expect(outerTitles).toEqual(['Mission 1', 'Tab 2']);
+
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-outer-add.png', fullPage: true });
+  });
+
+  test('2-level nested: delete outer tab also removes inner instance', async ({ page }) => {
+    const schema = {
+      type: 'closable-tab',
+      addable: true,
+      addBtnText: '+ Add Mission',
+      schema_format: {
+        type: 'closable-tab',
+        addable: true,
+        addBtnText: '+ Add Sub',
+        schema_format: { type: 'input-text', name: 'item', label: 'Item' },
+        tabs: [
+          { title: 'Sub 1', closable: true, body: { type: 'input-text', name: 'item', label: 'Item' } }
+        ]
+      },
+      tabs: [
+        {
+          title: 'Mission 1',
+          closable: true,
+          body: {
+            type: 'closable-tab',
+            addable: true,
+            addBtnText: '+ Add Sub',
+            schema_format: { type: 'input-text', name: 'item', label: 'Item' },
+            tabs: [
+              { title: 'Sub 1', closable: true, body: { type: 'input-text', name: 'item', label: 'Item' } }
+            ]
+          }
+        },
+        {
+          title: 'Mission 2',
+          closable: true,
+          body: {
+            type: 'closable-tab',
+            addable: true,
+            addBtnText: '+ Add Sub',
+            schema_format: { type: 'input-text', name: 'item', label: 'Item' },
+            tabs: [
+              { title: 'Sub 1', closable: true, body: { type: 'input-text', name: 'item', label: 'Item' } }
+            ]
+          }
+        }
+      ]
+    };
+
+    await setupSchemaPreview(page, schema);
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-delete-outer-before.png', fullPage: true });
+
+    const wrappers = page.locator('.closable-tab-wrapper');
+    const outerWrapper = wrappers.nth(0);
+    const outerTabs = outerWrapper.locator(TAB_LINK);
+    const outerCloseBtns = outerWrapper.locator(CLOSE_BTN);
+
+    // Initially 2 missions
+    await expect(outerTabs).toHaveCount(2);
+
+    // Delete Mission 2 (second close button on outer level)
+    await outerCloseBtns.nth(1).click();
+    await page.waitForTimeout(1000);
+
+    // Should have 1 mission left
+    await expect(outerTabs).toHaveCount(1);
+    const outerTitles = await outerTabs.allTextContents();
+    expect(outerTitles).toEqual(['Mission 1']);
+
+    await page.screenshot({ path: 'tests/e2e/screenshots/nested-two-level-delete-outer-after.png', fullPage: true });
+  });
 });
