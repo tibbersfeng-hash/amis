@@ -64,6 +64,9 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   // Keep ref in sync with state
   tabsRef.current = tabs;
 
+  // Guard: prevent MutationObserver from re-firing during our own setTabs → React re-render
+  const isSyncingRef = useRef(false);
+
   // Effect to sync tabs state with actual DOM (detect deletions by Amis native close,
   // and additions by Amis native addable — rebuilding new tabs with schema_format)
   useEffect(() => {
@@ -71,6 +74,8 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     if (!wrapper) return;
 
     const observer = new MutationObserver(() => {
+      if (isSyncingRef.current) return; // skip during our own re-render
+
       const tabLinks = wrapper.querySelectorAll('.cxd-Tabs-link:not(.cxd-Tabs-addable)');
       const currentTitles = new Set<string>();
 
@@ -87,6 +92,7 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
       const newTitles = Array.from(currentTitles).filter(title => !stateTitles.includes(title));
 
       if (removedTitles.length > 0 || newTitles.length > 0) {
+        isSyncingRef.current = true;
         setTabs(prev => {
           // Step 1: remove deleted tabs
           let synced = prev.filter(tab => {
@@ -106,6 +112,8 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
 
           return synced;
         });
+        // Release guard after React has flushed the update
+        requestAnimationFrame(() => { isSyncingRef.current = false; });
       }
     });
 
