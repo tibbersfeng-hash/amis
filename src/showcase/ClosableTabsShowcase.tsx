@@ -1,64 +1,49 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AmisLivePreview } from './AmisLivePreview';
 
-/**
- * Base form schema template — the ONLY source of form structure.
- * All tabs share this same schema. Data (initial values) are separate.
- */
-const FORM_SCHEMA = {
-  type: 'form',
-  wrapWithPanel: false,
-  body: [
-    { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
-    { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
-    { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
-    { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
-    { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
-    { type: 'select', name: 'marketCode', label: 'Market Code', options: [{ label: 'Code A', value: 'A' }, { label: 'Code B', value: 'B' }] },
-    { type: 'select', name: 'rateCode', label: 'Rate Code', options: [{ label: 'Rate 1', value: 'R1' }, { label: 'Rate 2', value: 'R2' }] },
-    { type: 'select', name: 'source', label: 'Source', options: [{ label: 'Web', value: 'Web' }, { label: 'App', value: 'App' }, { label: 'Mini Program', value: 'MiniProgram' }] },
-    { type: 'select', name: 'roomType', label: 'Room Type', options: [{ label: 'Standard', value: 'Standard' }, { label: 'Deluxe', value: 'Deluxe' }, { label: 'Suite', value: 'Suite' }] },
-    { type: 'select', name: 'roomCategory', label: 'Room Category', options: [{ label: 'Cat A', value: 'A' }, { label: 'Cat B', value: 'B' }] },
-    { type: 'radios', name: 'awardType', label: 'Registration Award', options: [{ label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' }] },
-    { type: 'input-text', name: 'awardPoints', label: 'Award Points' },
-    { type: 'select', name: 'billingCode', label: 'Billing Code', options: [{ label: 'BC-001', value: 'BC-001' }, { label: 'BC-002', value: 'BC-002' }] },
-    { type: 'input-text', name: 'stockQty', label: '库存数' },
-    { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
-  ],
-  actions: [{ type: 'submit', label: '提交', level: 'primary' }],
-};
+/** Extract schema_format from the external tabs schema. */
+function extractSchemaFormat(schema: Record<string, unknown>): Record<string, unknown>[] {
+  const tabs = (schema as any).tabs;
+  if (!Array.isArray(tabs) || tabs.length === 0) return DEFAULT_SCHEMA_FORMAT;
 
-/** Default initial data for a new tab. */
-const DEFAULT_TAB_DATA = {
-  subMissionType: 'Room Stay Prepaid Booking',
-  businessUnit: '',
-  currency: '',
-  paymentMethod: '',
-  targetSpending: '',
-  marketCode: '',
-  rateCode: '',
-  source: '',
-  roomType: '',
-  roomCategory: '',
-  awardType: 'points',
-  awardPoints: '',
-  billingCode: '',
-  stockQty: '',
-  transactionNote: '',
-};
+  // Use the first tab's body as the schema_format template
+  const firstBody = tabs[0]?.body;
+  if (firstBody?.type === 'form') {
+    return [firstBody];
+  }
+  return [firstBody];
+}
 
-/** Build tabs schema with N tabs. Each tab gets the SAME form schema + its own initial data. */
-function buildTabsSchema(tabCount: number, tabData: Record<string, unknown>[]) {
+/** Extract tab titles and data from the external tabs schema. */
+function extractTabData(schema: Record<string, unknown>): Record<string, unknown>[] {
+  const tabs = (schema as any).tabs;
+  if (!Array.isArray(tabs) || tabs.length === 0) return [];
+  return tabs.map((tab: any) => {
+    const { title, closable, body, ...rest } = tab;
+    const formData = body?.type === 'form' ? (body.data || {}) : {};
+    return { title: title || `Tab ${tabs.indexOf(tab) + 1}`, closable: !!closable, ...formData };
+  });
+}
+
+/** Build tabs schema from schema_format + tab count + tab data. */
+function buildTabsSchema(schemaFormat: Record<string, unknown>[], tabCount: number, tabData: Record<string, unknown>[]): Record<string, unknown> {
   const tabs: Record<string, unknown>[] = [];
   for (let i = 0; i < tabCount; i++) {
-    const data = { ...DEFAULT_TAB_DATA, ...(tabData[i] || {}) };
+    const data = tabData[i] || {};
+    // Deep clone each schema_format item and inject data
+    const items = schemaFormat.map(item => {
+      const cloned = JSON.parse(JSON.stringify(item));
+      if (cloned.type === 'form') {
+        cloned.data = data;
+        cloned.wrapWithPanel = false;
+      }
+      return cloned;
+    });
+
     tabs.push({
-      title: `Sub Mission ${i + 1}`,
-      closable: true,
-      body: {
-        ...FORM_SCHEMA,
-        data,
-      },
+      title: data.title || `Tab ${i + 1}`,
+      closable: data.closable !== false,
+      body: items.length === 1 ? items[0] : { type: 'container', body: items },
     });
   }
   return {
@@ -68,93 +53,95 @@ function buildTabsSchema(tabCount: number, tabData: Record<string, unknown>[]) {
   };
 }
 
+const DEFAULT_SCHEMA_FORMAT: Record<string, unknown>[] = [
+  {
+    type: 'form',
+    wrapWithPanel: false,
+    body: [
+      { type: 'input-text', name: 'name', label: 'Name', placeholder: 'Enter name' },
+    ],
+    actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+  },
+];
+
+const DEFAULT_TAB_DATA: Record<string, unknown> = { title: 'Tab 1', name: '' };
+
+const INITIAL_TABS = [
+  { ...DEFAULT_TAB_DATA },
+  { ...DEFAULT_TAB_DATA, title: 'Tab 2', name: 'Bob' },
+];
+
 /** Read form data from a single tab pane */
 function readTabFormData(scope: Element): Record<string, unknown> {
   const formData: Record<string, unknown> = {};
-
-  // Native inputs
-  const nativeInputs = scope.querySelectorAll('input[name], select[name], textarea[name]');
-  nativeInputs.forEach((el: Element) => {
+  const inputs = scope.querySelectorAll('input[name], select[name], textarea[name]');
+  inputs.forEach((el: Element) => {
     const input = el as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
     const name = input.getAttribute('name');
     if (name && input.value !== undefined && input.value !== '') {
       formData[name] = input.value;
     }
   });
-
-  // Amis select components — map label to field name
-  const formItems = scope.querySelectorAll('.cxd-Form-item');
-  const fieldNameMap: Record<string, string> = {
-    'Sub Mission Type': 'subMissionType',
-    'Business Unit': 'businessUnit',
-    'Currency': 'currency',
-    'Payment Method': 'paymentMethod',
-    'Market Code': 'marketCode',
-    'Rate Code': 'rateCode',
-    'Source': 'source',
-    'Room Type': 'roomType',
-    'Room Category': 'roomCategory',
-    'Billing Code': 'billingCode',
-  };
-  formItems.forEach((item: Element) => {
-    const select = item.querySelector('.cxd-Select');
-    if (!select) return;
-    const valueEl = select.querySelector('.cxd-Select-value');
-    const displayValue = valueEl?.textContent?.trim();
-    if (!displayValue || displayValue === '请选择') return;
-
-    const children = Array.from(item.children);
-    for (const child of children) {
-      if (child.classList.contains('cxd-Select')) continue;
-      const text = child.textContent?.trim().replace(/\*$/, '');
-      if (text && fieldNameMap[text]) {
-        const fieldName = fieldNameMap[text];
-        if (!formData[fieldName]) {
-          formData[fieldName] = displayValue;
-        }
-        break;
-      }
-    }
-  });
-
-  // Amis radio components — derive field name from label
-  const radioGroups = scope.querySelectorAll('.cxd-Radios');
-  radioGroups.forEach((radiosEl: Element) => {
-    const checkedRadio = radiosEl.querySelector('.cxd-Radio.is-checked');
-    if (!checkedRadio) return;
-
-    const valueText = checkedRadio.textContent?.trim() || '';
-    const valueMap: Record<string, string> = {
-      'Award Points': 'points',
-      'Voucher': 'voucher',
-      'No Award': 'none',
-    };
-
-    const labelEl = radiosEl.querySelector('.cxd-FieldLabel');
-    let fieldName = 'awardType';
-    if (labelEl) {
-      const labelText = labelEl.textContent?.trim().replace(/\*$/, '');
-      if (labelText === 'Registration Award') {
-        fieldName = 'awardType';
-      } else if (labelText && fieldNameMap[labelText]) {
-        fieldName = fieldNameMap[labelText];
-      } else if (labelText) {
-        fieldName = labelText.toLowerCase().replace(/[^a-zA-Z]/g, '').replace(/ ([a-z])/g, (_, c) => c.toUpperCase());
-      }
-    }
-
-    formData[fieldName] = valueMap[valueText] || valueText;
-  });
-
   return formData;
 }
 
-export const ClosableTabsShowcase: React.FC = () => {
+export const ClosableTabsShowcase: React.FC<{ schema?: Record<string, unknown>; onDataChange?: (data: Record<string, unknown>) => void }> = ({ schema: externalSchema, onDataChange: externalOnChange }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tabCount, setTabCount] = useState(2);
+  const [tabCount, setTabCount] = useState(INITIAL_TABS.length);
+  const [renderKey, setRenderKey] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [submissions, setSubmissions] = useState<Record<string, unknown>[][]>([]);
-  // Store latest form data from each tab index — survives schema rebuilds
-  const tabDataRef = useRef<Record<string, unknown>[]>([]);
+  const tabDataRef = useRef<Record<string, unknown>[]>(INITIAL_TABS);
+  const schemaFormatRef = useRef<Record<string, unknown>[]>(DEFAULT_SCHEMA_FORMAT);
+  const lastDataSnapshotRef = useRef<string>('');
+
+  // Track active tab index via DOM
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const checkActive = () => {
+      const links = container.querySelectorAll('.custom-closable-tabs > .cxd-Tabs-linksContainer .cxd-Tabs-link.is-active');
+      const allLinks = container.querySelectorAll('.custom-closable-tabs > .cxd-Tabs-linksContainer .cxd-Tabs-link');
+      for (let i = 0; i < allLinks.length; i++) {
+        if (allLinks[i] === links[0]) {
+          setActiveTabIndex(i);
+          return;
+        }
+      }
+    };
+
+    checkActive();
+    const observer = new MutationObserver(checkActive);
+    observer.observe(container, { childList: true, subtree: true, attributes: true });
+    return () => observer.disconnect();
+  }, []);
+
+  // Emit data changes to parent (debounced)
+  const emitDataChange = useCallback((data: Record<string, unknown>[]) => {
+    const snapshot = JSON.stringify(data);
+    if (snapshot === lastDataSnapshotRef.current) return;
+    lastDataSnapshotRef.current = snapshot;
+    externalOnChange?.({ tabs: data });
+  }, [externalOnChange]);
+
+  // Sync internal state with external schema prop (from showcase editor + render button)
+  useEffect(() => {
+    if (!externalSchema) return;
+
+    const format = extractSchemaFormat(externalSchema);
+    if (format.length > 0) {
+      schemaFormatRef.current = format;
+    }
+
+    const data = extractTabData(externalSchema);
+    if (data.length > 0) {
+      tabDataRef.current = data;
+      setTabCount(data.length);
+    }
+
+    setRenderKey(k => k + 1);
+  }, [externalSchema]);
 
   const handleSubmit = useCallback((rows: Record<string, unknown>[]) => {
     setSubmissions((prev) => {
@@ -292,15 +279,33 @@ export const ClosableTabsShowcase: React.FC = () => {
     return () => container.removeEventListener('click', handleClick, true);
   }, [handleSubmit]);
 
-  // Schema is built from tabCount + captured tab data.
-  // Use stored tab data so user-entered values survive schema rebuilds.
-  const currentSchema = buildTabsSchema(tabCount, tabDataRef.current);
+  // Sync form data from AmisLivePreview onChange → emit to parent (real-time, debounced)
+  const handleAmisDataChange = useCallback((changedData: Record<string, unknown>) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Read all tab pane data from DOM
+    const panes = container.querySelectorAll('.cxd-Tabs-pane');
+    const newData: Record<string, unknown>[] = [];
+    panes.forEach((pane) => {
+      const data = readTabFormData(pane);
+      if (Object.keys(data).length > 0) newData.push(data);
+    });
+
+    if (newData.length > 0) {
+      tabDataRef.current = newData;
+      emitDataChange(newData);
+    }
+  }, [emitDataChange]);
+
+  // Schema is built from schema_format + tabCount + captured tab data.
+  const currentSchema = buildTabsSchema(schemaFormatRef.current, tabCount, tabDataRef.current);
 
   return (
     <div className="closable-tabs-showcase">
       {/* Preview area */}
       <div className="closable-tabs-preview" ref={containerRef}>
-        <AmisLivePreview schema={currentSchema as Record<string, unknown>} />
+        <AmisLivePreview key={renderKey} schema={currentSchema as Record<string, unknown>} onDataChange={handleAmisDataChange} />
         {tabCount < 10 && (
           <button className="closable-tabs-add-btn" onClick={() => setTabCount((prev) => prev + 1)} type="button">
             <span className="add-icon">+</span>

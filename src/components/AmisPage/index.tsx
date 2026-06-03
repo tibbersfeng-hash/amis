@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import '../PhoneMockup'; // Registers phone-mockup renderer
 import '../DateRangePicker'; // Registers date-range-picker renderer
 import '../FieldWithExclude'; // Registers field-with-exclude renderer
+import '../ClosableTabs'; // Registers closable-tab renderer
 import type { Language } from '../LanguageSwitcher';
 
 /**

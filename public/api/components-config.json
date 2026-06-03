@@ -1,0 +1,38 @@
+{
+  "basicInfo": {
+    "title": "Summer Vacation Campaign",
+    "description": "A comprehensive summer vacation promotion campaign targeting loyal members with exclusive benefits, special discounts, and limited-time offers across multiple property categories.",
+    "priority": 1
+  },
+  "schedule": {
+    "period": {
+      "startTime": "2026-07-01 00:00:00",
+      "endTime": "2026-08-31 23:59:59"
+    },
+    "deadline": "2026-08-15"
+  },
+  "config": {
+    "category": "marketing",
+    "tags": ["featured", "limited", "vip"],
+    "theme": {
+      "primaryColor": "#4A5CBF",
+      "secondaryColor": "#FF6B35"
+    },
+    "enableNotifications": true,
+    "allowSharing": true
+  },
+  "media": {
+    "coverImage": "https://example.com/images/summer-campaign-cover.jpg",
+    "gallery": [
+      "https://example.com/images/gallery-1.jpg",
+      "https://example.com/images/gallery-2.jpg",
+      "https://example.com/images/gallery-3.jpg"
+    ],
+    "externalLink": "https://example.com/summer-promo",
+    "shareLink": "https://example.com/share/summer-campaign"
+  },
+  "content": {
+    "detailContent": "<h2>Summer Vacation Campaign Details</h2><p>Join our exclusive summer campaign and enjoy amazing benefits!</p><ul><li>Up to 30% off room rates</li><li>Complimentary breakfast</li><li>Free spa access</li></ul>",
+    "terms": "<h3>Terms & Conditions</h3><p>This promotion is valid from July 1 to August 31, 2026. Subject to availability. Cannot be combined with other offers.</p>"
+  }
+}

@@ -6,6 +6,16 @@ import { processSchemaMultiLang, flattenDataMultiLang } from '../utils/multiLang
 import { mockApiFetcher } from './mock-api';
 import type { Language } from '../components/LanguageSwitcher';
 
+// Register custom Amis renderers - these imports have side effects (registerRenderer calls)
+import '../components/PhoneMockup';
+import '../components/DateRangePicker';
+import '../components/FieldWithExclude';
+// Import ClosableTabs to register the closable-tab renderer
+import ClosableTabsModule from '../components/ClosableTabs';
+
+// Force the module to be evaluated (prevents tree-shaking)
+const _closableTabsLoaded = ClosableTabsModule;
+
 export interface AmisLivePreviewRef {
   getData: () => Record<string, unknown>;
   syncData: () => void;
@@ -237,72 +247,53 @@ export const AmisLivePreview = forwardRef<AmisLivePreviewRef, AmisLivePreviewPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSchema, data, lang]);
 
-  // Intercept combo add/delete button clicks natively
+  // Observe DOM mutations to detect combo structural changes (add/delete tabs).
+  // Amis combo handles add/delete natively; we sync the JSON via MutationObserver.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleComboClick = (e: Event) => {
-      const target = e.target as HTMLElement;
+    let syncTimer: ReturnType<typeof setTimeout>;
+    const observer = new MutationObserver(() => {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => {
+        // Read current combo state from DOM
+        const allComboCtrls = container.querySelectorAll('.cxd-ComboControl');
+        allComboCtrls.forEach((comboCtrl) => {
+          const comboTabs = comboCtrl.querySelector('.cxd-ComboTabs');
+          if (!comboTabs) return;
 
-      const addLink = target.closest('.cxd-ComboTabs-addLink');
-      if (addLink) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const comboTabs = addLink.closest('.cxd-ComboTabs');
-        if (!comboTabs) return;
-        const comboCtrl = comboTabs.closest('.cxd-ComboControl');
-        if (!comboCtrl) return;
-
-        const panes = comboTabs.querySelectorAll('.cxd-Tabs-pane');
-        const items: Record<string, unknown>[] = [];
-        panes.forEach((pane) => {
-          items.push(readComboItemData(pane));
-        });
-
-        const scaffold = (currentSchema as any)?.scaffold || {};
-        items.push({ ...scaffold, title: `Sub Mission ${items.length + 1}` });
-
-        // Notify parent to update state and force re-render
-        onNativeComboChange?.(items);
-        return;
-      }
-
-      const deleteBtn = target.closest('[data-role="delete-btn"], .cxd-Combo-tab-delBtn');
-      if (deleteBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const comboCtrl = deleteBtn.closest('.cxd-ComboControl');
-        if (!comboCtrl) return;
-        const comboTabs = comboCtrl.querySelector('.cxd-ComboTabs');
-        if (!comboTabs) return;
-
-        const tabLinks = comboTabs.querySelectorAll('.cxd-Tabs-link:not(.cxd-ComboTabs-addLink)');
-        let deleteIndex = -1;
-        tabLinks.forEach((tab, i) => {
-          if (tab.contains(deleteBtn)) deleteIndex = i;
-        });
-        if (deleteIndex === -1) return;
-
-        const panes = comboTabs.querySelectorAll('.cxd-Tabs-pane');
-        const items: Record<string, unknown>[] = [];
-        panes.forEach((pane, i) => {
-          if (i !== deleteIndex) {
+          const panes = comboTabs.querySelectorAll('.cxd-Tabs-pane');
+          const items: Record<string, unknown>[] = [];
+          panes.forEach((pane) => {
             items.push(readComboItemData(pane));
+          });
+
+          if (items.length > 0) {
+            const snapshot = JSON.stringify(items);
+            const comboName = extractComboNames(currentSchema).values().next().value;
+            if (comboName) {
+              modifiedValues.current = { ...modifiedValues.current, [comboName]: items };
+              const fullSnapshot = JSON.stringify(modifiedValues.current);
+              if (fullSnapshot !== lastSyncedRef.current) {
+                lastSyncedRef.current = fullSnapshot;
+                setUserValues({ ...modifiedValues.current });
+                onDataChange?.({ ...modifiedValues.current });
+                onNativeComboChange?.(items);
+              }
+            }
           }
         });
+      }, 150);
+    });
 
-        onNativeComboChange?.(items);
-      }
-    };
-
-    container.addEventListener('click', handleComboClick, true);
+    observer.observe(container, { childList: true, subtree: true });
     return () => {
-      container.removeEventListener('click', handleComboClick, true);
+      clearTimeout(syncTimer);
+      observer.disconnect();
     };
-  }, [currentSchema, onDataChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSchema, onDataChange, onNativeComboChange]);
 
   useImperativeHandle(ref, () => ({
     getData: () => {

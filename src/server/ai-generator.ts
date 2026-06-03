@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const COMPONENTS_GUIDE_PATH = path.resolve(__dirname, '..', 'docs', 'amis-components-guide.md');
+const COMPONENTS_GUIDE_PATH = path.resolve(__dirname, '..', 'docs', 'amis-components.md');
 
 /**
  * Read the components guide document.
@@ -11,7 +11,7 @@ function loadComponentsGuide(): string {
   try {
     return fs.readFileSync(COMPONENTS_GUIDE_PATH, 'utf-8');
   } catch {
-    return '# Amis 组件介绍文档\n\n(文档未找到，请确认 docs/amis-components-guide.md 存在)';
+    return '# Amis 组件介绍文档\n\n(文档未找到，请确认 docs/amis-components.md 存在)';
   }
 }
 
@@ -110,7 +110,7 @@ export function callClaude(userPrompt: string, currentSchema: string, currentDat
     const proc = spawn('claude', [
       '-p', prompt,
       '--output-format', 'text',
-      '--max-turns', '1',
+      '--max-turns', '50',
     ], {
       timeout: TIMEOUT_MS,
       shell: false,

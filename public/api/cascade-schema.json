@@ -1,0 +1,84 @@
+{
+  "type": "page",
+  "title": "三级联动表单",
+  "body": [
+    {
+      "type": "form",
+      "title": "",
+      "mode": "horizontal",
+      "horizontal": {
+        "left": 3,
+        "right": 9
+      },
+      "body": [
+        {
+          "type": "select",
+          "name": "category",
+          "label": "分类",
+          "required": true,
+          "placeholder": "请选择分类",
+          "clearable": true,
+          "searchable": true,
+          "source": {
+            "method": "get",
+            "url": "/api/options/categories"
+          }
+        },
+        {
+          "type": "select",
+          "name": "brand",
+          "label": "品牌",
+          "required": true,
+          "placeholder": "请先选择分类",
+          "clearable": true,
+          "searchable": true,
+          "source": {
+            "method": "get",
+            "url": "/api/options/brands",
+            "data": {
+              "category": "${category}"
+            }
+          },
+          "visibleOn": "this.category"
+        },
+        {
+          "type": "select",
+          "name": "model",
+          "label": "型号",
+          "required": true,
+          "placeholder": "请先选择品牌",
+          "clearable": true,
+          "searchable": true,
+          "source": {
+            "method": "get",
+            "url": "/api/options/models",
+            "data": {
+              "brand": "${brand}"
+            }
+          },
+          "visibleOn": "this.brand"
+        },
+        {
+          "type": "input-number",
+          "name": "quantity",
+          "label": "数量",
+          "required": true,
+          "placeholder": "请输入数量",
+          "min": 1,
+          "max": 9999,
+          "step": 1,
+          "precision": 0
+        },
+        {
+          "type": "textarea",
+          "name": "remark",
+          "label": "备注",
+          "placeholder": "请输入备注信息",
+          "rows": 4,
+          "maxLength": 500,
+          "showCount": true
+        }
+      ]
+    }
+  ]
+}

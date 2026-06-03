@@ -1,0 +1,59 @@
+{
+  "status": 0,
+  "msg": "ok",
+  "data": {
+    "count": 5,
+    "rows": [
+      {
+        "id": "1001",
+        "name": "夏季促销活动",
+        "category": "营销",
+        "status": "1",
+        "priority": "高",
+        "creator": "张三",
+        "createdAt": "2026-05-15 10:30:00",
+        "updatedAt": "2026-05-20 14:22:00"
+      },
+      {
+        "id": "1002",
+        "name": "会员积分任务",
+        "category": "运营",
+        "status": "1",
+        "priority": "中",
+        "creator": "李四",
+        "createdAt": "2026-05-18 09:00:00",
+        "updatedAt": "2026-05-25 16:45:00"
+      },
+      {
+        "id": "1003",
+        "name": "新用户注册奖励",
+        "category": "拉新",
+        "status": "0",
+        "priority": "高",
+        "creator": "王五",
+        "createdAt": "2026-05-20 11:15:00",
+        "updatedAt": "2026-05-20 11:15:00"
+      },
+      {
+        "id": "1004",
+        "name": "端午限时折扣",
+        "category": "营销",
+        "status": "2",
+        "priority": "低",
+        "creator": "赵六",
+        "createdAt": "2026-05-22 08:30:00",
+        "updatedAt": "2026-05-28 10:00:00"
+      },
+      {
+        "id": "1005",
+        "name": "签到打卡任务",
+        "category": "运营",
+        "status": "1",
+        "priority": "中",
+        "creator": "张三",
+        "createdAt": "2026-05-25 14:00:00",
+        "updatedAt": "2026-05-30 09:30:00"
+      }
+    ]
+  }
+}

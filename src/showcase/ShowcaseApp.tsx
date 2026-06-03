@@ -110,97 +110,27 @@ const lazyComponents: Record<string, React.LazyExoticComponent<React.FC<{ schema
   'amis-drawer': React.lazy(() => import('../components/DrawerShowcase')),
   'solid-fill-tabs': React.lazy(() => import('./SolidFillTabsShowcase')),
   'closable-tabs': React.lazy(() => import('./ClosableTabsShowcase')),
-  'combo-tab': React.lazy(() => import('./ComboShowcase')),
 };
 
 /**
  * Wrapper that renders the correct component based on page type.
  * Custom components use lazy-loaded modules; Amis components use AmisLivePreview directly.
  */
-const PageRenderer = React.forwardRef<AmisLivePreviewRef, { pageId: string; jsonSchema: string; dataJson?: string; lang?: Language; label?: string }>(
-  ({ pageId, jsonSchema, dataJson, lang = 'zh', label }, ref) => {
+const PageRenderer = React.forwardRef<AmisLivePreviewRef, { pageId: string; jsonSchema: string; dataJson?: string; lang?: Language; label?: string; onPreviewDataChange?: (data: Record<string, unknown>) => void }>(
+  ({ pageId, jsonSchema, dataJson, lang = 'zh', label, onPreviewDataChange }, ref) => {
+    // Guard against empty or invalid JSON — should not happen after render, but protects during page switch
+    let schema: Record<string, unknown> = {};
+    try { schema = jsonSchema.trim() ? JSON.parse(jsonSchema) : {}; } catch { return null; }
+
     if (lazyComponents[pageId]) {
       const CustomComponent = lazyComponents[pageId];
-      return <CustomComponent schema={JSON.parse(jsonSchema)} />;
+      return <CustomComponent schema={schema} onDataChange={onPreviewDataChange} />;
     }
-    const schema = JSON.parse(jsonSchema);
-    const data = dataJson ? JSON.parse(dataJson) : {};
+    const data = dataJson && dataJson.trim() ? JSON.parse(dataJson) : {};
     return <AmisLivePreview schema={schema} data={data} lang={lang} label={label} ref={ref} />;
   }
 );
 PageRenderer.displayName = 'PageRenderer';
-
-/**
- * Renders dual-JSON config section with tab switching (Schema JSON / Data JSON)
- * followed by the live preview component.
- */
-const DualJsonSection: React.FC<{ page: ReturnType<typeof getShowcasePage>; lang: Language }> = ({ page, lang }) => {
-  const [activeJsonTab, setActiveJsonTab] = useState<'schema' | 'data'>('schema');
-  const [schemaText, setSchemaText] = useState(page?.jsonSchema || '');
-  const [dataText, setDataText] = useState(page?.jsonData || '');
-  const [schemaModified, setSchemaModified] = useState(false);
-  const [dataModified, setDataModified] = useState(false);
-
-  // Reset when page changes
-  React.useEffect(() => {
-    setSchemaText(page?.jsonSchema || '');
-    setDataText(page?.jsonData || '');
-    setSchemaModified(false);
-    setDataModified(false);
-  }, [page?.id, page?.jsonSchema, page?.jsonData]);
-
-  const activeJson = activeJsonTab === 'schema' ? schemaText : dataText;
-  const setJson = activeJsonTab === 'schema' ? setSchemaText : setDataText;
-  const modified = activeJsonTab === 'schema' ? schemaModified : dataModified;
-  const setModified = activeJsonTab === 'schema' ? setSchemaModified : setDataModified;
-  const originalText = activeJsonTab === 'schema' ? page?.jsonSchema : page?.jsonData;
-  const label = activeJsonTab === 'schema' ? 'Schema JSON' : 'Data JSON';
-
-  return (
-    <>
-      <div className="showcase-section">
-        <div className="showcase-json-tabs">
-          <button
-            className={`showcase-json-tab ${activeJsonTab === 'schema' ? 'is-active' : ''}`}
-            onClick={() => setActiveJsonTab('schema')}
-          >
-            Schema JSON
-          </button>
-          <button
-            className={`showcase-json-tab ${activeJsonTab === 'data' ? 'is-active' : ''}`}
-            onClick={() => setActiveJsonTab('data')}
-          >
-            Data JSON
-          </button>
-        </div>
-        <div className="showcase-json-editor">
-          <div className="showcase-json-toolbar">
-            <span className="showcase-json-label">{label}</span>
-            {modified && (
-              <button className="showcase-json-reset" onClick={() => { setJson(originalText || ''); setModified(false); }}>
-                Reset
-              </button>
-            )}
-          </div>
-          <textarea
-            className="showcase-json-textarea"
-            value={activeJson}
-            onChange={(e) => { setJson(e.target.value); setModified(true); }}
-            spellCheck={false}
-          />
-        </div>
-      </div>
-      <div className="showcase-section">
-        <h2 className="showcase-section-title">Live Preview</h2>
-        <div className="showcase-preview-container">
-          <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-            <PageRenderer pageId={page!.id} jsonSchema={page!.jsonSchema} dataJson={page!.jsonData} lang={lang} />
-          </Suspense>
-        </div>
-      </div>
-    </>
-  );
-};
 
 export const ShowcaseApp: React.FC = () => {
   const [activeId, setActiveId] = useState<string>(() => {
@@ -218,6 +148,42 @@ export const ShowcaseApp: React.FC = () => {
   const [dataJson, setDataJson] = useState<string>('');
   const [schemaModified, setSchemaModified] = useState(false);
   const [dataModified, setDataModified] = useState(false);
+
+  // Rendered JSON state — only updated when user clicks "Render" button
+  const [renderedSchemaJson, setRenderedSchemaJson] = useState<string>('');
+  const [renderedDataJson, setRenderedDataJson] = useState<string>('');
+  const [renderKey, setRenderKey] = useState(0);
+
+  const handleRender = useCallback(() => {
+    let mergedSchema = schemaJson;
+    try {
+      const schema = JSON.parse(schemaJson);
+      const data = dataJson.trim() ? JSON.parse(dataJson) : null;
+      // Inject data JSON values into schema tabs (for Closable Tabs, Combo Tab, etc.)
+      if (data && Array.isArray(schema?.tabs) && schema.tabs.length > 0) {
+        const dataTabs = Array.isArray(data) ? data : (data?.tabs || []);
+        if (Array.isArray(dataTabs) && dataTabs.length > 0) {
+          const merged = schema.tabs.map((tab: Record<string, unknown>, i: number) => {
+            const tabData = dataTabs[i];
+            if (!tabData || typeof tabData !== 'object') return tab;
+            // Merge data values into tab body
+            const body = tab.body;
+            if (body && typeof body === 'object' && (body as any).type === 'form') {
+              return { ...tab, body: { ...body, data: { ...(body as any).data, ...tabData } } };
+            }
+            return tab;
+          });
+          mergedSchema = JSON.stringify({ ...schema, tabs: merged }, null, 2);
+        }
+      }
+    } catch { /* use original schema */ }
+
+    setRenderedSchemaJson(mergedSchema);
+    setRenderedDataJson(dataJson);
+    setRenderKey((k) => k + 1);
+    setSchemaModified(false);
+    setDataModified(false);
+  }, [schemaJson, dataJson]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -251,6 +217,13 @@ export const ShowcaseApp: React.FC = () => {
   // to avoid accessing lazy getters outside Suspense boundary.
 
   const handleSelect = useCallback((id: string) => setActiveId(id), []);
+
+  // Real-time data sync: preview form changes → dataJson update (avoids infinite loop —
+  // dataJson edits still require "渲染" to affect preview)
+  const handlePreviewDataChange = useCallback((data: Record<string, unknown>) => {
+    setDataJson(JSON.stringify(data, null, 2));
+    setDataModified(true);
+  }, []);
 
   const handleLangChange = useCallback((newLang: Language) => {
     setLang(newLang);
@@ -292,6 +265,10 @@ export const ShowcaseApp: React.FC = () => {
           dataJson={dataJson}
           schemaModified={schemaModified}
           dataModified={dataModified}
+          renderedSchemaJson={renderedSchemaJson}
+          renderedDataJson={renderedDataJson}
+          renderKey={renderKey}
+          onRender={handleRender}
           submittedData={submittedData}
           onSetSchemaJson={setSchemaJson}
           onSetDataJson={setDataJson}
@@ -301,9 +278,107 @@ export const ShowcaseApp: React.FC = () => {
           onSubmit={handleSubmit}
           i18nRef={i18nRef}
           plainRef={plainRef}
+          onPreviewDataChange={handlePreviewDataChange}
         />
       </Suspense>
     </div>
+  );
+};
+
+/**
+ * Renders a custom component page with editable JSON.
+ * - schema-preview: no external JSON editor (has its own internal editor)
+ * - pages with jsonData: dual JSON tabs (Schema / Data), preview uses rendered values
+ * - other custom pages: single JSON editor, preview uses rendered values
+ */
+const CustomPageSection: React.FC<{
+  page: ReturnType<typeof getShowcasePage>;
+  lang: Language;
+  schemaJson: string;
+  dataJson: string;
+  renderedSchemaJson: string;
+  renderedDataJson: string;
+  schemaModified: boolean;
+  dataModified: boolean;
+  renderKey: number;
+  onRender: () => void;
+  onSetSchemaJson: (v: string) => void;
+  onSetDataJson: (v: string) => void;
+  onSetSchemaModified: (v: boolean) => void;
+  onSetDataModified: (v: boolean) => void;
+  onPreviewDataChange?: (data: Record<string, unknown>) => void;
+}> = ({ page, lang, schemaJson, dataJson, renderedSchemaJson, renderedDataJson, schemaModified, dataModified, renderKey, onRender, onSetSchemaJson, onSetDataJson, onSetSchemaModified, onSetDataModified, onPreviewDataChange }) => {
+  const hasDualJson = !!page.jsonData;
+  const [activeJsonTab, setActiveJsonTab] = useState<'schema' | 'data'>('schema');
+
+  // Reset tab when page changes
+  useEffect(() => { setActiveJsonTab('schema'); }, [page?.id]);
+
+  // schema-preview has its own internal editor — no external JSON section needed
+  if (page.id === 'schema-preview') {
+    return (
+      <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
+        <PageRenderer key={renderKey} pageId={page.id} jsonSchema={page.jsonSchema} lang={lang} />
+      </Suspense>
+    );
+  }
+
+  const activeJson = activeJsonTab === 'schema' ? schemaJson : dataJson;
+  const setJson = activeJsonTab === 'schema' ? onSetSchemaJson : onSetDataJson;
+  const modified = activeJsonTab === 'schema' ? schemaModified : dataModified;
+  const setModified = activeJsonTab === 'schema' ? onSetSchemaModified : onSetDataModified;
+  const originalText = activeJsonTab === 'schema' ? page.jsonSchema : page.jsonData;
+  const label = activeJsonTab === 'schema' ? (hasDualJson ? 'Schema JSON' : 'Schema') : 'Data JSON';
+
+  return (
+    <>
+      <div className="showcase-section">
+        {hasDualJson && (
+          <div className="showcase-json-tabs">
+            <button
+              className={`showcase-json-tab ${activeJsonTab === 'schema' ? 'is-active' : ''}`}
+              onClick={() => setActiveJsonTab('schema')}
+            >
+              Schema JSON
+            </button>
+            <button
+              className={`showcase-json-tab ${activeJsonTab === 'data' ? 'is-active' : ''}`}
+              onClick={() => setActiveJsonTab('data')}
+            >
+              Data JSON
+            </button>
+          </div>
+        )}
+        <div className="showcase-json-editor">
+          <div className="showcase-json-toolbar">
+            <span className="showcase-json-label">{label}</span>
+            <span className="showcase-toolbar-spacer" />
+            <button className="showcase-json-render-btn" onClick={onRender}>
+              渲染
+            </button>
+            {modified && (
+              <button className="showcase-json-reset" onClick={() => { setJson(originalText || ''); setModified(false); }}>
+                Reset
+              </button>
+            )}
+          </div>
+          <textarea
+            className="showcase-json-textarea"
+            value={activeJson}
+            onChange={(e) => { setJson(e.target.value); setModified(true); }}
+            spellCheck={false}
+          />
+        </div>
+      </div>
+      <div className="showcase-section">
+        <h2 className="showcase-section-title">Live Preview</h2>
+        <div className="showcase-preview-container">
+          <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
+            <PageRenderer key={renderKey} pageId={page.id} jsonSchema={renderedSchemaJson || page.jsonSchema} dataJson={renderedDataJson || page.jsonData || ''} lang={lang} onPreviewDataChange={onPreviewDataChange} />
+          </Suspense>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -318,8 +393,12 @@ const ShowcasePageContent: React.FC<{
   hasMultiLang: boolean;
   schemaJson: string;
   dataJson: string;
+  renderedSchemaJson: string;
+  renderedDataJson: string;
   schemaModified: boolean;
   dataModified: boolean;
+  renderKey: number;
+  onRender: () => void;
   submittedData: Record<string, unknown> | null;
   onSetSchemaJson: (v: string) => void;
   onSetDataJson: (v: string) => void;
@@ -329,12 +408,14 @@ const ShowcasePageContent: React.FC<{
   onSubmit: () => void;
   i18nRef: React.RefObject<AmisLivePreviewRef>;
   plainRef: React.RefObject<AmisLivePreviewRef>;
+  onPreviewDataChange?: (data: Record<string, unknown>) => void;
 }> = (props) => {
   const {
     page, lang, isAmis, hasMultiLang,
-    schemaJson, dataJson, schemaModified, dataModified, submittedData,
+    schemaJson, dataJson, renderedSchemaJson, renderedDataJson,
+    schemaModified, dataModified, renderKey, onRender, submittedData,
     onSetSchemaJson, onSetDataJson, onSetSchemaModified, onSetDataModified,
-    onLangChange, onSubmit, i18nRef, plainRef,
+    onLangChange, onSubmit, i18nRef, plainRef, onPreviewDataChange,
   } = props;
 
   // Reset editable JSON when switching pages — inside Suspense so lazy getters are safe
@@ -347,6 +428,8 @@ const ShowcasePageContent: React.FC<{
     onSetDataJson(_data);
     onSetSchemaModified(false);
     onSetDataModified(false);
+    // Sync rendered with original on page switch
+    onRender();
   }, [page?.id]);
 
   return (
@@ -391,6 +474,10 @@ const ShowcasePageContent: React.FC<{
                     <div className="showcase-json-editor">
                       <div className="showcase-json-toolbar">
                         <span className="showcase-json-label">Schema (i18n)</span>
+                        <span className="showcase-toolbar-spacer" />
+                        <button className="showcase-json-render-btn" onClick={onRender}>
+                          渲染
+                        </button>
                         {schemaModified && (
                           <button className="showcase-json-reset" onClick={() => { onSetSchemaJson(page.jsonSchemaI18n ?? page.jsonSchema); onSetSchemaModified(false); }}>
                             Reset
@@ -411,6 +498,10 @@ const ShowcasePageContent: React.FC<{
                       <div className="showcase-json-editor">
                         <div className="showcase-json-toolbar">
                           <span className="showcase-json-label">Data (i18n)</span>
+                          <span className="showcase-toolbar-spacer" />
+                          <button className="showcase-json-render-btn" onClick={onRender}>
+                            渲染
+                          </button>
                           {dataModified && (
                             <button className="showcase-json-reset" onClick={() => { onSetDataJson(page.dataI18n || ''); onSetDataModified(false); }}>
                               Reset
@@ -430,7 +521,7 @@ const ShowcasePageContent: React.FC<{
                     <h2 className="showcase-section-title">Live Preview — 支持 i18n</h2>
                     <div className="showcase-preview-container">
                       <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                        <PageRenderer key={`i18n-${page.id}`} pageId={page.id} jsonSchema={page.jsonSchemaI18n ?? page.jsonSchema} dataJson={page.dataI18n} lang={lang} ref={i18nRef} label="实时预览 — 可编辑表单字段" />
+                        <PageRenderer key={`i18n-${page.id}-${renderKey}`} pageId={page.id} jsonSchema={renderedSchemaJson || (page.jsonSchemaI18n ?? page.jsonSchema)} dataJson={renderedDataJson || page.dataI18n || ''} lang={lang} ref={i18nRef} label="实时预览 — 可编辑表单字段" />
                       </Suspense>
                     </div>
                   </div>
@@ -440,6 +531,10 @@ const ShowcasePageContent: React.FC<{
                     <div className="showcase-json-editor">
                       <div className="showcase-json-toolbar">
                         <span className="showcase-json-label">Schema (plain)</span>
+                        <span className="showcase-toolbar-spacer" />
+                        <button className="showcase-json-render-btn" onClick={onRender}>
+                          渲染
+                        </button>
                         {schemaModified && (
                           <button className="showcase-json-reset" onClick={() => { onSetSchemaJson(page.jsonSchema); onSetSchemaModified(false); }}>
                             Reset
@@ -460,6 +555,10 @@ const ShowcasePageContent: React.FC<{
                       <div className="showcase-json-editor">
                         <div className="showcase-json-toolbar">
                           <span className="showcase-json-label">Data (plain)</span>
+                          <span className="showcase-toolbar-spacer" />
+                          <button className="showcase-json-render-btn" onClick={onRender}>
+                            渲染
+                          </button>
                           {dataModified && (
                             <button className="showcase-json-reset" onClick={() => { onSetDataJson(page.data || ''); onSetDataModified(false); }}>
                               Reset
@@ -479,7 +578,7 @@ const ShowcasePageContent: React.FC<{
                     <h2 className="showcase-section-title">Live Preview — 不支持 i18n</h2>
                     <div className="showcase-preview-container">
                       <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                        <PageRenderer key={`plain-${page.id}`} pageId={page.id} jsonSchema={page.jsonSchema} dataJson={page.data} lang="zh" ref={plainRef} label="实时预览（固定中文）" />
+                        <PageRenderer key={`plain-${page.id}-${renderKey}`} pageId={page.id} jsonSchema={renderedSchemaJson || page.jsonSchema} dataJson={renderedDataJson || page.data || ''} lang="zh" ref={plainRef} label="实时预览（固定中文）" />
                       </Suspense>
                     </div>
                   </div>
@@ -498,6 +597,10 @@ const ShowcasePageContent: React.FC<{
                     <div className="showcase-json-editor">
                       <div className="showcase-json-toolbar">
                         <span className="showcase-json-label">Schema</span>
+                        <span className="showcase-toolbar-spacer" />
+                        <button className="showcase-json-render-btn" onClick={onRender}>
+                          渲染
+                        </button>
                         {schemaModified && (
                           <button className="showcase-json-reset" onClick={() => { onSetSchemaJson(page.jsonSchema); onSetSchemaModified(false); }}>
                             Reset
@@ -516,7 +619,7 @@ const ShowcasePageContent: React.FC<{
                     <h2 className="showcase-section-title">Live Preview</h2>
                     <div className="showcase-preview-container">
                       <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                        <PageRenderer key={`amis-${page.id}`} pageId={page.id} jsonSchema={page.jsonSchema} dataJson={page.data} lang={lang} ref={i18nRef} label="实时预览" />
+                        <PageRenderer key={`amis-${page.id}-${renderKey}`} pageId={page.id} jsonSchema={renderedSchemaJson || page.jsonSchema} dataJson={renderedDataJson || page.data || ''} lang={lang} ref={i18nRef} label="实时预览" />
                       </Suspense>
                     </div>
                   </div>
@@ -530,45 +633,23 @@ const ShowcasePageContent: React.FC<{
               )}
             </>
           ) : (
-            <>
-              {page.id === 'schema-preview' ? (
-                <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                  <PageRenderer pageId={page.id} jsonSchema={page.jsonSchema} lang={lang} />
-                </Suspense>
-              ) : page.jsonData ? (
-                <DualJsonSection page={page} lang={lang} />
-              ) : (
-                <>
-                  <div className="showcase-section">
-                    <h2 className="showcase-section-title">JSON Configuration</h2>
-                    <div className="showcase-json-editor">
-                      <div className="showcase-json-toolbar">
-                        <span className="showcase-json-label">Schema</span>
-                        {schemaModified && (
-                          <button className="showcase-json-reset" onClick={() => { onSetSchemaJson(page.jsonSchema); onSetSchemaModified(false); }}>
-                            Reset
-                          </button>
-                        )}
-                      </div>
-                      <textarea
-                        className="showcase-json-textarea"
-                        value={schemaJson}
-                        onChange={(e) => { onSetSchemaJson(e.target.value); onSetSchemaModified(true); }}
-                        spellCheck={false}
-                      />
-                    </div>
-                  </div>
-                  <div className="showcase-section">
-                    <h2 className="showcase-section-title">Live Preview</h2>
-                    <div className="showcase-preview-container">
-                      <Suspense fallback={<div className="showcase-loading">Loading preview...</div>}>
-                        <PageRenderer pageId={page.id} jsonSchema={page.jsonSchema} dataJson={page.data} lang={lang} />
-                      </Suspense>
-                    </div>
-                  </div>
-                </>
-              )}
-            </>
+            <CustomPageSection
+              page={page}
+              lang={lang}
+              schemaJson={schemaJson}
+              dataJson={dataJson}
+              renderedSchemaJson={renderedSchemaJson}
+              renderedDataJson={renderedDataJson}
+              schemaModified={schemaModified}
+              dataModified={dataModified}
+              renderKey={renderKey}
+              onRender={onRender}
+              onSetSchemaJson={onSetSchemaJson}
+              onSetDataJson={onSetDataJson}
+              onSetSchemaModified={onSetSchemaModified}
+              onSetDataModified={onSetDataModified}
+              onPreviewDataChange={onPreviewDataChange}
+            />
           )}
         </>
       )}

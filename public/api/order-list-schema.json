@@ -1,0 +1,59 @@
+{
+  "pageType": "crudPage",
+  "pageTitle": "订单管理",
+  "className": "mission-root",
+  "api": "/api/orders",
+  "filterTitle": "查询条件",
+  "searchFields": [
+    {
+      "type": "input-text",
+      "props": {
+        "name": "orderNo",
+        "label": "订单号",
+        "placeholder": "请输入订单号"
+      }
+    },
+    {
+      "type": "input-text",
+      "props": {
+        "name": "customerName",
+        "label": "客户名称",
+        "placeholder": "请输入客户名称"
+      }
+    },
+    {
+      "type": "select",
+      "props": {
+        "name": "orderStatus",
+        "label": "订单状态",
+        "placeholder": "请选择订单状态",
+        "options": [
+          { "label": "待付款", "value": "pending" },
+          { "label": "已付款", "value": "paid" },
+          { "label": "已发货", "value": "shipped" },
+          { "label": "已完成", "value": "completed" },
+          { "label": "已取消", "value": "cancelled" }
+        ]
+      }
+    }
+  ],
+  "crudColumns": [
+    { "name": "orderNo", "label": "订单号", "type": "text" },
+    { "name": "customerName", "label": "客户名称", "type": "text" },
+    { "name": "orderDate", "label": "下单日期", "type": "date" },
+    { "name": "amount", "label": "金额", "type": "text" },
+    { "name": "paymentMethod", "label": "支付方式", "type": "text" },
+    {
+      "name": "orderStatus",
+      "label": "订单状态",
+      "type": "status",
+      "options": [
+        { "label": "待付款", "value": "pending" },
+        { "label": "已付款", "value": "paid" },
+        { "label": "已发货", "value": "shipped" },
+        { "label": "已完成", "value": "completed" },
+        { "label": "已取消", "value": "cancelled" }
+      ]
+    }
+  ]
+}

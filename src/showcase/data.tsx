@@ -36,6 +36,10 @@ export interface ShowcasePage {
   /** Second JSON block for dual-config pages (e.g. Closable Tabs: schema vs data). */
   jsonData?: string;
   component: React.FC;
+  /** Amis component type for AI prompt (e.g. "tabs", "combo", "form"). */
+  type?: string;
+  /** Amis component className for AI prompt (e.g. "custom-closable-tabs"). */
+  className?: string;
 }
 
 /**
@@ -78,8 +82,8 @@ const customShowcasePages: ShowcasePage[] = [
   {
     id: 'schema-preview',
     category: '工具',
-    title: 'Schema Preview',
-    description: '输入任意 Amis JSON Schema，实时渲染预览。支持所有 Amis 表单组件。',
+    title: 'Schema Design',
+    description: '输入任意 Amis JSON Schema，实时渲染设计。支持所有 Amis 表单组件。',
     jsonSchema: JSON.stringify({
       description: 'Paste any Amis schema JSON in the editor, click "渲染预览" to see it rendered live.',
       shortcut: 'Ctrl+Enter to render',
@@ -265,7 +269,8 @@ const customShowcasePages: ShowcasePage[] = [
     category: '反馈组件',
     title: 'Drawer — 抽屉',
     description: '从边缘滑出的抽屉面板。通过 setValue 将抽屉内选择的值回写到父表单字段，无需 HTTP 请求。触发按钮放在录入区域。',
-    props: '| 参数 | 类型 | 默认值 | 说明 |\n|------|------|--------|------|\n| `title` | `string` | - | 抽屉标题 |\n| `position` | `\'left\' \| \'right\' \| \'top\' \| \'bottom\'` | `\'right\'` | 抽屉位置 |\n| `width` | `number \| string` | `500` | 抽屉宽度 |\n| `body` | `Schema` | - | 抽屉内容 |\n| `closeOnEsc` | `boolean` | `true` | ESC 关闭 |\n| `closeOnOutside` | `boolean` | `true` | 点击外部关闭 |',
+    type: 'button',
+    className: 'cxd-Button',
     jsonSchema: JSON.stringify({
       type: 'input-group',
       label: '选中人员',
@@ -304,12 +309,20 @@ const customShowcasePages: ShowcasePage[] = [
     category: '布局组件',
     title: 'Solid Fill Tabs',
     description: '实心填充型 Tab 样式。选中=蓝底白字，未选中=白底蓝字+实线外框。无 hover 效果，无下划线。',
+    type: 'tabs',
+    className: 'custom-solid-fill-tabs',
     jsonSchema: JSON.stringify({
       type: 'tabs',
       className: 'custom-solid-fill-tabs',
       tabs: [
         { title: 'Rule Setup', body: '规则配置内容区域' },
         { title: 'Display', body: '显示设置内容区域' },
+      ],
+    }, null, 2),
+    jsonData: JSON.stringify({
+      tabs: [
+        { title: 'Rule Setup' },
+        { title: 'Display' },
       ],
     }, null, 2),
     component: () => {
@@ -321,161 +334,61 @@ const customShowcasePages: ShowcasePage[] = [
     id: 'closable-tabs',
     category: '布局组件',
     title: 'Closable Tabs',
-    description: '可关闭 Tab + 添加按钮，每个 tab 内嵌表单。新增 tab 时自动生成相同表单结构。支持表单提交并显示提交数据。',
+    description: '可关闭 Tab + 添加按钮，每个 tab 内嵌表单。新增 tab 时从 schema_format 自动生成相同表单结构。',
+    type: 'closable-tab',
     jsonSchema: JSON.stringify({
-      type: 'form',
-      wrapWithPanel: false,
-      body: [
-        { type: 'select', name: 'subMissionType', label: 'Sub Mission Type', required: true, options: [{ label: 'Room Stay Prepaid Booking', value: 'Room Stay Prepaid Booking' }, { label: 'Direct Booking', value: 'Direct Booking' }] },
-        { type: 'select', name: 'businessUnit', label: 'Business Unit', required: true, options: [{ label: 'BU1', value: 'BU1' }, { label: 'BU2', value: 'BU2' }, { label: 'BU3', value: 'BU3' }] },
-        { type: 'input-text', name: 'targetSpending', label: 'Target Spending' },
-        { type: 'select', name: 'currency', label: 'Currency', options: [{ label: '积分', value: '积分' }, { label: '钻石', value: '钻石' }, { label: '金币', value: '金币' }] },
-        { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [{ label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' }] },
-        { type: 'select', name: 'marketCode', label: 'Market Code', options: [{ label: 'Code A', value: 'A' }, { label: 'Code B', value: 'B' }] },
-        { type: 'select', name: 'rateCode', label: 'Rate Code', options: [{ label: 'Rate 1', value: 'R1' }, { label: 'Rate 2', value: 'R2' }] },
-        { type: 'select', name: 'source', label: 'Source', options: [{ label: 'Web', value: 'Web' }, { label: 'App', value: 'App' }, { label: 'Mini Program', value: 'MiniProgram' }] },
-        { type: 'select', name: 'roomType', label: 'Room Type', options: [{ label: 'Standard', value: 'Standard' }, { label: 'Deluxe', value: 'Deluxe' }, { label: 'Suite', value: 'Suite' }] },
-        { type: 'select', name: 'roomCategory', label: 'Room Category', options: [{ label: 'Cat A', value: 'A' }, { label: 'Cat B', value: 'B' }] },
-        { type: 'radios', name: 'awardType', label: 'Registration Award', options: [{ label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' }] },
-        { type: 'input-text', name: 'awardPoints', label: 'Award Points' },
-        { type: 'select', name: 'billingCode', label: 'Billing Code', options: [{ label: 'BC-001', value: 'BC-001' }, { label: 'BC-002', value: 'BC-002' }] },
-        { type: 'input-text', name: 'stockQty', label: '库存数' },
-        { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
+      type: 'closable-tab',
+      addable: true,
+      addBtnText: '+ Add Tab',
+      schema_format: [
+        {
+          type: 'form',
+          wrapWithPanel: false,
+          data: {},
+          body: [
+            { type: 'input-text', name: 'name', label: 'Name', placeholder: 'Enter name' },
+          ],
+          actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+        },
       ],
-      actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+      tabs: [
+        {
+          title: 'Tab 1',
+          closable: true,
+          body: {
+            type: 'form',
+            wrapWithPanel: false,
+            data: { name: 'Alice' },
+            body: [
+              { type: 'input-text', name: 'name', label: 'Name', placeholder: 'Enter name' },
+            ],
+            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+          },
+        },
+        {
+          title: 'Tab 2',
+          closable: true,
+          body: {
+            type: 'form',
+            wrapWithPanel: false,
+            data: { name: 'Bob' },
+            body: [
+              { type: 'input-text', name: 'name', label: 'Name', placeholder: 'Enter name' },
+            ],
+            actions: [{ type: 'submit', label: '提交', level: 'primary' }],
+          },
+        },
+      ],
     }, null, 2),
     jsonData: JSON.stringify({
       tabs: [
-        {
-          title: 'Sub Mission 1',
-          subMissionType: 'Room Stay Prepaid Booking',
-          businessUnit: '',
-          currency: '',
-          paymentMethod: '',
-          targetSpending: '',
-          marketCode: '',
-          rateCode: '',
-          source: '',
-          roomType: '',
-          roomCategory: '',
-          awardType: 'points',
-          awardPoints: '',
-          billingCode: '',
-          stockQty: '',
-          transactionNote: '',
-        },
-        {
-          title: 'Sub Mission 2',
-          subMissionType: 'Direct Booking',
-          businessUnit: 'BU2',
-          currency: '钻石',
-          paymentMethod: 'Credit Card',
-          targetSpending: '',
-          marketCode: '',
-          rateCode: '',
-          source: '',
-          roomType: '',
-          roomCategory: '',
-          awardType: 'voucher',
-          awardPoints: '',
-          billingCode: '',
-          stockQty: '',
-          transactionNote: '',
-        },
+        { title: 'Tab 1', name: 'Alice' },
+        { title: 'Tab 2', name: 'Bob' },
       ],
     }, null, 2),
     component: () => {
       const ClosableTabsPreviewLazy = React.lazy(() => import('./ClosableTabsPreview'));
       return <ClosableTabsPreviewLazy />;
-    },
-  },
-  {
-    id: 'combo-tab',
-    category: '布局组件',
-    title: 'Combo Tab',
-    description: '使用 Amis combo 组件，通过纯 CSS 样式实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌完整表单。添加/删除 tab 不会影响未删除 tab 的表单内容。',
-    jsonSchema: JSON.stringify({
-      type: 'combo',
-      className: 'custom-combo-tabs',
-      labelField: 'title',
-      tabsLabelTpl: '${title}',
-      multiple: true,
-      multiLine: false,
-      removable: true,
-      tabsMode: true,
-      max: 10,
-      addButtonText: '+ Add Sub Mission',
-      scaffold: {
-        title: '', subMissionType: '', businessUnit: '', targetSpending: '',
-        currency: '', paymentMethod: '', marketCode: '', rateCode: '',
-        source: '', roomType: '', roomCategory: '', noOfNights: '',
-        minimumSpending: '', awardType: 'points', awardPoints: '',
-        billingCode: '', stockQty: '', transactionNote: '',
-      },
-      items: [
-        { type: 'select', name: 'subMissionType', label: 'Sub Mission Type*', required: true, options: [
-          { label: 'F&B Spending', value: 'FNB_SPENDING' },
-          { label: 'Room Stay Nights', value: 'ROOM_STAY_NIGHTS' },
-          { label: 'Room Spending', value: 'ROOM_SPENDING' },
-          { label: 'Direct Booking', value: 'Direct Booking' },
-        ]},
-        { type: 'select', name: 'businessUnit', label: 'Business Unit*', required: true, options: [
-          { label: 'Room', value: 'ROOM' }, { label: 'F&B', value: 'FNB' }, { label: 'Health', value: 'HEALTH' },
-        ]},
-        { type: 'group', body: [
-          { type: 'input-number', name: 'targetSpending', label: 'Target Spending' },
-          { type: 'select', name: 'currency', label: 'Currency', options: [
-            { label: 'HKD', value: 'HKD' }, { label: 'USD', value: 'USD' }, { label: '积分', value: '积分' }, { label: '钻石', value: '钻石' },
-          ]},
-        ]},
-        { type: 'group', body: [
-          { type: 'input-number', name: 'noOfNights', label: 'No. of Nights' },
-          { type: 'input-number', name: 'minimumSpending', label: 'Minimum Spending' },
-        ]},
-        { type: 'group', body: [
-          { type: 'select', name: 'paymentMethod', label: 'Payment Method', options: [
-            { label: 'Credit Card', value: 'Credit Card' }, { label: 'Cash', value: 'Cash' },
-          ]},
-          { type: 'select', name: 'source', label: 'Source', options: [
-            { label: 'Direct', value: 'DIRECT' }, { label: 'OTA', value: 'OTA' },
-          ]},
-        ]},
-        { type: 'group', body: [
-          { type: 'select', name: 'marketCode', label: 'Market Code', options: [
-            { label: 'GDS', value: 'GDS' }, { label: 'CORPORATE', value: 'CORPORATE' },
-          ]},
-          { type: 'select', name: 'rateCode', label: 'Rate Code', options: [
-            { label: 'RACK', value: 'RACK' }, { label: 'BAR', value: 'BAR' },
-          ]},
-        ]},
-        { type: 'group', body: [
-          { type: 'select', name: 'roomCategory', label: 'Room Category', options: [
-            { label: 'Deluxe', value: 'DELUXE' }, { label: 'Premier', value: 'PREMIER' },
-          ]},
-          { type: 'select', name: 'roomType', label: 'Room Type', options: [
-            { label: 'King', value: 'KING' }, { label: 'Twin', value: 'TWIN' },
-          ]},
-        ]},
-        { type: 'radios', name: 'awardType', label: 'Registration Award', options: [
-          { label: 'Award Points', value: 'points' }, { label: 'Voucher', value: 'voucher' }, { label: 'No Award', value: 'none' },
-        ]},
-        { type: 'wrapper', className: 'award-panel', body: [
-          { type: 'input-number', name: 'awardPoints', label: 'Award Points' },
-          { type: 'select', name: 'billingCode', label: 'Billing Code', options: [
-            { label: 'BCODE_ROOM_001', value: 'BCODE_ROOM_001' }, { label: 'BCODE_FNB_001', value: 'BCODE_FNB_001' },
-          ]},
-          { type: 'input-number', name: 'stockQty', label: '库存数' },
-          { type: 'input-text', name: 'transactionNote', label: 'Transaction Note' },
-        ]},
-      ],
-      value: [
-        { title: 'Sub Mission 1', subMissionType: '', businessUnit: '', targetSpending: '', currency: '', paymentMethod: '', marketCode: '', rateCode: '', source: '', roomType: '', roomCategory: '', noOfNights: '', minimumSpending: '', awardType: 'points', awardPoints: '', billingCode: '', stockQty: '', transactionNote: '' },
-        { title: 'Sub Mission 2', subMissionType: 'Direct Booking', businessUnit: 'BU2', currency: '钻石', paymentMethod: 'Credit Card', marketCode: '', rateCode: '', source: '', roomType: '', roomCategory: '', noOfNights: '', minimumSpending: '', awardType: 'voucher', awardPoints: '', billingCode: '', stockQty: '', transactionNote: '' },
-      ],
-    }, null, 2),
-    component: () => {
-      const ComboTabShowcase = React.lazy(() => import('./ComboShowcase'));
-      return <ComboTabShowcase />;
     },
   },
 ];
@@ -491,6 +404,50 @@ const lazyAmisPages: ShowcasePage[] = amisPageMeta.map(createLazyAmisPage);
  * while jsonSchema/component/data trigger a dynamic import on first access.
  */
 export const showcasePages: ShowcasePage[] = [...customShowcasePages, ...lazyAmisPages];
+
+export interface ComponentCatalogEntry {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  /** Amis component type (e.g. "tabs", "combo", "form"). */
+  type?: string;
+  /** Amis component className (e.g. "custom-closable-tabs"). */
+  className?: string;
+}
+
+/**
+ * Build a lightweight component catalog from all showcase pages.
+ * Only includes id, category, title, description — avoids lazy getter evaluation.
+ * Used by AI generator to know all available components.
+ */
+export function getComponentCatalog(): ComponentCatalogEntry[] {
+  const catalog: ComponentCatalogEntry[] = [];
+
+  // Custom pages — eagerly available
+  for (const page of customShowcasePages) {
+    catalog.push({
+      id: page.id,
+      category: page.category,
+      title: page.title,
+      description: page.description,
+      type: page.type,
+      className: page.className,
+    });
+  }
+
+  // Amis pages — use meta directly (no lazy getter evaluation)
+  for (const meta of amisPageMeta) {
+    catalog.push({
+      id: meta.id,
+      category: meta.category,
+      title: meta.title,
+      description: '',
+    });
+  }
+
+  return catalog;
+}
 
 export function getShowcasePage(id: string): ShowcasePage | undefined {
   return showcasePages.find(p => p.id === id);

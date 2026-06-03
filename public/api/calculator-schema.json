@@ -1,0 +1,50 @@
+{
+  "type": "page",
+  "body": {
+    "type": "form",
+    "title": "价格计算器",
+    "mode": "horizontal",
+    "body": [
+      {
+        "type": "input-number",
+        "name": "unitPrice",
+        "label": "单价",
+        "placeholder": "请输入单价",
+        "required": true,
+        "precision": 2,
+        "min": 0
+      },
+      {
+        "type": "input-number",
+        "name": "quantity",
+        "label": "数量",
+        "placeholder": "请输入数量",
+        "required": true,
+        "precision": 0,
+        "min": 0
+      },
+      {
+        "type": "input-number",
+        "name": "discount",
+        "label": "折扣",
+        "placeholder": "请输入折扣（0-100）",
+        "required": true,
+        "precision": 0,
+        "min": 0,
+        "max": 100
+      },
+      {
+        "type": "input-number",
+        "name": "totalPrice",
+        "label": "总价",
+        "disabled": true,
+        "precision": 2,
+        "mode": "readonly",
+        "formula": {
+          "expression": "unitPrice * quantity * discount / 100",
+          "condition": "${unitPrice && quantity && discount}"
+        }
+      }
+    ]
+  }
+}

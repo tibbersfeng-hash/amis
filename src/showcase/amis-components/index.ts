@@ -277,8 +277,9 @@ export async function loadAmisPage(id: string): Promise<ShowcasePage | undefined
   const loader = moduleLoaders[moduleName];
   if (!loader) return undefined;
 
-  const pages = await loader();
-  return pages.find(p => p.id === id);
+  const mod = await loader();
+  const pages = (mod as any).default as ShowcasePage[];
+  return pages?.find(p => p.id === id);
 }
 
 // ─── Backward-compat: lazy-loaded showcase pages ───────────────────

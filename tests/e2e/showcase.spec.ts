@@ -1445,6 +1445,9 @@ test.describe.parallel('Showcase Smoke Test — All Pages', () => {
     { id: 'date-range-picker', title: 'DateRangePicker' },
     { id: 'preview-panel', title: 'PreviewPanel' },
     { id: 'amis-drawer', title: 'Drawer' },
+    { id: 'solid-fill-tabs', title: 'Solid Fill Tabs' },
+    { id: 'closable-tabs', title: 'Closable Tabs' },
+    { id: 'combo-tab', title: 'Combo Tab' },
   ];
 
   // Amis built-in components (defined in amis-components/)

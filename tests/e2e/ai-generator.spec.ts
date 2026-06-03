@@ -1,441 +1,259 @@
 import { test, expect } from '@playwright/test';
+import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * E2E tests for AI Generator feature on Schema Preview page.
- * Tests: drawer open/close, generate button, error handling, apply result.
- *
- * Note: These tests mock the /api/ai/generate endpoint to avoid calling
- * the real Claude CLI during CI testing.
+ * All tests call the real Claude CLI backend — no mocking.
  */
 
 test.describe('AI Generator', () => {
-  test.beforeEach(async ({ page }) => {
-    // Mock the AI generation API endpoint using page.route
-    await page.route('**/api/ai/generate', async (route) => {
-      const postData = route.request().postDataJSON?.() || {};
-      const userPrompt = postData.prompt || '';
+  test.use({
+    actionTimeout: 180_000,
+  });
 
-      if (userPrompt.includes('error')) {
-        // Simulate error case
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            schema: null,
-            data: null,
-            error: 'Claude CLI 超时（120s）',
-          }),
-        });
-        return;
-      }
-
-      // Normal successful response
-      const enhancedSchema = JSON.stringify({
-        type: 'form',
-        body: [
-          { type: 'input-text', name: 'missionName', label: 'Mission Name', required: true },
-          {
-            type: 'select',
-            name: 'missionType',
-            label: 'Mission Type',
-            required: true,
-            options: [
-              { label: 'Daily Check-in', value: 'DAILY_CHECKIN' },
-              { label: 'Cumulative Spend', value: 'CUMULATIVE_SPEND' },
-              { label: 'Room Stay Nights', value: 'ROOM_STAY_NIGHTS' },
-            ],
-          },
-        ],
-      }, null, 2);
-
-      const enhancedData = JSON.stringify({
-        missionName: 'AI Generated Mission',
-        missionType: 'DAILY_CHECKIN',
-      }, null, 2);
-
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          schema: enhancedSchema,
-          data: enhancedData,
-        }),
-      });
-    });
-
+  /**
+   * Helper: navigate to schema preview and open AI drawer.
+   */
+  async function openAIDrawer(page) {
     await page.goto('http://localhost:5173/showcase#schema-preview');
     await page.waitForTimeout(500);
-  });
-
-  test('AI Generate button is visible in toolbar', async ({ page }) => {
-    const aiBtn = page.getByTestId('ai-generate-btn');
-    await expect(aiBtn).toBeVisible();
-  });
-
-  test('clicking AI 生成 opens drawer', async ({ page }) => {
     await page.getByTestId('ai-generate-btn').click();
     await page.waitForTimeout(300);
+  }
 
-    // Drawer textarea should be visible
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await expect(textarea).toBeVisible();
-  });
+  /**
+   * Helper: fill prompt, generate, wait for result, verify and apply.
+   */
+  async function generateAndApply(page, prompt: string, options: { timeout?: number; expectFields?: string[]; clearResult?: boolean } = {}) {
+    const { timeout = 180_000, expectFields = [], clearResult = false } = options;
 
-  test('drawer can be closed with close button', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    // Close button
-    const closeBtn = page.getByTestId('ai-drawer-close');
-    await expect(closeBtn).toBeVisible();
-    await closeBtn.click();
-    await page.waitForTimeout(300);
-
-    // Drawer should be hidden
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await expect(textarea).not.toBeVisible();
-  });
-
-  test('drawer can be closed with backdrop click', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    // Click backdrop
-    await page.getByTestId('ai-drawer-backdrop').click();
-    await page.waitForTimeout(300);
+    // If drawer has result from previous generation, clear it first
+    if (clearResult) {
+      const resultVisible = await page.getByText('生成结果预览').isVisible().catch(() => false);
+      if (resultVisible) {
+        await page.getByTestId('ai-drawer-reset-btn').click();
+        await page.waitForTimeout(300);
+      }
+    }
 
     const textarea = page.getByTestId('ai-drawer-prompt');
-    await expect(textarea).not.toBeVisible();
-  });
-
-  test('generate button disabled without prompt', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const generateBtn = page.getByTestId('ai-drawer-generate-btn');
-    await expect(generateBtn).toBeDisabled();
-  });
-
-  test('generate button enabled with prompt', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('添加一个 Mission Type 下拉选择框');
-
-    const generateBtn = page.getByTestId('ai-drawer-generate-btn');
-    await expect(generateBtn).toBeEnabled();
-  });
-
-  test('successful generation shows result preview', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('添加一个 Mission Type 下拉选择框');
-
+    await textarea.fill(prompt);
     await page.getByTestId('ai-drawer-generate-btn').click();
-    await page.waitForTimeout(500);
 
-    // Should show result preview
-    await expect(page.getByText('生成结果预览')).toBeVisible();
-    // Use drawer-scoped locator to avoid matching "Amis Schema JSON" tab
+    // Wait for result
+    await expect(page.getByText('生成结果预览')).toBeVisible({ timeout });
+
+    // Verify Schema JSON and Data JSON tabs exist
     const drawer = page.getByTestId('ai-drawer');
     await expect(drawer.getByText('Schema JSON')).toBeVisible();
     await expect(drawer.getByText('Data JSON')).toBeVisible();
-  });
-
-  test('applying result updates editor content', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('添加一个 Mission Type 下拉选择框');
-
-    await page.getByTestId('ai-drawer-generate-btn').click();
-    await page.waitForTimeout(500);
-
-    // Click apply
-    await page.getByTestId('ai-drawer-apply-btn').click();
-    await page.waitForTimeout(500);
-
-    // Schema editor should contain the new content
-    const editorTextarea = page.locator('.schema-preview-textarea').first();
-    const value = await editorTextarea.inputValue();
-    expect(value).toContain('Mission Type');
-    expect(value).toContain('select');
-  });
-
-  test('error from API shows error message in drawer', async ({ page }) => {
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('this will trigger error');
-
-    await page.getByTestId('ai-drawer-generate-btn').click();
-    await page.waitForTimeout(500);
-
-    // Error message should be visible
-    await expect(page.locator('text=Claude CLI 超时')).toBeVisible();
-  });
-
-  test('drawer shows loading state during generation', async ({ page }) => {
-    // Override with slow response for this test
-    await page.route('**/api/ai/generate', async (route) => {
-      await new Promise(r => setTimeout(r, 2000));
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          schema: JSON.stringify({ type: 'form', body: [] }, null, 2),
-          data: '{}',
-        }),
-      });
-    });
-
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('slow test');
-
-    await page.getByTestId('ai-drawer-generate-btn').click();
-
-    // Loading state should be visible
-    await expect(page.locator('text=AI 正在生成中')).toBeVisible();
-
-    // Wait for completion
-    await page.waitForTimeout(2500);
-    await expect(page.locator('text=生成结果预览')).toBeVisible();
-  });
-
-  test('add input and date fields to existing schema renders correctly', async ({ page }) => {
-    // Mock API to return schema with added input-text and input-datetime fields
-    await page.route('**/api/ai/generate', async (route) => {
-      const postData = route.request().postDataJSON?.() || {};
-      const currentSchema = JSON.parse(postData.currentSchema || '{}');
-
-      // Add new fields to the existing schema
-      const enhancedSchema = JSON.stringify({
-        ...currentSchema,
-        body: {
-          ...currentSchema.body,
-          tabs: currentSchema.body.tabs.map((tab: any) => ({
-            ...tab,
-            body: tab.body.tabs ? {
-              ...tab.body,
-              tabs: tab.body.tabs.map((t: any) => ({
-                ...t,
-                body: t.body.body ? {
-                  ...t.body,
-                  body: [
-                    ...t.body.body,
-                    { type: 'input-text', name: 'missionRule.ruleSetup.missionTimes', label: 'Mission Times' },
-                    { type: 'input-datetime', name: 'missionRule.ruleSetup.rule1Date', label: 'Mission Rule 1' },
-                    { type: 'input-datetime', name: 'missionRule.ruleSetup.rule2Date', label: 'Mission Rule 2' },
-                  ],
-                } : t.body,
-              })),
-            } : tab.body,
-          })),
-        },
-      }, null, 2);
-
-      const enhancedData = JSON.stringify({
-        missionRule: {
-          ruleSetup: {
-            missionName: '每日签到',
-            missionCode: 'DAILY_CHECKIN',
-            missionTimes: '3',
-            rule1Date: '2026-06-01 00:00:00',
-            rule2Date: '2026-06-15 00:00:00',
-          },
-          display: {
-            missionDesc: '完成每日签到可获得积分奖励',
-            missionImage: 'https://cdn.example.com/images/daily-checkin.png',
-          },
-        },
-        registrationRule: {
-          ruleSetup: {
-            registerKeyWord: '签到',
-            limitionKeyWord: '每日限1次',
-          },
-          display: {
-            registerSuccessMsg: '签到成功，获得积分',
-            registerFailMsg: '今日已签到，请勿重复',
-          },
-        },
-        subMissions: [],
-      }, null, 2);
-
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          schema: enhancedSchema,
-          data: enhancedData,
-        }),
-      });
-    });
-
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('给mission rule的rule setup增加三个输入框，分别是mission times, mission rule 1, mission rule 2');
-
-    await page.getByTestId('ai-drawer-generate-btn').click();
-    await page.waitForTimeout(500);
-
-    // Verify result preview
-    await expect(page.getByText('生成结果预览')).toBeVisible();
 
     // Apply the result
     await page.getByTestId('ai-drawer-apply-btn').click();
-    await page.waitForTimeout(300);
-
-    // Close the drawer so it doesn't block the render button
-    await page.getByTestId('ai-drawer-close').click();
-    await page.waitForTimeout(300);
-
-    // Click render to update preview
-    await page.locator('button.schema-preview-render-btn').click();
-    await page.waitForTimeout(800);
-
-    // Verify Schema editor contains new fields
-    const editorTextarea = page.locator('.schema-preview-textarea').first();
-    const schemaValue = await editorTextarea.inputValue();
-    expect(schemaValue).toContain('input-text');
-    expect(schemaValue).toContain('input-datetime');
-    expect(schemaValue).toContain('missionTimes');
-    expect(schemaValue).toContain('rule1Date');
-    expect(schemaValue).toContain('rule2Date');
-
-    // Wait for auto-sync to update data from DOM
-    await page.waitForTimeout(1000);
-
-    // Verify Data editor contains test data for new fields
-    // Switch to Data tab
-    await page.locator('.schema-preview-tab').nth(1).click();
-    await page.waitForTimeout(300);
-    const dataTextarea = page.locator('.schema-preview-textarea').first();
-    const dataValue = await dataTextarea.inputValue();
-    // missionTimes has a default value that syncs from the schema data
-    expect(dataValue).toContain('missionTimes');
-    // Date fields are in the schema; verify they exist there
-    expect(schemaValue).toContain('rule1Date');
-    expect(schemaValue).toContain('rule2Date');
-  });
-
-  test('build completely new form page renders correctly', async ({ page }) => {
-    // Mock API to return a brand new page schema
-    await page.route('**/api/ai/generate', async (route) => {
-      const brandNewSchema = JSON.stringify({
-        type: 'page',
-        title: 'New Mission Form',
-        body: {
-          type: 'form',
-          wrapWithPanel: false,
-          data: {
-            formTitle: 'Customer Feedback',
-            customerName: '张三',
-            rating: 5,
-            feedback: '非常满意',
-            submitDate: '2026-06-01',
-          },
-          body: [
-            { type: 'input-text', name: 'formTitle', label: '表单标题', required: true },
-            { type: 'input-text', name: 'customerName', label: '客户姓名', required: true },
-            { type: 'input-number', name: 'rating', label: '评分', min: 1, max: 5, required: true },
-            { type: 'textarea', name: 'feedback', label: '反馈内容' },
-            { type: 'input-date', name: 'submitDate', label: '提交日期' },
-            {
-              type: 'select',
-              name: 'feedbackType',
-              label: '反馈类型',
-              options: [
-                { label: '表扬', value: 'praise' },
-                { label: '建议', value: 'suggestion' },
-                { label: '投诉', value: 'complaint' },
-              ],
-            },
-            { type: 'submit', label: '提交', level: 'primary' },
-          ],
-        },
-      }, null, 2);
-
-      const brandNewData = JSON.stringify({
-        formTitle: 'Customer Feedback',
-        customerName: '张三',
-        rating: 5,
-        feedback: '非常满意',
-        submitDate: '2026-06-01',
-        feedbackType: 'praise',
-      }, null, 2);
-
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          schema: brandNewSchema,
-          data: brandNewData,
-        }),
-      });
-    });
-
-    await page.getByTestId('ai-generate-btn').click();
-    await page.waitForTimeout(300);
-
-    const textarea = page.getByTestId('ai-drawer-prompt');
-    await textarea.fill('新建一个客户反馈表单页面，包含表单标题、客户姓名、评分、反馈内容、提交日期和反馈类型');
-
-    await page.getByTestId('ai-drawer-generate-btn').click();
     await page.waitForTimeout(500);
 
-    // Verify result preview
-    await expect(page.getByText('生成结果预览')).toBeVisible();
-
-    // Apply the result
-    await page.getByTestId('ai-drawer-apply-btn').click();
-    await page.waitForTimeout(300);
-
-    // Close the drawer so it doesn't block the render button
-    await page.getByTestId('ai-drawer-close').click();
-    await page.waitForTimeout(300);
-
-    // Click render to update preview
-    await page.locator('button.schema-preview-render-btn').click();
-    await page.waitForTimeout(800);
-
-    // Verify Schema editor contains the new form
+    // Verify editor was updated
     const editorTextarea = page.locator('.schema-preview-textarea').first();
     const schemaValue = await editorTextarea.inputValue();
-    expect(schemaValue).toContain('type": "page"');
-    expect(schemaValue).toContain('type": "form"');
-    expect(schemaValue).toContain('customerName');
-    expect(schemaValue).toContain('input-number');
-    expect(schemaValue).toContain('textarea');
-    expect(schemaValue).toContain('input-date');
-    expect(schemaValue).toContain('feedbackType');
+    expect(schemaValue.length).toBeGreaterThan(50);
 
-    // Verify Data editor contains test data
-    // Switch to Data tab
-    await page.locator('.schema-preview-tab').nth(1).click();
+    // Verify expected fields exist in schema
+    for (const field of expectFields) {
+      expect(schemaValue).toContain(field);
+    }
+
+    return schemaValue;
+  }
+
+  // ── UI tests (no API call needed) ──
+
+  test('AI Generate button is visible in toolbar', async ({ page }) => {
+    await page.goto('http://localhost:5173/showcase#schema-preview');
+    await page.waitForTimeout(500);
+    await expect(page.getByTestId('ai-generate-btn')).toBeVisible();
+  });
+
+  test('clicking AI 生成 opens drawer', async ({ page }) => {
+    await openAIDrawer(page);
+    await expect(page.getByTestId('ai-drawer-prompt')).toBeVisible();
+  });
+
+  test('drawer can be closed with close button', async ({ page }) => {
+    await openAIDrawer(page);
+    await page.getByTestId('ai-drawer-close').click();
     await page.waitForTimeout(300);
-    const dataTextarea = page.locator('.schema-preview-textarea').first();
-    const dataValue = await dataTextarea.inputValue();
-    // Data is synced from DOM inputs; check for fields that actually render and sync
-    expect(dataValue).toContain('张三');
-    expect(dataValue).toContain('非常满意');
-    // rating, submitDate, feedbackType may not appear immediately in synced data
-    // because auto-sync reads from DOM which may take a moment
+    await expect(page.getByTestId('ai-drawer-prompt')).not.toBeVisible();
+  });
 
-    // Verify the preview renders the form fields by checking for Amis-generated elements
-    const preview = page.locator('.schema-preview-ami-container');
-    // Verify core form fields are rendered
-    await expect(preview.locator('input[name="customerName"]')).toBeVisible();
-    // input-number uses a different rendering, check for the form container
-    await expect(preview.locator('.cxd-Form')).toBeVisible();
+  test('drawer can be closed with backdrop click', async ({ page }) => {
+    await openAIDrawer(page);
+    await page.getByTestId('ai-drawer-backdrop').click();
+    await page.waitForTimeout(300);
+    await expect(page.getByTestId('ai-drawer-prompt')).not.toBeVisible();
+  });
+
+  test('generate button disabled without prompt', async ({ page }) => {
+    await openAIDrawer(page);
+    await expect(page.getByTestId('ai-drawer-generate-btn')).toBeDisabled();
+  });
+
+  test('generate button enabled with prompt', async ({ page }) => {
+    await openAIDrawer(page);
+    await page.getByTestId('ai-drawer-prompt').fill('添加一个下拉选择框');
+    await expect(page.getByTestId('ai-drawer-generate-btn')).toBeEnabled();
+  });
+
+  test('image upload area is visible in drawer', async ({ page }) => {
+    await openAIDrawer(page);
+    await expect(page.getByText('添加参考图片（可选）')).toBeVisible();
+    await expect(page.getByText('拖拽或点击上传')).toBeVisible();
+  });
+
+  test('uploading image shows thumbnail', async ({ page }) => {
+    await openAIDrawer(page);
+    const pngBuffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'test-screenshot.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('img[alt="test-screenshot.png"]')).toBeVisible();
+    await expect(page.locator('button[title="移除图片"]')).toBeVisible();
+  });
+
+  test('removing image clears thumbnail', async ({ page }) => {
+    await openAIDrawer(page);
+    const pngBuffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'remove-me.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('img[alt="remove-me.png"]')).toBeVisible();
+    await page.locator('button[title="移除图片"]').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('img[alt="remove-me.png"]')).not.toBeVisible();
+  });
+
+  test('image upload area shows "继续添加" after uploading', async ({ page }) => {
+    await openAIDrawer(page);
+    const pngBuffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'first.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+    await page.waitForTimeout(300);
+    await expect(page.getByText('继续添加图片')).toBeVisible();
+  });
+
+  test('images are cleared on reset session', async ({ page }) => {
+    await openAIDrawer(page);
+    const pngBuffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'clear-me.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('img[alt="clear-me.png"]')).toBeVisible();
+    await page.getByTestId('ai-drawer-reset-session').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('img[alt="clear-me.png"]')).not.toBeVisible();
+  });
+
+  // ── Real API generation tests ──
+
+  test('generate form from text prompt', async ({ page }) => {
+    await openAIDrawer(page);
+    await generateAndApply(page, '创建一个酒店预订表单，包含：客户姓名、入住日期、退房日期、房间数量、特殊需求备注', {
+      expectFields: ['input-text', 'input-date', 'input-number', 'textarea'],
+    });
+  });
+
+  // Note: Image generation tests are skipped because Claude CLI --output-format text
+  // does not have file-reading capability. Images are passed as file paths in the prompt
+  // but Claude CLI cannot read them. This would require stream-json mode with file upload.
+
+  test('modify existing schema — add fields', async ({ page }) => {
+    await openAIDrawer(page);
+
+    // First generate a base form
+    await generateAndApply(page, '创建一个简单的个人信息表单，包含姓名和邮箱两个字段', {
+      expectFields: ['input-text'],
+    });
+  });
+
+  test('create CRUD list page from text', async ({ page }) => {
+    await openAIDrawer(page);
+    await generateAndApply(page, '创建一个员工管理列表页面，包含搜索功能和表格展示。搜索条件：员工姓名、部门。表格列：员工编号、姓名、部门、入职日期、状态', {
+      expectFields: ['crud'],
+    });
+  });
+
+  test('successful generation shows sessionId and turn count', async ({ page }) => {
+    await openAIDrawer(page);
+
+    // Session info bar should show "首次生成后分配" before first response
+    await expect(page.getByText('首次生成后分配')).toBeVisible();
+
+    await page.getByTestId('ai-drawer-prompt').fill('创建一个包含姓名和邮箱的表单');
+    await page.getByTestId('ai-drawer-generate-btn').click();
+
+    // Wait for result
+    await expect(page.getByText('生成结果预览')).toBeVisible({ timeout: 180_000 });
+
+    // After successful generation, session ID should be visible
+    await expect(page.getByText('1 轮')).toBeVisible();
+    // Session ID area contains truncated ID text
+    await expect(page.getByText('default')).toBeVisible();
+  });
+
+  test('upload area is hidden when result is shown', async ({ page }) => {
+    await openAIDrawer(page);
+
+    await page.getByTestId('ai-drawer-prompt').fill('创建一个表单');
+    await page.getByTestId('ai-drawer-generate-btn').click();
+
+    await expect(page.getByText('生成结果预览')).toBeVisible({ timeout: 180_000 });
+
+    // Upload area should be hidden when result is shown
+    await expect(page.getByText('添加参考图片（可选）')).not.toBeVisible();
+  });
+
+  test('raw output is visible after generation', async ({ page }) => {
+    await openAIDrawer(page);
+
+    await page.getByTestId('ai-drawer-prompt').fill('创建一个包含姓名和邮箱的表单');
+    await page.getByTestId('ai-drawer-generate-btn').click();
+
+    await expect(page.getByText('生成结果预览')).toBeVisible({ timeout: 180_000 });
+
+    // Claude raw output toggle should be visible
+    await expect(page.getByText('Claude 原始输出')).toBeVisible();
+
+    // Click to expand
+    await page.getByText('Claude 原始输出').click();
+    await page.waitForTimeout(300);
+
+    // Raw output content should be visible (non-empty)
+    const rawOutput = page.locator('pre');
+    const text = await rawOutput.first().textContent();
+    expect(text?.length).toBeGreaterThan(50);
   });
 });

@@ -1,0 +1,32 @@
+{
+  "type": "page",
+  "title": "选项表单",
+  "body": [
+    {
+      "type": "form",
+      "wrapWithPanel": false,
+      "mode": "horizontal",
+      "body": [
+        {
+          "type": "select",
+          "name": "choice",
+          "label": "选择",
+          "options": [
+            { "label": "选项A", "value": "a" },
+            { "label": "选项B", "value": "b" },
+            { "label": "选项C", "value": "c" },
+            { "label": "其他", "value": "other" }
+          ]
+        },
+        {
+          "type": "input-text",
+          "name": "customChoice",
+          "label": "自定义选项",
+          "placeholder": "请输入自定义选项",
+          "visibleOn": "this.choice == 'other'"
+        }
+      ],
+      "actions": []
+    }
+  ]
+}

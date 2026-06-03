@@ -60,7 +60,7 @@ describe('ClosableTabsPreview', () => {
       render(<ClosableTabsPreview />);
       const tabs = document.querySelectorAll('.schema-preview-tab');
       expect(tabs).toHaveLength(2);
-      expect(tabs[0].textContent).toBe('Form Schema JSON');
+      expect(tabs[0].textContent).toBe('Tabs Schema JSON');
       expect(tabs[1].textContent).toBe('Tabs Data JSON');
     });
 
@@ -94,7 +94,7 @@ describe('ClosableTabsPreview', () => {
     it('textarea contains schema JSON by default', () => {
       render(<ClosableTabsPreview />);
       const textarea = document.querySelector('.schema-preview-textarea') as HTMLTextAreaElement;
-      expect(textarea.value).toContain('"type": "form"');
+      expect(textarea.value).toContain('"type": "tabs"');
     });
 
     it('textarea shows data JSON when data tab is active', () => {

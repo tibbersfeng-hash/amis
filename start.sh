@@ -2,7 +2,7 @@
 set -e
 
 PROJECT_DIR="/home/claude/code_space/frontend/amis-main"
-PORT=8888
+PORT=5173
 
 cd "$PROJECT_DIR"
 

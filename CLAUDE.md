@@ -212,6 +212,72 @@ Save 按钮 → 输出 zh/en 双版本 JSON
 | ClosableTabs | `closable-tabs` | 布局组件 | 可关闭 Tab + 添加按钮，每个 tab 内嵌表单，支持表单提交并记录 |
 | **ComboTab** | `combo-tab` | 布局组件 | **使用 Amis combo 组件，通过纯 CSS 实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌表单。必须使用 `type: 'combo'`，不能用 tabs 替代，只通过 CSS 改造外观，添加新 item 时不影响已有 item 的表单数据（combo 自带状态管理，不需要 React state 驱动）** |
 
+### AI Generator（AI 生成器）
+
+在 Schema Preview 页面提供 AI 生成功能，通过侧边抽屉与用户交互。
+
+#### API 接口
+
+- **POST `/api/ai/generate`** — 发送用户 prompt + 当前 schema/data 到后端，返回生成的 schema 和 data JSON
+
+**请求体格式：**
+```json
+{
+  "prompt": "描述你的修改需求",
+  "currentSchema": "...",
+  "currentData": "...",
+  "sessionId": "可选的会话 ID",
+  "images": [
+    {
+      "mimeType": "image/png",
+      "data": "base64-encoded-image-data",
+      "fileName": "screenshot.png"
+    }
+  ]
+}
+```
+
+**响应体格式：**
+```json
+{
+  "schema": "{ ...生成的 schema JSON... }",
+  "data": "{ ...生成的 data JSON... }",
+  "sessionId": "会话 ID（首次生成时返回）"
+}
+```
+
+#### 图片上传（参考 cc-connect 实现）
+
+AI Generator 支持上传图片作为参考，实现方式参考 cc-connect 的图片传输机制：
+
+- **cc-connect 原理**：`cc-connect send --image /path/to/image.png` 读取图片文件，通过 JSON 发送给 Claude Code。Claude Code 的 `session.go:Send()` 方法将图片转为 base64，构建 multimodal content array：
+  ```json
+  {
+    "type": "user",
+    "message": {
+      "role": "user",
+      "content": [
+        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": "..."}},
+        {"type": "text", "text": "prompt text"}
+      ]
+    }
+  }
+  ```
+- **前端实现**：`AIGeneratorDrawer.tsx` 通过拖拽或文件选择器上传图片，转为 base64 后随 JSON 请求体发送给后端
+- **限制**：最多 4 张图片，单张最大 5MB，支持 PNG/JPG/GIF/WebP
+- **后端处理**：后端收到 base64 图片后，应保存到 `.cc-connect/attachments/` 目录，并通过 cc-connect 的 Send API 转发给 Claude Code（含 base64 图片数据）
+
+#### 组件文件
+
+- `src/showcase/AIGeneratorDrawer.tsx` — AI 生成器抽屉组件（含图片上传）
+- `src/server/ai-generator.ts` — 服务端 AI 生成逻辑（调用 Claude CLI）
+- `tests/e2e/ai-generator.spec.ts` — E2E 测试
+
+#### 提示词与组件参考
+
+- `docs/ai-generator-prompt.md` — AI 生成器的系统提示词模板（输出格式、Schema/Data 规范）
+- `docs/amis-components.md` — Amis 可用组件列表知识库（组件属性、布局、CSS 类约定）
+
 ### Amis 组件多语言展示
 Amis 内置组件（如 InputText, Select, Form 等）每个展示 6 个区块：
 

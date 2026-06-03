@@ -1,0 +1,57 @@
+{
+  "pageType": "crudPage",
+  "pageTitle": "任务列表",
+  "className": "mission-root",
+  "api": "/api/mission-list",
+  "filterTitle": "查询条件",
+  "searchFields": [
+    {
+      "type": "input-date",
+      "props": {
+        "name": "startDate",
+        "label": "开始日期",
+        "placeholder": "请选择日期",
+        "format": "YYYY-MM-DD"
+      }
+    },
+    {
+      "type": "input-date-range",
+      "props": {
+        "name": "dateRange",
+        "label": "日期范围",
+        "placeholder": "请选择日期范围",
+        "format": "YYYY-MM-DD"
+      }
+    }
+  ],
+  "crudColumns": [
+    {
+      "name": "date",
+      "label": "日期",
+      "type": "date",
+      "format": "YYYY-MM-DD"
+    },
+    {
+      "name": "createdDate",
+      "label": "创建日期",
+      "type": "date",
+      "format": "YYYY-MM-DD"
+    },
+    {
+      "name": "title",
+      "label": "标题",
+      "type": "text"
+    },
+    {
+      "name": "status",
+      "label": "状态",
+      "type": "text"
+    },
+    {
+      "name": "description",
+      "label": "描述",
+      "type": "text"
+    }
+  ],
+  "fields": []
+}

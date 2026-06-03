@@ -2746,7 +2746,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   height: 10px !important;
 }
 
-/* + Add button — positioned tightly after existing tabs */
+/* + Add button — Amis native addable */
 .custom-closable-tabs .cxd-Tabs-addable {
   display: inline-flex !important;
   flex-direction: row !important;
@@ -2772,6 +2772,52 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   line-height: 1 !important;
   position: relative !important;
   list-style: none !important;
+}
+
+/* + Add button — custom injected (same style as Amis native addable) */
+.custom-closable-tabs .closable-custom-add {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 10px 10px 10px 20px !important;
+  gap: 10px !important;
+  width: auto !important;
+  height: 40px !important;
+  color: #394DB9 !important;
+  font-weight: 500 !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  margin-left: 0 !important;
+  border-left: none !important;
+  background: #F9FAFA !important;
+  border-right: none !important;
+  border-top: 4px solid transparent !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+  line-height: 1 !important;
+  position: relative !important;
+  list-style: none !important;
+}
+
+.custom-closable-tabs .closable-custom-add::before {
+  display: none !important;
+}
+
+.custom-closable-tabs .closable-custom-add a {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: #394DB9 !important;
+  background: transparent !important;
+  border: none !important;
+  text-decoration: none !important;
+  line-height: 1 !important;
 }
 
 /* Remove divider line — button should be tight against tabs */

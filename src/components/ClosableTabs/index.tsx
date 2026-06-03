@@ -5,9 +5,9 @@ import type { FormControlProps, RenderSchema } from 'amis';
 /**
  * ClosableTab — Amis custom renderer with `schema_format` support.
  *
- * Strategy: fully control add via click interception (not Amis native addable).
- * The MutationObserver only tracks deletions. This avoids the feedback loop where
- * Observer → setTabs → React re-render → Amis DOM update → Observer again.
+ * Custom add button injected into Amis tab bar DOM. No Amis native `addable`.
+ * Single MutationObserver handles both add button re-injection and deletion tracking.
+ * The Observer effect has NO state dependencies to prevent re-render loops.
  */
 interface ClosableTabProps extends FormControlProps {
   schema_format?: Record<string, unknown>;
@@ -31,6 +31,8 @@ function buildTabFromSchema(
   };
 }
 
+const ADD_BTN_CLASS = 'closable-custom-add';
+
 const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   const {
     schema_format,
@@ -42,12 +44,16 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     max,
     render,
     data,
-    ...restProps
   } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<Record<string, unknown>[]>([]);
-  const renderRef = useRef(0);
+  // Refs for config values used in Observer (no re-render needed)
+  const addableRef = useRef(addable);
+  const addBtnTextRef = useRef(addBtnText);
+  const maxRef = useRef(max);
+  const schemaRef = useRef(schema_format);
+  const canAddRef = useRef(false);
 
   // Build initial tabs
   const hasInitialTabs = Array.isArray(initialTabs) && initialTabs.length > 0;
@@ -57,18 +63,72 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
     hasInitialTabs ? initialTabs : defaultTabs
   );
 
-  // Keep ref in sync with state
-  tabsRef.current = tabs;
+  const handleAddRef = useRef<(() => void) | null>(null);
 
-  // MutationObserver: only track deletions (close buttons)
+  // Keep refs in sync
+  tabsRef.current = tabs;
+  addableRef.current = addable;
+  addBtnTextRef.current = addBtnText;
+  maxRef.current = max;
+  schemaRef.current = schema_format;
+  canAddRef.current = addable !== false && schema_format && (max === undefined || tabs.length < max);
+
+  // Handle add tab — fully controlled
+  const handleAdd = useCallback(() => {
+    const schema = schemaRef.current;
+    if (!schema) return;
+    const currentTabs = tabsRef.current;
+    const max = maxRef.current;
+    if (max !== undefined && currentTabs.length >= max) return;
+
+    let nextIndex = currentTabs.length + 1;
+    const existingTitles = new Set(currentTabs.map(t => t.title));
+    while (existingTitles.has(`Tab ${nextIndex}`) || existingTitles.has(`Sub Mission ${nextIndex}`)) {
+      nextIndex++;
+    }
+
+    const newTab = buildTabFromSchema(schema, nextIndex);
+    setTabs(prev => [...prev, newTab]);
+  }, []);
+  handleAddRef.current = handleAdd;
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
-    const observer = new MutationObserver(() => {
-      const tabLinks = wrapper.querySelectorAll('.cxd-Tabs-link:not(.cxd-Tabs-addable)');
-      const currentTitles = new Set<string>();
+    const syncAddBtn = () => {
+      const linksContainer = wrapper.querySelector('.custom-closable-tabs .cxd-Tabs-links');
+      if (!linksContainer) return;
 
+      const existingBtn = linksContainer.querySelector(`.${ADD_BTN_CLASS}`);
+
+      if (!canAddRef.current) {
+        // Remove button if it exists but shouldn't
+        if (existingBtn) existingBtn.remove();
+        return;
+      }
+
+      // Skip if button already exists (prevents infinite loop)
+      if (existingBtn) return;
+
+      const addBtn = document.createElement('li');
+      addBtn.className = `cxd-Tabs-link ${ADD_BTN_CLASS}`;
+      addBtn.style.cssText = 'cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:10px 10px 10px 20px;height:40px;color:#394DB9;font-weight:500;font-size:18px;background:#F9FAFA;border-top:4px solid transparent;list-style:none;margin:0;border:none;border-radius:0;box-sizing:border-box;';
+      addBtn.innerHTML = `<a style="padding:0;margin:0;font-size:18px;font-weight:500;color:#394DB9;background:transparent;border:none;text-decoration:none;line-height:1;">${addBtnTextRef.current || '+ Add Tab'}</a>`;
+      addBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        handleAddRef.current();
+      }, true);
+
+      linksContainer.appendChild(addBtn);
+    };
+
+    const observer = new MutationObserver(() => {
+      syncAddBtn();
+
+      const tabLinks = wrapper.querySelectorAll(`.custom-closable-tabs .cxd-Tabs-links > .cxd-Tabs-link:not(.${ADD_BTN_CLASS})`);
+      const currentTitles = new Set<string>();
       tabLinks.forEach(link => {
         const title = (link as HTMLElement).querySelector('a')?.textContent?.trim();
         if (title) currentTitles.add(title);
@@ -86,60 +146,15 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
       }
     });
 
+    requestAnimationFrame(syncAddBtn);
     observer.observe(wrapper, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, []);
+  }, []); // Empty deps — runs once on mount only
 
-  // Intercept Amis add button clicks: handle tab creation ourselves
-  const handleAddClick = useCallback(() => {
-    if (!schema_format) return;
-    const currentTabs = tabsRef.current;
-    if (max !== undefined && currentTabs.length >= max) return;
-
-    let nextIndex = currentTabs.length + 1;
-    const existingTitles = new Set(currentTabs.map(t => t.title));
-
-    while (existingTitles.has(`Tab ${nextIndex}`) || existingTitles.has(`Sub Mission ${nextIndex}`)) {
-      nextIndex++;
-    }
-
-    const newTab = buildTabFromSchema(schema_format, nextIndex);
-    setTabs(prev => [...prev, newTab]);
-  }, [schema_format, max]);
-
-  // Set up click interception for Amis addable button
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const addBtn = target.closest('.cxd-Tabs-addable');
-      if (!addBtn || !wrapper.contains(addBtn)) return;
-
-      // Intercept add click: prevent Amis native add, handle it ourselves
-      e.preventDefault();
-      e.stopPropagation();
-      handleAddClick();
-    };
-
-    wrapper.addEventListener('click', handleClick, true);
-    return () => wrapper.removeEventListener('click', handleClick, true);
-  }, [handleAddClick, max]);
-
-  // Force re-render key bump when tabs change (ensures Amis re-renders fully)
-  const currentKey = tabs.length;
-  const currentRenderKey = renderRef.current;
-
-  const canAdd = addable !== false && schema_format && (max === undefined || tabs.length < max);
-
-  // Build native tabs schema — addable is true so Amis renders the + button,
-  // but we intercept clicks to handle creation ourselves
   const nativeTabsSchema: RenderSchema = {
     type: 'tabs',
     className: className || 'custom-closable-tabs',
-    addable: canAdd,
-    addBtnText: addBtnText || '+ Add Tab',
+    addable: false,
     closable: closable !== false,
     tabs: tabs,
   };
@@ -153,7 +168,6 @@ const ClosableTabInner: React.FC<ClosableTabProps> = (props) => {
   );
 };
 
-// Register the renderer directly with Amis
 console.log('[ClosableTabs] Registering closable-tab renderer using registerRenderer from amis...');
 registerRenderer({
   type: 'closable-tab',

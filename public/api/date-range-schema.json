@@ -1,0 +1,69 @@
+{
+  "type": "page",
+  "title": "日期范围计算",
+  "body": {
+    "type": "wrapper",
+    "className": "form-card",
+    "body": {
+      "type": "form",
+      "mode": "horizontal",
+      "labelWidth": 120,
+      "wrapWithPanel": false,
+      "body": [
+        {
+          "type": "input-date",
+          "name": "startDate",
+          "label": "开始日期",
+          "required": true,
+          "placeholder": "请选择开始日期",
+          "format": "YYYY-MM-DD",
+          "inputFormat": "YYYY-MM-DD",
+          "maxDate": "${endDate}"
+        },
+        {
+          "type": "input-date",
+          "name": "endDate",
+          "label": "结束日期",
+          "required": true,
+          "placeholder": "请选择结束日期",
+          "format": "YYYY-MM-DD",
+          "inputFormat": "YYYY-MM-DD",
+          "validateOnChange": true,
+          "validations": {
+            "isLaterOrEqual": "${startDate}"
+          },
+          "validationErrors": {
+            "isLaterOrEqual": "结束日期不能早于开始日期"
+          }
+        },
+        {
+          "type": "divider",
+          "lineStyle": {
+            "color": "#E8E8E8"
+          }
+        },
+        {
+          "type": "input-number",
+          "name": "daysCount",
+          "label": "天数差",
+          "readOnly": true,
+          "placeholder": "自动计算",
+          "precision": 0,
+          "suffix": "天",
+          "mode": "formula",
+          "formula": {
+            "conditions": [
+              {
+                "condition": "${startDate && endDate}",
+                "value": "dateDiff(${startDate}, ${endDate}, 'days')"
+              },
+              {
+                "value": "0"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

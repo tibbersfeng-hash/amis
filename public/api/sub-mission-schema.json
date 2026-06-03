@@ -1,0 +1,221 @@
+{
+  "type": "page",
+  "className": "mission-root",
+  "data": {},
+  "body": [
+    {
+      "type": "wrapper",
+      "className": "page-header-bar",
+      "body": [
+        {
+          "type": "tpl",
+          "tpl": "<h1 class=\"page-title\">Sub Mission Rule</h1>",
+          "inline": false
+        },
+        {
+          "type": "button",
+          "label": "Return to List",
+          "className": "return-link",
+          "actionType": "link",
+          "link": "index.html?page=list"
+        }
+      ]
+    },
+    {
+      "type": "wrapper",
+      "className": "mission-body-split",
+      "body": [
+        {
+          "type": "wrapper",
+          "className": "mission-left",
+          "body": {
+            "type": "form",
+            "mode": "normal",
+            "wrapWithPanel": false,
+            "body": [
+              {
+                "type": "combo",
+                "name": "subMissions",
+                "multiple": true,
+                "removable": true,
+                "tabsMode": true,
+                "addButtonText": "+ Add",
+                "scaffold": {
+                  "title": ""
+                },
+                "items": [
+                  {
+                    "type": "wrapper",
+                    "body": [
+                      {
+                        "type": "tpl",
+                        "tpl": "<div class=\"sub-tab-bar\"><span class=\"sub-tab-btn active\">Rule Setup</span><span class=\"sub-tab-btn\">Display</span></div>",
+                        "inline": false
+                      },
+                      {
+                        "type": "wrapper",
+                        "className": "form-card",
+                        "body": [
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "subMissionType",
+                                "label": "Sub Mission Type",
+                                "required": true,
+                                "options": [
+                                  { "label": "F&B frequency", "value": "FNB_FREQUENCY" },
+                                  { "label": "F&B Spending", "value": "FNB_SPENDING" },
+                                  { "label": "Room Stay Nights", "value": "ROOM_STAY_NIGHTS" },
+                                  { "label": "Room Spending", "value": "ROOM_SPENDING" },
+                                  { "label": "Room Stay Prepaid Booking", "value": "ROOM_STAY_PREPAID" }
+                                ],
+                                "placeholder": "Please Select"
+                              },
+                              {
+                                "type": "select",
+                                "name": "businessUnit",
+                                "label": "Business Unit",
+                                "required": true,
+                                "options": [
+                                  { "label": "Room", "value": "ROOM" },
+                                  { "label": "F&B", "value": "FNB" },
+                                  { "label": "Health", "value": "HEALTH" }
+                                ],
+                                "placeholder": "Please Select"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "group",
+                            "body": [
+                              {
+                                "type": "input-number",
+                                "name": "times",
+                                "label": "Times",
+                                "placeholder": "Please input"
+                              },
+                              {
+                                "type": "input-number",
+                                "name": "minimumSpending",
+                                "label": "Minimum Spending",
+                                "placeholder": "Please input"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "select",
+                            "name": "currency",
+                            "label": "Currency",
+                            "options": [
+                              { "label": "HKD", "value": "HKD" },
+                              { "label": "USD", "value": "USD" },
+                              { "label": "CNY", "value": "CNY" }
+                            ],
+                            "placeholder": "Please Select"
+                          },
+                          {
+                            "type": "radios",
+                            "name": "registrationAward",
+                            "label": "Registration Award",
+                            "options": [
+                              { "label": "Award Points", "value": "AWARD_POINTS" },
+                              { "label": "Voucher", "value": "AWARD_VOUCHER" },
+                              { "label": "No Award", "value": "NO_AWARD" }
+                            ]
+                          },
+                          {
+                            "type": "wrapper",
+                            "className": "award-panel",
+                            "visibleOn": "this.registrationAward == 'AWARD_POINTS'",
+                            "body": [
+                              {
+                                "type": "input-text",
+                                "name": "awardPoints",
+                                "label": "Award Points",
+                                "placeholder": "Please input"
+                              },
+                              {
+                                "type": "select",
+                                "name": "billingCode",
+                                "label": "Billing Code",
+                                "options": [
+                                  { "label": "BCODE_ROOM_001", "value": "BCODE_ROOM_001" },
+                                  { "label": "BCODE_FNB_001", "value": "BCODE_FNB_001" }
+                                ],
+                                "placeholder": "Please Select"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "inventory",
+                                "label": "库存数",
+                                "placeholder": "Please input"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "transactionNote",
+                                "label": "Transaction Note",
+                                "placeholder": "Please input"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "wrapper",
+                            "className": "award-panel",
+                            "visibleOn": "this.registrationAward == 'AWARD_VOUCHER'",
+                            "body": [
+                              {
+                                "type": "select",
+                                "name": "voucherBillingCode",
+                                "label": "Billing Code",
+                                "options": [
+                                  { "label": "BCODE_ROOM_001", "value": "BCODE_ROOM_001" },
+                                  { "label": "BCODE_FNB_001", "value": "BCODE_FNB_001" }
+                                ],
+                                "placeholder": "Please Select"
+                              },
+                              {
+                                "type": "input-text",
+                                "name": "voucherInventory",
+                                "label": "库存数",
+                                "placeholder": "Please input"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "wrapper",
+          "className": "mission-right",
+          "body": {
+            "type": "wrapper",
+            "className": "preview-panel",
+            "body": [
+              {
+                "type": "tpl",
+                "tpl": "<div class=\"language-switcher\"><span class=\"language-label\">Preview Language:</span><select class=\"language-select\" onchange=\"window.__onPreviewLanguageChange && window.__onPreviewLanguageChange(this.value)\"><option value=\"zh\">中文</option><option value=\"en\">English</option></select></div>",
+                "inline": false
+              },
+              {
+                "type": "wrapper",
+                "className": "phone-card",
+                "body": { "type": "phone-mockup" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "sticky-footer"
+    }
+  ]
+}

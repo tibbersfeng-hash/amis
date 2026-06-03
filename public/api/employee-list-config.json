@@ -1,0 +1,42 @@
+{
+  "items": [
+    {
+      "employeeId": "EMP001",
+      "employeeName": "张三",
+      "department": "技术部",
+      "hireDate": "2023-03-15",
+      "status": "在职"
+    },
+    {
+      "employeeId": "EMP002",
+      "employeeName": "李四",
+      "department": "产品部",
+      "hireDate": "2022-07-01",
+      "status": "在职"
+    },
+    {
+      "employeeId": "EMP003",
+      "employeeName": "王五",
+      "department": "运营部",
+      "hireDate": "2021-11-20",
+      "status": "离职"
+    },
+    {
+      "employeeId": "EMP004",
+      "employeeName": "赵六",
+      "department": "人力资源部",
+      "hireDate": "2024-01-10",
+      "status": "在职"
+    },
+    {
+      "employeeId": "EMP005",
+      "employeeName": "孙七",
+      "department": "财务部",
+      "hireDate": "2023-09-05",
+      "status": "在职"
+    }
+  ],
+  "total": 5,
+  "page": 1,
+  "perPage": 10
+}
