@@ -27,7 +27,8 @@ function collectMultiLangFields(schema: unknown): string[] {
       if (typeof obj.name === 'string') {
         fields.push(obj.name);
       }
-      // Also include excludeCheckboxName so mergeI18nData preserves {zh, en} format
+      // Also include excludeName and excludeCheckboxName so multiLang data is preserved
+      if (typeof obj.excludeName === 'string') fields.push(obj.excludeName);
       if (typeof obj.excludeCheckboxName === 'string') fields.push(obj.excludeCheckboxName);
     }
     for (const val of Object.values(obj)) {
@@ -325,7 +326,13 @@ function mergeI18nData(
 
     const existing = lookup[field];
     if (existing && isI18nValue(existing)) {
-      merged[field] = { ...existing, [currentLang]: domVal };
+      // For boolean/array values (component state: checkbox toggle, multi-select),
+      // the change applies to ALL languages, not just the current one.
+      if (typeof domVal === 'boolean' || Array.isArray(domVal)) {
+        merged[field] = { zh: domVal, en: domVal };
+      } else {
+        merged[field] = { ...existing, [currentLang]: domVal };
+      }
     } else {
       merged[field] = { zh: domVal, en: domVal };
     }
