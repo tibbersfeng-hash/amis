@@ -1051,12 +1051,8 @@ export default defineConfig({
                 }
               }
 
-              // Pagination
+              // Return ALL items — Amis CRUD handles client-side pagination with loadDataOnce
               const total = items.length;
-              const page = Math.max(1, parseInt(urlObj.searchParams.get('page') || '1', 10));
-              const pageSize = Math.max(1, Math.min(100, parseInt(urlObj.searchParams.get('pageSize') || '10', 10)));
-              const start = (page - 1) * pageSize;
-              const pagedItems = items.slice(start, start + pageSize);
 
               res.writeHead(200, {
                 'Content-Type': 'application/json',
@@ -1064,11 +1060,8 @@ export default defineConfig({
               });
               res.end(JSON.stringify({
                 listSchema,
-                items: pagedItems,
+                items,
                 total,
-                page,
-                pageSize,
-                totalPages: Math.ceil(total / pageSize),
               }));
             } catch (err) {
               console.error(`[API List] Error: ${err.message}`);

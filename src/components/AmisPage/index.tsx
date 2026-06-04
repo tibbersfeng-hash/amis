@@ -118,7 +118,7 @@ function readDomValue(
       if (match) return match.value;
     }
 
-    // Checkbox (multi-select)
+    // Checkbox (multi-select) — only return when match found
     const cbChecked = document.querySelectorAll(
       '.cxd-Checkbox--checkbox--default.checked',
     );
@@ -129,7 +129,7 @@ function readDomValue(
         const match = opts.find((o) => o.label === label);
         if (match) values.push(match.value);
       });
-      return values.join(',');
+      if (values.length > 0) return values.join(',');
     }
 
     // Select: read display text from the value span
@@ -141,7 +141,21 @@ function readDomValue(
     }
   }
 
-  // ③ Switch
+  // ③ Date/month picker: match by placeholder containing the field name
+  const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+  for (const p of pickers) {
+    const inp = p as HTMLInputElement;
+    if (inp.value && (field === 'date' || field === 'time' || field === 'month')) {
+      // Heuristic: the field name is often part of the surrounding form item label
+      // but we can't reliably match without schema. Return first matching date-value.
+      // Best effort: if placeholder contains a clue, use it.
+      if (field === 'date' && inp.placeholder?.includes('日期')) return inp.value;
+      if (field === 'month' && inp.placeholder?.includes('月份')) return inp.value;
+      if (field === 'time' && inp.placeholder?.includes('时间')) return inp.value;
+    }
+  }
+
+  // ④ Switch
   if (field === 'switch') {
     return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
   }

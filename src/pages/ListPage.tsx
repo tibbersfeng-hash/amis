@@ -1,47 +1,154 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { render as renderAmis } from 'amis';
+import ReactDOM from 'react-dom';
 import { Loading, ErrorDisplay } from '../components/Loading';
+import { getLocale } from '../utils/locale';
+import '../components/ClosableTabs'; // Register closable-tab renderer
 
 const DEFAULT_PAGE_SIZE = 10;
-
-interface Column {
-  name: string;
-  label: string;
-  sortable?: boolean;
-}
-
-interface SearchField {
-  name: string;
-  label: string;
-  type: string;
-  placeholder?: string;
-  options?: { label: string; value: string }[];
-}
 
 interface ListSchema {
   title: string;
   dataIdPrefix?: string;
   linkTemplate?: string;
-  columns: Column[];
-  searchFields?: SearchField[];
-}
-
-interface ListItem {
-  dataId: string;
-  [key: string]: unknown;
+  columns: Array<{ name: string; label: string; sortable?: boolean }>;
+  searchFields?: Array<{
+    name: string;
+    label: string;
+    type: string;
+    placeholder?: string;
+    options?: { label: string; value: string }[];
+  }>;
 }
 
 interface ListResponse {
   listSchema: ListSchema;
-  items: ListItem[];
+  items: Array<{ dataId: string; [key: string]: unknown }>;
   total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
 }
 
 function parseParams(): { dataType: string } {
   const params = new URLSearchParams(window.location.search);
   return { dataType: params.get('dataType') || '' };
+}
+
+/**
+ * Build Amis filter (search form) from list schema searchFields
+ */
+function buildFilter(listSchema: ListSchema): Record<string, unknown> | undefined {
+  if (!listSchema.searchFields?.length) return undefined;
+
+  const body = listSchema.searchFields.map((field) => {
+    if (field.type === 'select') {
+      return {
+        type: 'select',
+        name: field.name,
+        label: field.label,
+        placeholder: field.placeholder || `请选择${field.label}`,
+        clearable: true,
+        options: field.options || [],
+      };
+    }
+    return {
+      type: 'input-text',
+      name: field.name,
+      label: field.label,
+      placeholder: field.placeholder || `请输入${field.label}`,
+      clearable: true,
+    };
+  });
+
+  return {
+    title: '',
+    mode: 'inline',
+    wrapWithPanel: true,
+    className: 'crud-search-form',
+    target: 'crud-table',
+    body,
+    actions: [
+      { type: 'submit', label: '查询', level: 'primary' },
+      { type: 'reset', label: '重置' },
+    ],
+  };
+}
+
+/**
+ * Build Amis columns from list schema columns
+ */
+function buildColumns(listSchema: ListSchema): Array<Record<string, unknown>> {
+  return listSchema.columns.map((col) => ({
+    name: col.name,
+    label: col.label,
+    sortable: col.sortable || false,
+  }));
+}
+
+/**
+ * Build Amis operation column with View/Edit/Delete buttons
+ */
+function buildOperationColumn(dataType: string, linkTemplate?: string): Record<string, unknown> {
+  return {
+    type: 'operation',
+    label: '操作',
+    fixed: 'right',
+    width: 160,
+    buttons: [
+      {
+        type: 'button',
+        label: '查看',
+        level: 'link',
+        actionType: 'link',
+        link: linkTemplate || `/remote?dataType=${dataType}&dataId=\${dataId}`,
+      },
+      {
+        type: 'button',
+        label: '编辑',
+        level: 'link',
+        actionType: 'link',
+        link: linkTemplate || `/remote?dataType=${dataType}&dataId=\${dataId}`,
+      },
+      {
+        type: 'button',
+        label: '删除',
+        level: 'link',
+        className: 'text-danger',
+        actionType: 'ajax',
+        api: `delete:/api/page/delete?dataId=\${dataId}`,
+        confirmText: '确定要删除这条记录吗？',
+      },
+    ],
+  };
+}
+
+/**
+ * Build full Amis CRUD schema from list config
+ */
+function buildCrudSchema(dataType: string, listSchema: ListSchema, items: Array<{ dataId: string; [key: string]: unknown }>, total: number): Record<string, unknown> {
+  const columns = buildColumns(listSchema);
+  const filter = buildFilter(listSchema);
+  const operationCol = buildOperationColumn(dataType, listSchema.linkTemplate);
+
+  return {
+    type: 'crud',
+    name: 'crud-table',
+    mode: 'table',
+    syncLocation: false,
+    loadDataOnce: true,
+    data: {
+      items,
+      total,
+    },
+    ...(filter ? { filter } : {}),
+    columns: [...columns, operationCol],
+    headerToolbar: ['filter-toggler'],
+    footerToolbar: [
+      { type: 'statistics', align: 'left' },
+      { type: 'pagination', align: 'center', maxButtons: 6, showPageInput: false },
+      { type: 'switch-per-page', align: 'right' },
+    ],
+    perPage: DEFAULT_PAGE_SIZE,
+    perPageAvailable: [10, 20, 50],
+  };
 }
 
 const ListPage: React.FC = () => {
@@ -52,16 +159,9 @@ const ListPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Search state (client-side filter within current page)
-  const [searchValues, setSearchValues] = useState<Record<string, string>>({});
-  // Sort state
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
-
+  // Fetch list data from API
   useEffect(() => {
     if (!dataType) {
       setError('请指定 dataType 参数，例如: /list?dataType=hotel-basic');
@@ -72,7 +172,7 @@ const ListPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/page/list?dataType=${encodeURIComponent(dataType)}&page=${page}&pageSize=${pageSize}`)
+    fetch(`/api/page/list?dataType=${encodeURIComponent(dataType)}`)
       .then(async (r) => {
         if (!r.ok) {
           const errBody = await r.json().catch(() => ({}));
@@ -88,92 +188,64 @@ const ListPage: React.FC = () => {
         setError(err.message || '加载列表失败');
         setLoading(false);
       });
-  }, [dataType, page, pageSize]);
-
-  // Reset to page 1 when dataType changes
-  useEffect(() => {
-    setPage(1);
   }, [dataType]);
 
-  // Filter + sort items (client-side on current page)
-  const displayItems = useMemo(() => {
-    if (!listData) return [];
+  // Render Amis CRUD schema when data is loaded
+  useEffect(() => {
+    if (!containerRef.current || !listData) return;
 
-    let items = [...listData.items];
+    containerRef.current.innerHTML = '';
 
-    // Apply search filters
-    const { keyword, ...fieldFilters } = searchValues;
-    for (const [field, value] of Object.entries(fieldFilters)) {
-      if (!value) continue;
-      items = items.filter((item) => {
-        const fieldVal = item[field];
-        return fieldVal !== undefined && fieldVal !== null &&
-          String(fieldVal).toLowerCase().includes(value.toLowerCase());
-      });
-    }
+    const { listSchema, items, total } = listData;
+    const amisSchema = buildCrudSchema(dataType, listSchema, items, total);
 
-    // Keyword search across text fields
-    if (keyword) {
-      const kw = keyword.toLowerCase();
-      const textFields = (listData.listSchema.columns || [])
-        .map((c) => c.name)
-        .filter(Boolean);
+    const amisScoped = renderAmis(
+      amisSchema as any,
+      {
+        data: {},
+        locale: getLocale(),
+        theme: 'cxd',
+      },
+      {
+        session: 'list-page',
+        theme: 'cxd',
+        locale: getLocale(),
+        fetcher: (api: any) => {
+          const { url, method = 'get', data, config } = api;
+          let fetchUrl = url;
+          let fetchConfig: RequestInit = {
+            method: method.toUpperCase(),
+            headers: { 'Content-Type': 'application/json' },
+            ...config,
+          };
 
-      items = items.filter((item) =>
-        textFields.some((field) => {
-          const val = item[field];
-          return val !== undefined && val !== null &&
-            String(val).toLowerCase().includes(kw);
-        })
-      );
-    }
+          if (method === 'get' && data) {
+            const params = new URLSearchParams(data as Record<string, string>);
+            fetchUrl += (fetchUrl.includes('?') ? '&' : '?') + params.toString();
+          } else if (data) {
+            fetchConfig.body = JSON.stringify(data);
+          }
 
-    // Apply sorting
-    if (sortField) {
-      items.sort((a, b) => {
-        const va = a[sortField];
-        const vb = b[sortField];
-        if (va === undefined || va === null) return 1;
-        if (vb === undefined || vb === null) return -1;
-        const cmp = typeof va === 'number'
-          ? va - Number(vb)
-          : String(va).localeCompare(String(vb));
-        return sortAsc ? cmp : -cmp;
-      });
-    }
+          return fetch(fetchUrl, fetchConfig).then((res) => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            return res.json();
+          });
+        },
+        isCancel: (value: unknown) => (value as Error)?.message === 'cancel',
+        confirm: (msg: string) => Promise.resolve(confirm(msg)),
+        notify: (type: string, msg: string) => console.log(`[amis] ${type}: ${msg}`),
+      },
+      ''
+    );
 
-    return items;
-  }, [listData, searchValues, sortField, sortAsc]);
+    ReactDOM.render(amisScoped, containerRef.current);
 
-  const handleSearchChange = useCallback((name: string, value: string) => {
-    setSearchValues((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleReset = useCallback(() => {
-    setSearchValues({});
-  }, []);
-
-  const handleSort = useCallback((field: string) => {
-    setSortField((prev) => prev === field ? field : field);
-    setSortAsc((prev) => sortField === field ? !prev : true);
-  }, [sortField]);
-
-  const handleRowClick = useCallback((item: ListItem) => {
-    const tpl = listData?.listSchema.linkTemplate || '/remote?dataType=' + dataType + '&dataId=' + item.dataId;
-    const link = tpl.replace(/\$\{dataId\}/g, item.dataId).replace(/\$\{dataType\}/g, dataType);
-    window.location.href = link;
+    return () => {
+      if (containerRef.current) {
+        ReactDOM.unmountComponentAtNode(containerRef.current);
+      }
+    };
   }, [dataType, listData]);
-
-  const goToPage = useCallback((p: number) => {
-    if (p >= 1 && p <= (listData?.totalPages || 1)) {
-      setPage(p);
-    }
-  }, [listData]);
-
-  const formatValue = (val: unknown): string => {
-    if (val === undefined || val === null) return '-';
-    return String(val);
-  };
 
   if (!dataType) {
     return <ErrorDisplay message="请指定 dataType 参数，例如: /list?dataType=hotel-basic" />;
@@ -187,145 +259,9 @@ const ListPage: React.FC = () => {
     return <ErrorDisplay message={error} />;
   }
 
-  if (!listData) {
-    return null;
-  }
-
-  const { listSchema, total, page: currentPage, totalPages } = listData;
-
-  // Generate page numbers for pagination UI
-  const pageNumbers: (number | string)[] = [];
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
-  } else {
-    pageNumbers.push(1);
-    if (currentPage > 3) pageNumbers.push('...');
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-      pageNumbers.push(i);
-    }
-    if (currentPage < totalPages - 2) pageNumbers.push('...');
-    pageNumbers.push(totalPages);
-  }
-
   return (
-    <div className="list-page-container">
-      <div className="list-page-header">
-        <h2>{listSchema.title || dataType + ' 列表'}</h2>
-      </div>
-
-      {/* Search panel */}
-      {listSchema.searchFields && listSchema.searchFields.length > 0 && (
-        <div className="list-page-search">
-          {listSchema.searchFields.map((field) => (
-            <div className="search-field" key={field.name}>
-              <label>{field.label}</label>
-              {field.type === 'select' ? (
-                <select
-                  value={searchValues[field.name] || ''}
-                  onChange={(e) => handleSearchChange(field.name, e.target.value)}
-                >
-                  <option value="">全部</option>
-                  {(field.options || []).map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  placeholder={field.placeholder || '搜索...'}
-                  value={searchValues[field.name] || ''}
-                  onChange={(e) => handleSearchChange(field.name, e.target.value)}
-                />
-              )}
-            </div>
-          ))}
-          <button className="list-page-btn list-page-btn-reset" onClick={handleReset}>
-            重置
-          </button>
-        </div>
-      )}
-
-      {/* Summary */}
-      <div className="list-page-summary">
-        共 {total} 条记录，第 {currentPage}/{totalPages} 页
-        {searchValues.keyword || Object.values(searchValues).some(v => v) ? '（已过滤）' : ''}
-      </div>
-
-      {/* Table */}
-      <div className="list-page-table-wrapper">
-        <table className="list-page-table">
-          <thead>
-            <tr>
-              {listSchema.columns.map((col) => (
-                <th
-                  key={col.name}
-                  className={col.sortable ? 'sortable' : ''}
-                  onClick={col.sortable ? () => handleSort(col.name) : undefined}
-                >
-                  {col.label}
-                  {col.sortable && sortField === col.name && (
-                    <span className="sort-indicator">{sortAsc ? ' ▲' : ' ▼'}</span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {displayItems.length === 0 ? (
-              <tr>
-                <td colSpan={listSchema.columns.length} className="empty-row">暂无数据</td>
-              </tr>
-            ) : (
-              displayItems.map((item) => (
-                <tr
-                  key={item.dataId}
-                  className="clickable-row"
-                  onClick={() => handleRowClick(item)}
-                >
-                  {listSchema.columns.map((col) => (
-                    <td key={col.name}>{formatValue(item[col.name])}</td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="list-page-pagination">
-          <button
-            className="page-btn"
-            disabled={currentPage <= 1}
-            onClick={() => goToPage(currentPage - 1)}
-          >
-            ‹ 上一页
-          </button>
-
-          {pageNumbers.map((p, i) =>
-            typeof p === 'string' ? (
-              <span key={`ellipsis-${i}`} className="page-ellipsis">...</span>
-            ) : (
-              <button
-                key={p}
-                className={`page-btn ${p === currentPage ? 'page-btn-active' : ''}`}
-                onClick={() => goToPage(p)}
-              >
-                {p}
-              </button>
-            )
-          )}
-
-          <button
-            className="page-btn"
-            disabled={currentPage >= totalPages}
-            onClick={() => goToPage(currentPage + 1)}
-          >
-            下一页 ›
-          </button>
-        </div>
-      )}
+    <div className="amis-list-page">
+      <div ref={containerRef} className="amis-scope" />
     </div>
   );
 };

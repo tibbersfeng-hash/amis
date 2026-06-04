@@ -83,10 +83,16 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
       () => loc().fill('777'),
       '777');
   });
-  test('select 渲染正常', async ({ page }) => {
-    await expect(page.locator('.cxd-Select')).toBeVisible();
-    await sw(page, 'en'); await sw(page, 'zh');
-    await expect(page.locator('.cxd-Select')).toBeVisible();
+  test('select', async ({ page }) => {
+    await assertPersist(page,
+      () => page.evaluate(() => document.querySelector('.cxd-Select-value')?.textContent?.trim() ?? ''),
+      async () => {
+        await page.locator('.cxd-Select').click();
+        await page.waitForTimeout(300);
+        await page.locator('.cxd-Select-option').filter({ hasText: '选项二' }).click();
+        await page.waitForTimeout(300);
+      },
+      '选项二');
   });
   test('radios', async ({ page }) => {
     await assertPersist(page,
@@ -106,12 +112,57 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
       },
       '关');
   });
-  test('input-date / month 渲染正常', async ({ page }) => {
-    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
-    await expect(page.getByPlaceholder('请选择月份')).toHaveValue('2026-06');
-    await sw(page, 'en'); await sw(page, 'zh');
-    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
-    await expect(page.getByPlaceholder('请选择月份')).toHaveValue('2026-06');
+  test('input-date', async ({ page }) => {
+    await assertPersist(page,
+      () => page.evaluate(() => {
+        const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+        for (const p of pickers) {
+          const inp = p as HTMLInputElement;
+          if (inp.placeholder?.includes('日期')) return inp.value;
+        }
+        return '';
+      }),
+      async () => {
+        await page.evaluate(() => {
+          const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+          for (const p of pickers) {
+            const inp = p as HTMLInputElement;
+            if (!inp.placeholder?.includes('日期')) continue;
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+            if (setter) setter.call(inp, '2026-12-25');
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+            inp.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        await page.waitForTimeout(500);
+      },
+      '2026-12-25');
+  });
+  test('input-month', async ({ page }) => {
+    await assertPersist(page,
+      () => page.evaluate(() => {
+        const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+        for (const p of pickers) {
+          const inp = p as HTMLInputElement;
+          if (inp.placeholder?.includes('月份')) return inp.value;
+        }
+        return '';
+      }),
+      async () => {
+        await page.evaluate(() => {
+          const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+          for (const p of pickers) {
+            const inp = p as HTMLInputElement;
+            if (!inp.placeholder?.includes('月份')) continue;
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+            if (setter) setter.call(inp, '2027-03');
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+            inp.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        await page.waitForTimeout(500);
+      },
+      '2027-03');
   });
   test('input-rating', async ({ page }) => {
     const init = String(await page.evaluate(() => document.querySelectorAll('.cxd-Rating-star.is-active').length));
