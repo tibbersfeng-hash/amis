@@ -102,18 +102,16 @@ function writeDomValue(field: string, value: string): void {
   }
 }
 
-/** Persist latest form values into the lookup, returning the updated lookup */
+/** Persist current DOM values into the lookup, returning the updated lookup */
 function persistToLookup(
   lookup: Record<string, Record<string, string>>,
   fields: string[],
-  lang: string,
-  latestFormData?: Record<string, unknown>
+  lang: string
 ): Record<string, Record<string, string>> {
   const updated = { ...lookup };
   for (const field of fields) {
-    const currentVal = readLatestValue(field, latestFormData);
+    const currentVal = readDomValue(field);
     if (currentVal !== undefined) {
-    // persistToLookup doesn't have rawFormData context, rely on DOM + onChange
       const prev = updated[field] || { zh: '', en: '' };
       updated[field] = { ...prev, [lang]: currentVal };
     }
@@ -135,36 +133,22 @@ function applyFromLookup(
   }
 }
 
-/** Read the latest form value — DOM first (native inputs), then Amis onChange data, then raw data fallback */
-function readLatestValue(
-  field: string,
-  latestFormData?: Record<string, unknown>,
-  rawFallback?: Record<string, unknown>
-): string | undefined {
-  const dom = readDomValue(field);
-  if (dom !== undefined) return dom;
-  if (latestFormData && field in latestFormData) {
-    const val = latestFormData[field];
-    if (val !== null && val !== undefined) return String(val);
-  }
-  if (rawFallback && field in rawFallback) {
-    const val = rawFallback[field];
-    if (val !== null && val !== undefined) return String(val);
-  }
-  return undefined;
-}
-
 /** Merge current values into {zh, en} for all multiLang fields */
 function mergeI18nData(
   rawData: Record<string, unknown>,
   lookup: Record<string, Record<string, string>>,
   fields: string[],
-  currentLang: string,
-  latestFormData?: Record<string, unknown>
+  currentLang: string
 ): Record<string, unknown> {
   const merged = { ...rawData };
   for (const field of fields) {
-    const domVal = readLatestValue(field, latestFormData, rawData);
+    // Try DOM first (input[name]), then raw form data as fallback
+    let domVal = readDomValue(field);
+    if (domVal === undefined) {
+      const raw = rawData[field];
+      if (raw === undefined || raw === null) continue;
+      domVal = String(raw);
+    }
     if (domVal === undefined) continue;
 
     const existing = lookup[field];
@@ -241,11 +225,6 @@ export const AmisPage: React.FC<AmisPageProps> = ({
     [formData, i18nFields, lookup, currentLang]
   );
 
-  // Track latest form values via Amis onChange (covers all component types)
-  const formDataRef = useRef<Record<string, unknown>>(displayData);
-  const latestFormData = (): Record<string, unknown> | undefined =>
-    Object.keys(formDataRef.current).length > 0 ? formDataRef.current : undefined;
-
   // i18n-aware fetcher — merges multiLang fields before POST
   const fetcher = useCallback(
     (api: { url: string; method?: string; data?: unknown; config?: RequestInit }, props?: unknown) => {
@@ -254,8 +233,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
           api.data as Record<string, unknown>,
           lookupRef.current,
           i18nFields,
-          langRef.current,
-          latestFormData()
+          langRef.current
         );
         api = { ...api, data: merged };
       }
@@ -268,9 +246,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const handleLanguageChange = useCallback(
     (newLang: Language) => {
       if (newLang === langRef.current) return;
-      // Persist current values (via onChange tracking) into lookup,
-      // then trigger Amis re-render with updated displayData.
-      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current, latestFormData());
+      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current);
       setLookup(updated);
       langRef.current = newLang;
       setCurrentLang(newLang);
@@ -295,10 +271,6 @@ export const AmisPage: React.FC<AmisPageProps> = ({
         data: amisData,
         locale,
         theme: 'cxd',
-        onBulkChange: (values: Record<string, unknown>) => {
-          // Track latest form values for all component types
-          formDataRef.current = { ...formDataRef.current, ...values };
-        },
       },
       {
         session: 'mission-cms',
