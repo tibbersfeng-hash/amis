@@ -50,8 +50,8 @@ export default [
         ],
       },
       {
-        marketCodes: { zh: 'GDS,BAR', en: 'GDS,BAR' },
-        rateCodes: { zh: 'RACK,BAR', en: 'RACK,BAR' },
+        marketCodes: { zh: ['GDS', 'BAR'], en: ['GDS', 'BAR'] },
+        rateCodes: { zh: ['RACK', 'BAR'], en: ['RACK', 'BAR'] },
       },
       "| 参数 | 类型 | 默认值 | 说明 |\n|------|------|--------|------|\n| `name` | `string` | - | 字段名称 |\n| `label` | `string` | - | 标签文本 |\n| `options` | `Option[]` | - | 选项列表 |\n| `multiple` | `boolean` | `false` | 是否多选 |\n| `excludeName` | `string` | - | 排除字段名 |\n| `excludeCheckboxName` | `string` | - | 排除复选框字段名 |\n| `searchable` | `boolean` | `false` | 是否可搜索 |\n| `placeholder` | `string` | - | 占位符文本 |"),
 ];
