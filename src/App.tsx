@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { usePageLoader } from './hooks/usePageLoader';
-import { AmisPage } from './components/AmisPage';
+// Lazy load AmisPage so the Amis SDK (~4MB) is only loaded when a page needs it
+const AmisPage = React.lazy(() =>
+  import('./components/AmisPage').then((m) => ({ default: m.AmisPage }))
+);
 import { Loading, ErrorDisplay } from './components/Loading';
 import { StickyFooter } from './components/StickyFooter';
 import { I18nConfigPanel } from './components/I18nConfigPanel';
@@ -10,7 +13,9 @@ import { getPageMeta } from './utils/pageRegistry';
 import { setComponentLanguage, initComponentI18n } from './utils/i18n-config';
 import type { Language } from './components/LanguageSwitcher';
 import ShowcaseApp from './showcase/ShowcaseApp';
-import RemotePage from './pages/RemotePage';
+import ListPage from './pages/ListPage';
+
+const RemotePage = React.lazy(() => import('./pages/RemotePage'));
 
 const MISSION_PAGES = ['mission', 'promotion'];
 
@@ -165,9 +170,18 @@ function App() {
     return <ShowcaseApp />;
   }
 
-  // Remote page route — fetch schema + data from API URLs
+  // Remote page route — fetch schema + data from API URLs (lazy loaded, Amis SDK loaded on demand)
   if (window.location.pathname === '/remote') {
-    return <RemotePage />;
+    return (
+      <React.Suspense fallback={<div className="lazy-loading"><Loading /></div>}>
+        <RemotePage />
+      </React.Suspense>
+    );
+  }
+
+  // List page route — show searchable table for a data type
+  if (window.location.pathname === '/list') {
+    return <ListPage />;
   }
 
   const [pageName, setPageName] = useState<string>('');
@@ -369,7 +383,7 @@ function App() {
   };
 
   return (
-    <>
+    <React.Suspense fallback={<div className="lazy-loading"><Loading /></div>}>
       <AmisPage
         schema={data.schema}
         formData={initialFormData}
@@ -383,7 +397,7 @@ function App() {
           onCancel={handleCancel}
         />
       )}
-    </>
+    </React.Suspense>
   );
 }
 

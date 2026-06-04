@@ -1,0 +1,24 @@
+{
+  "title": "酒店列表",
+  "dataIdPrefix": "hotel-",
+  "linkTemplate": "/remote?dataType=hotel-basic&dataId=${dataId}",
+  "columns": [
+    { "name": "hotelName", "label": "酒店名称", "sortable": true },
+    { "name": "hotelCode", "label": "酒店代码" },
+    { "name": "city", "label": "所在城市", "sortable": true },
+    { "name": "hotelBrand", "label": "品牌" },
+    { "name": "contactPerson", "label": "联系人" },
+    { "name": "contactPhone", "label": "联系电话" },
+    { "name": "roomCount", "label": "客房数", "sortable": true }
+  ],
+  "searchFields": [
+    { "name": "keyword", "label": "搜索", "type": "text", "placeholder": "酒店名称 / 城市 / 代码" },
+    { "name": "hotelBrand", "label": "品牌", "type": "select", "options": [
+      { "label": "香格里拉", "value": "shangri-la" },
+      { "label": "嘉里", "value": "kerry" },
+      { "label": "盛贸", "value": "traders" },
+      { "label": "JEN", "value": "jen" }
+    ]},
+    { "name": "city", "label": "城市", "type": "text" }
+  ]
+}

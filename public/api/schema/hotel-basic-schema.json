@@ -1,0 +1,105 @@
+{
+  "type": "form",
+  "title": "酒店基础信息",
+  "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
+  "mode": "horizontal",
+  "horizontal": {
+    "left": 4,
+    "right": 8
+  },
+  "body": [
+    {
+      "type": "input-text",
+      "name": "hotelName",
+      "label": "酒店名称",
+      "placeholder": "请输入酒店名称",
+      "required": true,
+      "clearable": true
+    },
+    {
+      "type": "select",
+      "name": "hotelBrand",
+      "label": "酒店品牌",
+      "placeholder": "请选择品牌",
+      "required": true,
+      "options": [
+        { "label": "香格里拉", "value": "shangri-la" },
+        { "label": "嘉里", "value": "kerry" },
+        { "label": "盛贸", "value": "traders" },
+        { "label": "JEN", "value": "jen" }
+      ],
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "hotelCode",
+      "label": "酒店代码",
+      "placeholder": "例如: CNHSN001",
+      "required": true,
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "address",
+      "label": "酒店地址",
+      "placeholder": "请输入酒店地址",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "city",
+      "label": "所在城市",
+      "placeholder": "请输入城市",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "contactPerson",
+      "label": "联系人",
+      "placeholder": "请输入联系人姓名",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "contactPhone",
+      "label": "联系电话",
+      "placeholder": "请输入联系电话",
+      "clearable": true
+    },
+    {
+      "type": "input-email",
+      "name": "contactEmail",
+      "label": "联系邮箱",
+      "placeholder": "请输入联系邮箱",
+      "clearable": true
+    },
+    {
+      "type": "input-number",
+      "name": "roomCount",
+      "label": "客房总数",
+      "placeholder": "请输入客房数量",
+      "min": 0,
+      "clearable": true
+    },
+    {
+      "type": "textarea",
+      "name": "description",
+      "label": "酒店描述",
+      "placeholder": "请输入酒店简介",
+      "minRows": 3,
+      "maxRows": 6,
+      "clearable": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "submit",
+      "label": "提交保存",
+      "level": "primary"
+    },
+    {
+      "type": "reset",
+      "label": "重置"
+    }
+  ]
+}

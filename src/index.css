@@ -254,6 +254,214 @@ body {
   background: #fff; border: 1px solid #d0d5e0; border-radius: var(--radius-sm);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; min-width: 60px; overflow: hidden; display: none;
 }
+
+/* ===== List Page ===== */
+.list-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+}
+
+.list-page-header h2 {
+  margin: 0 0 20px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.list-page-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  align-items: flex-end;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.search-field label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.search-field input,
+.search-field select {
+  padding: 6px 10px;
+  border: 1px solid #d0d5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-field input:focus,
+.search-field select:focus {
+  border-color: var(--primary, #4A5CBF);
+  box-shadow: 0 0 0 2px var(--primary-light, #F0F1FF);
+}
+
+.list-page-btn {
+  padding: 6px 16px;
+  border: 1px solid #d0d5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #fff;
+  color: #666;
+  transition: all 0.2s;
+  height: 32px;
+}
+
+.list-page-btn:hover {
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+.list-page-summary {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.list-page-table-wrapper {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.list-page-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.list-page-table th {
+  background: #f8f9fa;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.list-page-table th.sortable {
+  cursor: pointer;
+}
+
+.list-page-table th.sortable:hover {
+  background: #eef0f5;
+}
+
+.sort-indicator {
+  font-size: 11px;
+  color: var(--primary, #4A5CBF);
+}
+
+.list-page-table td {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.list-page-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.list-page-table tbody tr.clickable-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.list-page-table tbody tr.clickable-row:hover {
+  background: var(--primary-light, #F0F1FF);
+}
+
+.list-page-table .empty-row {
+  text-align: center;
+  color: #bbb;
+  padding: 40px 14px;
+  font-size: 14px;
+}
+
+/* ===== List Page Pagination ===== */
+.list-page-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 8px 0;
+}
+
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #d0d5e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #555;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-light, #F0F1FF);
+  border-color: var(--primary, #4A5CBF);
+  color: var(--primary, #4A5CBF);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-btn-active {
+  background: var(--primary, #4A5CBF);
+  border-color: var(--primary, #4A5CBF);
+  color: #fff;
+}
+
+.page-btn-active:hover {
+  background: var(--primary-hover, #3d4fb0) !important;
+  border-color: var(--primary-hover, #3d4fb0) !important;
+  color: #fff !important;
+}
+
+.page-ellipsis {
+  padding: 0 4px;
+  color: #999;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* ===== Lazy Loading Fallback ===== */
+.lazy-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
 .phone-lang-dropdown.open { display: block; }
 .phone-lang-option { padding: 6px 12px; font-size: 11px; color: #333; cursor: pointer; white-space: nowrap; }
 .phone-lang-option:hover { background: var(--primary-light); }

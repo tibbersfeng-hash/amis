@@ -1,0 +1,106 @@
+{
+  "type": "form",
+  "title": "餐厅基础信息",
+  "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
+  "mode": "horizontal",
+  "horizontal": {
+    "left": 4,
+    "right": 8
+  },
+  "body": [
+    {
+      "type": "input-text",
+      "name": "restaurantName",
+      "label": "餐厅名称",
+      "placeholder": "请输入餐厅名称",
+      "required": true,
+      "clearable": true
+    },
+    {
+      "type": "select",
+      "name": "restaurantType",
+      "label": "餐厅类型",
+      "placeholder": "请选择类型",
+      "required": true,
+      "options": [
+        { "label": "中餐厅", "value": "chinese" },
+        { "label": "西餐厅", "value": "western" },
+        { "label": "日餐厅", "value": "japanese" },
+        { "label": "自助餐厅", "value": "buffet" },
+        { "label": "大堂吧", "value": "lobby-lounge" }
+      ],
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "hotelCode",
+      "label": "所属酒店代码",
+      "placeholder": "例如: CNHSN001",
+      "required": true,
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "floor",
+      "label": "所在楼层",
+      "placeholder": "例如: 3F",
+      "clearable": true
+    },
+    {
+      "type": "input-number",
+      "name": "seatCount",
+      "label": "座位数",
+      "placeholder": "请输入座位数量",
+      "min": 0,
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "cuisine",
+      "label": "菜系",
+      "placeholder": "例如: 粤菜、川菜",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "manager",
+      "label": "餐厅经理",
+      "placeholder": "请输入经理姓名",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "managerPhone",
+      "label": "经理电话",
+      "placeholder": "请输入联系电话",
+      "clearable": true
+    },
+    {
+      "type": "input-text",
+      "name": "openTime",
+      "label": "营业时间",
+      "placeholder": "例如: 11:00-22:00",
+      "clearable": true
+    },
+    {
+      "type": "textarea",
+      "name": "description",
+      "label": "餐厅描述",
+      "placeholder": "请输入餐厅简介",
+      "minRows": 3,
+      "maxRows": 6,
+      "clearable": true
+    }
+  ],
+  "actions": [
+    {
+      "type": "submit",
+      "label": "提交保存",
+      "level": "primary"
+    },
+    {
+      "type": "reset",
+      "label": "重置"
+    }
+  ]
+}

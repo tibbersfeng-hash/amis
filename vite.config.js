@@ -999,6 +999,85 @@ export default defineConfig({
             return;
           }
 
+          // GET /api/page/list?dataType=xxx&page=1&pageSize=10 — list data items with pagination
+          if (req.method === 'GET' && req.url && req.url.startsWith('/api/page/list')) {
+            const urlObj = new URL(req.url, `http://${req.headers.host}`);
+            const dataType = urlObj.searchParams.get('dataType');
+
+            if (!dataType) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'dataType is required' }));
+              return;
+            }
+
+            try {
+              const apiDir = path.resolve(__dirname, 'public', 'api');
+              const listSchemaFile = path.join(apiDir, 'schema', `${dataType}-list.json`);
+
+              if (!fs.existsSync(listSchemaFile)) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: `List schema not found: ${dataType}-list.json` }));
+                return;
+              }
+
+              const listSchema = JSON.parse(fs.readFileSync(listSchemaFile, 'utf-8'));
+              const dataDir = path.join(apiDir, 'data');
+              const prefix = listSchema.dataIdPrefix || '';
+
+              // Scan data directory for matching files
+              const allFiles = fs.readdirSync(dataDir).filter(f => f.endsWith('-data.json'));
+              const items = [];
+
+              for (const file of allFiles) {
+                // Match by prefix if configured
+                if (prefix && !file.startsWith(prefix)) continue;
+
+                const content = JSON.parse(fs.readFileSync(path.join(dataDir, file), 'utf-8'));
+                const dataId = file.replace('-data.json', '');
+
+                // Only include fields defined in columns (to keep response lean)
+                const columnNames = (listSchema.columns || []).map((c) => c.name);
+                const filtered = { dataId };
+                for (const key of columnNames) {
+                  if (key in content) {
+                    filtered[key] = content[key];
+                  }
+                }
+
+                if (columnNames.length === 0) {
+                  items.push({ dataId, ...content });
+                } else {
+                  items.push(filtered);
+                }
+              }
+
+              // Pagination
+              const total = items.length;
+              const page = Math.max(1, parseInt(urlObj.searchParams.get('page') || '1', 10));
+              const pageSize = Math.max(1, Math.min(100, parseInt(urlObj.searchParams.get('pageSize') || '10', 10)));
+              const start = (page - 1) * pageSize;
+              const pagedItems = items.slice(start, start + pageSize);
+
+              res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+              });
+              res.end(JSON.stringify({
+                listSchema,
+                items: pagedItems,
+                total,
+                page,
+                pageSize,
+                totalPages: Math.ceil(total / pageSize),
+              }));
+            } catch (err) {
+              console.error(`[API List] Error: ${err.message}`);
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: err.message }));
+            }
+            return;
+          }
+
           // GET /api/page?dataType=xxx&dataId=xxx — load schema + data from JSON files
           if (req.method === 'GET' && req.url && req.url.startsWith('/api/page')) {
             const urlObj = new URL(req.url, `http://${req.headers.host}`);
@@ -1011,10 +1090,10 @@ export default defineConfig({
               return;
             }
 
-            // Read files dynamically from public/api/
+            // Read files dynamically from public/api/{schema,data}/
             const apiDir = path.resolve(__dirname, 'public', 'api');
-            const schemaFile = path.join(apiDir, `${dataType}-schema.json`);
-            const dataFile = path.join(apiDir, `${dataId}-data.json`);
+            const schemaFile = path.join(apiDir, 'schema', `${dataType}-schema.json`);
+            const dataFile = path.join(apiDir, 'data', `${dataId}-data.json`);
 
             try {
               // Schema file — read fresh every request (no caching)
@@ -1041,6 +1120,67 @@ export default defineConfig({
               res.writeHead(500, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: err.message }));
             }
+            return;
+          }
+
+          // POST /api/page/save — save data to JSON file (creates if not exists)
+          if (req.method === 'POST' && req.url && req.url.startsWith('/api/page/save')) {
+            const urlObj = new URL(req.url, `http://${req.headers.host}`);
+            const dataId = urlObj.searchParams.get('dataId');
+
+            if (!dataId) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'dataId is required' }));
+              return;
+            }
+
+            // Sanitize dataId to prevent path traversal
+            const sanitizedId = dataId.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            let body = '';
+            req.on('data', (chunk) => { body += chunk; });
+            req.on('end', () => {
+              try {
+                const parsed = JSON.parse(body);
+                const dataToSave = parsed.data || parsed;
+
+                // Extract form field values — Amis sends form data directly
+                const apiDir = path.resolve(__dirname, 'public', 'api');
+                const dataFile = path.join(apiDir, 'data', `${sanitizedId}-data.json`);
+
+                const isNew = !fs.existsSync(dataFile);
+
+                // Read existing data if file exists (merge mode)
+                let existingData = {};
+                if (!isNew) {
+                  existingData = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+                }
+
+                // Strip metadata fields before saving to data file
+                const { dataId: _did, dataType: _dt, ...cleanData } = dataToSave;
+
+                // Merge: new values overwrite existing, keep existing fields not in form
+                const mergedData = { ...existingData, ...cleanData };
+
+                // Write to file
+                fs.writeFileSync(dataFile, JSON.stringify(mergedData, null, 2), 'utf-8');
+
+                const ts = new Date().toISOString();
+                console.log(`[API Save ${ts}] ${isNew ? 'Created' : 'Updated'}: ${sanitizedId}-data.json`);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                  status: 0,
+                  msg: isNew ? '新增成功' : '保存成功',
+                  dataId: sanitizedId,
+                  isNew,
+                }));
+              } catch (err) {
+                console.error(`[API Save] Error: ${err.message}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message, status: 1 }));
+              }
+            });
             return;
           }
 

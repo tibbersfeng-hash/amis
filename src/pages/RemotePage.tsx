@@ -25,8 +25,8 @@ function parseRemoteParams(): { dataType: string; dataId: string } {
  * URL format: /remote?dataType=xxx&dataId=xxx
  *
  * Server reads files dynamically from public/api/:
- *   - schema: {dataType}-schema.json
- *   - data:   {dataId}-data.json
+ *   - schema: public/api/schema/{dataType}-schema.json
+ *   - data:   public/api/data/{dataId}-data.json
  *
  * Files are read fresh on every request — modify JSON files,
  * then refresh the page to see changes. No server restart needed.
@@ -47,10 +47,19 @@ const RemotePage: React.FC = () => {
     return null;
   }
 
+  // Inject dataId and dataType into form data so Amis form API templates
+  // like ${dataId} and ${dataType} resolve correctly on submit.
+  // This allows the form to POST to /api/page/save?dataId=${dataId}&dataType=${dataType}.
+  const enhancedFormData = {
+    ...data.data,
+    dataId: params.dataId,
+    dataType: params.dataType,
+  };
+
   return (
     <AmisPage
       schema={data.schema}
-      formData={data.data}
+      formData={enhancedFormData}
       locale={getLocale()}
     />
   );

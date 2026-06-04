@@ -1,0 +1,24 @@
+{
+  "title": "餐厅列表",
+  "dataIdPrefix": "restaurant-",
+  "linkTemplate": "/remote?dataType=restaurant-basic&dataId=${dataId}",
+  "columns": [
+    { "name": "restaurantName", "label": "餐厅名称", "sortable": true },
+    { "name": "restaurantType", "label": "餐厅类型" },
+    { "name": "hotelCode", "label": "所属酒店代码" },
+    { "name": "floor", "label": "所在楼层" },
+    { "name": "cuisine", "label": "菜系" },
+    { "name": "seatCount", "label": "座位数", "sortable": true },
+    { "name": "openTime", "label": "营业时间" }
+  ],
+  "searchFields": [
+    { "name": "keyword", "label": "搜索", "type": "text", "placeholder": "餐厅名称 / 菜系" },
+    { "name": "restaurantType", "label": "类型", "type": "select", "options": [
+      { "label": "中餐厅", "value": "chinese" },
+      { "label": "西餐厅", "value": "western" },
+      { "label": "日餐厅", "value": "japanese" },
+      { "label": "自助餐厅", "value": "buffet" },
+      { "label": "大堂吧", "value": "lobby-lounge" }
+    ]}
+  ]
+}

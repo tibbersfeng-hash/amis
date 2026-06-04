@@ -8,45 +8,109 @@
 
 项目是一个**通用 CMS 后台配置系统**，通过 JSON 配置驱动页面功能，而非硬编码。
 
-**核心原则：配置即页面**。任何功能页面的结构、字段、验证规则都由 JSON 配置文件定义，代码层只负责渲染引擎和数据流。
-
-### 统一单页架构
-
-**React + Vite 项目，通过 URL 参数确定加载哪个页面**。所有页面细节由 Amis JSON schema 定义，React 组件负责渲染引擎和数据流。
+**核心原则：配置即页面，零代码改动即可支持新数据类型**。新增任意业务类型（酒店、餐厅、会议室等），只需添加 JSON 文件，不修改任何 TypeScript/React 代码。
 
 ```
-URL 参数 → 确定页面名称 (?page=xxx)
+新增类型 = 2个 Schema 文件 + N个 Data 文件
+├── schema/{type}-schema.json   ← 详情页表单定义（必须）
+├── schema/{type}-list.json     ← 列表页展示配置（可选）
+└── data/{id}-data.json         ← 业务数据（0到N个）
+```
+
+**无需：** 新建组件、注册路由、修改后端、加 TypeScript 类型。
+
+### 双路由架构
+
+**React + Vite 项目，通过 `pathname` + 参数确定加载哪个页面**。支持两套渲染路径：
+
+```
+/list?dataType=xxx          → ListPage（通用列表页，纯 React）
+/remote?dataType=xxx&id=xxx → RemotePage → AmisPage（详情/编辑页，Amis 引擎）
+```
+
+**Detail 流：**
+```
+/remote?dataType=hotel-basic&dataId=hotel-beijing-shangrila
     ↓
-动态加载 {name}-schema.json + {name}-config.json
+GET /api/page?dataType=xxx&dataId=xxx
     ↓
-App.tsx → usePageLoader → extractFormData → formData
+服务端读取 schema/{type}-schema.json + data/{id}-data.json
     ↓
-AmisPage → render(schema, {data: formData}) from amis
+RemotePage → enhancedFormData（注入 dataId/dataType）
+    ↓
+AmisPage → amis.render(schema, { data }) → 自动回显
 ```
 
-### URL 路由规则
-
-通过 URL 参数决定渲染哪个功能页面：
-
-| URL | 功能页面 | 加载配置 |
-|-----|---------|---------|
-| `?page=list` | 任务列表页 | `api/list-schema.json` + `api/list-config.json` |
-| `?page=mission` | 任务规则配置页 | `api/mission-schema.json` + `api/mission-config.json` |
-| `?page=<name>` | 任意功能页 | `api/<name>-schema.json` + `api/<name>-config.json` |
-
+**List 流：**
 ```
-?mode=view    → 只读查看模式
-?mode=edit    → 编辑模式（默认）
-?id=<id>      → 记录 ID（详情页用）
+/list?dataType=hotel-basic
+    ↓
+GET /api/page/list?dataType=xxx
+    ↓
+服务端读取 schema/{type}-list.json（定义列+搜索字段）
+    ↓
+按 dataIdPrefix 扫描 data/ 目录匹配数据文件
+    ↓
+ListPage 渲染表格（搜索/排序/分页/跳转详情）
 ```
 
-### 配置命名约定
+### 一行代码不动，加新类型
 
-每个功能页面对应一对 JSON 文件：
-- `<name>-schema.json` — 页面结构（Amis JSON Schema），定义字段、布局、验证
-- `<name>-config.json` — 页面数据（表单初始值、业务数据）
+只需在 `public/api/` 下创建文件：
 
-**文件命名规则**：URL 参数 `?page=<name>` 直接对应 `api/<name>-schema.json` 和 `api/<name>-config.json`。
+```
+public/api/
+├── schema/
+│   ├── {type}-schema.json    ← Amis 表单 schema（定义字段、校验、布局）
+│   └── {type}-list.json      ← 列表配置（定义列、搜索字段、dataId 前缀）
+└── data/
+    └── {dataId}-data.json    ← 业务数据（提交保存自动创建/合并）
+```
+
+| 文件 | 必须？ | 说明 |
+|------|--------|------|
+| `schema/{type}-schema.json` | ✅ 是 | 表单结构，api 必须含 `${dataId}` 和 `${dataType}` 模板 |
+| `schema/{type}-list.json` | ❌ 否 | 列表配置，缺省则列表页 404 |
+| `data/{id}-data.json` | ❌ 否 | 业务数据，不存在时表单为空（新建），提交后自动创建 |
+
+**Schema API 约定：**
+```json
+{
+  "type": "form",
+  "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
+  ...
+}
+```
+
+**List schema 格式：**
+```json
+{
+  "title": "列表标题",
+  "dataIdPrefix": "type-",
+  "linkTemplate": "/remote?dataType=xxx&dataId=${dataId}",
+  "columns": [
+    { "name": "fieldName", "label": "列名", "sortable": true }
+  ],
+  "searchFields": [
+    { "name": "keyword", "label": "搜索", "type": "text" },
+    { "name": "fieldName", "label": "过滤", "type": "select", "options": [...] }
+  ]
+}
+```
+
+### 后端 API
+
+所有接口在 `vite.config.js` 中间件中定义，读写 JSON 文件：
+
+| 接口 | 方法 | 用途 |
+|------|------|------|
+| `/api/page?dataType=xxx&dataId=xxx` | GET | 读取 schema + data，返回 `{schema, data}` |
+| `/api/page/save?dataId=xxx` | POST | 保存到 `data/{id}.json`，合并模式 |
+| `/api/page/list?dataType=xxx` | GET | 返回 `{listSchema, items, total}` |
+
+- 文件每请求读取，修改 JSON 后刷新即生效
+- POST save 自动剔除 `dataId`/`dataType` 元数据字段
+- 列表按 `dataIdPrefix` 前缀匹配数据文件
 
 ## 样式策略：统一 CSS 覆盖系统
 
@@ -555,10 +619,11 @@ config.missionRule.ruleSetup.missionCode → formData.missionCode
 
 ## 开发规则
 
-1. **新增页面**：创建 `{name}-schema.json` + `{name}-config.json` 放在 `public/api/`，无需新建组件
-2. **样式修改**：只修改 `src/index.css`，不改动 JSON 中的样式属性
-3. **字段增删**：只修改 schema.json，在字段上添加/修改 `sourcePath` 即可，数据自动从 config.json 提取
-4. **测试优先**：所有改动先更新 E2E 测试，再改代码
-5. **Figma 对齐**：所有视觉变更以 Figma 导出文件为唯一标准
-6. **禁止新建 HTML 页面**：所有页面功能都在 React 中通过 Amis JSON schema 驱动
-7. **构建注意**：`public/` 下的文件会自动复制到 `dist/`，`api/` 目录保持静态服务
+1. **零代码改动约束**：所有优化、功能扩展不得要求新增类型时修改 TypeScript/React 代码。方案如不满足此约束，必须重新设计。例外：新增底层渲染能力（新组件类型、新交互模式）可改代码，但必须确保已有类型的 JSON 配置继续零代码工作。
+2. **新增类型**：在 `public/api/schema/` 下创建 `{type}-schema.json`（+ 可选 `{type}-list.json`），在 `public/api/data/` 下创建 `{id}-data.json`，无需新建组件
+3. **样式修改**：只修改 `src/index.css`，不改动 JSON 中的样式属性
+4. **字段增删**：只修改 schema.json，无需改代码
+5. **测试优先**：所有改动先更新 E2E 测试，再改代码
+6. **Figma 对齐**：所有视觉变更以 Figma 导出文件为唯一标准
+7. **禁止新建 HTML 页面**：所有页面功能都在 React 中通过路由 + JSON 驱动
+8. **构建注意**：`public/` 下的文件会自动复制到 `dist/`，`api/` 目录保持静态服务

@@ -14,8 +14,8 @@ export interface UseRemotePageOptions {
  * Fetches schema and data from the single /api/page endpoint.
  *
  * Server reads JSON files dynamically from public/api/:
- *   - schema: {dataType}-schema.json
- *   - data:   {dataId}-data.json
+ *   - schema: public/api/schema/{dataType}-schema.json
+ *   - data:   public/api/data/{dataId}-data.json
  *
  * Files are read fresh on every request — no restart needed.
  *
@@ -26,7 +26,7 @@ export interface UseRemotePageOptions {
  *   });
  *
  * → GET /api/page?dataType=remote&dataId=remote
- * → reads public/api/remote-schema.json + remote-data.json
+ * → reads public/api/schema/remote-schema.json + public/api/data/remote-data.json
  */
 export function useRemotePage({ dataType, dataId }: UseRemotePageOptions) {
   const [data, setData] = useState<RemotePageData | null>(null);
