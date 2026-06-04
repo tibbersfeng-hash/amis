@@ -10,9 +10,9 @@ import type { Language } from '../LanguageSwitcher';
 
 // ── i18n helpers ──────────────────────────────────────────────
 
-/** Check if a value is a {zh, en} multi-language object */
+/** Check if a value is a {zh, en} multi-language object (at minimum has a zh key) */
 function isI18nValue(val: unknown): val is Record<string, string> {
-  return !!val && typeof val === 'object' && 'zh' in (val as object) && Object.keys(val as object).length >= 2;
+  return !!val && typeof val === 'object' && 'zh' in (val as object);
 }
 
 /** Recursively collect all fields with "multiLang: true" from an Amis schema */
@@ -55,7 +55,8 @@ function flattenData(
   for (const field of fields) {
     const orig = lookup[field];
     if (orig) {
-      result[field] = orig[lang] || orig['zh'];
+      // Use target lang value; if the key doesn't exist, the field shows empty
+      result[field] = lang in orig ? orig[lang] : undefined;
     }
   }
   return result;
