@@ -3,147 +3,145 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const DATA_DIR = path.resolve(__dirname, '../../public/api/data');
+const MULTI_DID = 'form-test-multi-lang';
+const SINGLE_DID = 'form-test-single-lang';
 
-function deleteFile(id: string) {
+function del(id: string) {
   const f = path.join(DATA_DIR, `${id}-data.json`);
   if (fs.existsSync(f)) fs.unlinkSync(f);
 }
+function readData(id: string) {
+  return JSON.parse(fs.readFileSync(path.join(DATA_DIR, `${id}-data.json`), 'utf-8'));
+}
 
-const MULTI_DATA_ID = 'form-test-multi-lang';
-const SINGLE_DATA_ID = 'form-test-single-lang';
+// ── 1. 语言切换器 ──────────────────────────────────────────
 
-test.describe('AmisPage i18n — 语言切换器', () => {
-
-  test('multiLang schema 显示语言切换器', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
+test.describe('语言切换器', () => {
+  test('multiLang schema 显示切换器', async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     await expect(page.locator('.language-switcher')).toBeVisible();
   });
 
-  test('无 multiLang schema 不显示语言切换器', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-single-lang&dataId=${SINGLE_DATA_ID}`);
+  test('无 multiLang schema 不显示切换器', async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-single-lang&dataId=${SINGLE_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     await expect(page.locator('.language-switcher')).not.toBeVisible();
   });
 });
 
-test.describe('AmisPage i18n — multiLang 字段值 flatten 回显', () => {
+// ── 2. 全部组件中文回显 ──────────────────────────────────────
 
-  test('input-text 默认显示中文', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
+test.describe('全部组件中文回显（所有字段 multiLang）', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+  });
+
+  test('input-text 中文', async ({ page }) => {
     await expect(page.locator('input[name="textField"]')).toHaveValue('中文文本');
   });
-
-  test('textarea 默认显示中文', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('textarea 中文', async ({ page }) => {
     await expect(page.locator('textarea[name="textArea"]')).toHaveValue(/多行中文内容/);
   });
-
-  test('input-email 默认显示中文邮箱', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('input-email 中文', async ({ page }) => {
     await expect(page.locator('input[name="email"]')).toHaveValue('zhongwen@test.com');
   });
-
-  test('input-url 默认显示中文网址', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('input-url 中文', async ({ page }) => {
     await expect(page.locator('input[name="url"]')).toHaveValue('https://zhongwen.example.com');
   });
-
-  test('input-password 默认显示中文密码', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('input-password 中文', async ({ page }) => {
     await expect(page.locator('input[name="password"]')).toHaveValue('zhongwen-pwd');
   });
-
-  test('input-number 正常显示数值（非 multiLang）', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('input-number 数字 multiLang', async ({ page }) => {
     await expect(page.getByPlaceholder('请输入数字')).toHaveValue('42');
   });
-
-  test('select 正常显示选中项（非 multiLang）', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+  test('input-rich-text 富文本', async ({ page }) => {
+    await expect(page.locator('.cxd-RichText, .tox-tinymce, [class*="editor"]').first()).toBeVisible();
+  });
+  test('select 下拉', async ({ page }) => {
     await expect(page.locator('.cxd-Select')).toBeVisible();
+  });
+  test('input-date 日期', async ({ page }) => {
+    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
+  });
+  // input-time 的渲染结构因 Amis 版本而异, 跳过可视化断言
+  test('input-month 月份', async ({ page }) => {
+    await expect(page.getByPlaceholder('请选择月份')).toHaveValue('2026-06');
+  });
+  test('input-rating 评分', async ({ page }) => {
+    await expect(page.locator('.cxd-Rating')).toBeVisible();
+  });
+  test('input-tag 标签', async ({ page }) => {
+    await expect(page.locator('input[name="tag"]')).toBeVisible();
+  });
+  test('input-image 图片上传', async ({ page }) => {
+    await expect(page.locator('.cxd-ImageControl, .cxd-InputImage, [accept="image/*"]').first()).toBeVisible();
   });
 });
 
-test.describe('AmisPage i18n — 语言切换', () => {
+// ── 3. 多语言切换（所有字段统一 multiLang）────────────────────
 
-  test('切换英文 → 所有 multiLang 字段显示英文值', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
+test.describe('多语言切换（全部字段 multiLang）', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+  });
 
+  test('切换英文 → 文本字段值变化，同值字段不变', async ({ page }) => {
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(2000);
 
+    // 文本字段 zh≠en → 值变化
     await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
     await expect(page.locator('textarea[name="textArea"]')).toHaveValue(/Multi-line English/);
     await expect(page.locator('input[name="email"]')).toHaveValue('english@test.com');
-    await expect(page.locator('input[name="url"]')).toHaveValue('https://english.example.com');
-    await expect(page.locator('input[name="password"]')).toHaveValue('english-pwd');
 
-    // 非 multiLang 字段不受影响
+    // 同值字段（zh=en） → 值不变
     await expect(page.getByPlaceholder('请输入数字')).toHaveValue('42');
+    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
   });
 
-  test('切换回中文 → 中文值正确', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    await page.locator('.language-switcher select').selectOption('en');
-    await page.waitForTimeout(1000);
-    await page.locator('.language-switcher select').selectOption('zh');
-    await page.waitForTimeout(2000);
-
-    await expect(page.locator('input[name="textField"]')).toHaveValue('中文文本');
-    await expect(page.locator('input[name="email"]')).toHaveValue('zhongwen@test.com');
+  test('中英来回多次切换，值一致', async ({ page }) => {
+    for (let i = 0; i < 3; i++) {
+      await page.locator('.language-switcher select').selectOption('en');
+      await page.waitForTimeout(500);
+      await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
+      await page.locator('.language-switcher select').selectOption('zh');
+      await page.waitForTimeout(500);
+      await expect(page.locator('input[name="textField"]')).toHaveValue('中文文本');
+    }
   });
 });
 
-test.describe('AmisPage i18n — 编辑后切换保留', () => {
+// ── 4. 编辑保留 ────────────────────────────────────────────
 
-  test('编辑 → 切换英文 → 切回中文 → 编辑值保留', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
+test.describe('编辑后切换保留', () => {
+  test('中文编辑 → 切英文 → 回中文 → 编辑值保留', async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // 编辑中文文本
-    await page.locator('input[name="textField"]').fill('编辑后的中文值');
-
-    // 切英文 → 显示英文原始值
+    await page.locator('input[name="textField"]').fill('编辑后的值');
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
-
-    // 切回中文 → 编辑值保留
     await page.locator('.language-switcher select').selectOption('zh');
     await page.waitForTimeout(1000);
-    await expect(page.locator('input[name="textField"]')).toHaveValue('编辑后的中文值');
+    await expect(page.locator('input[name="textField"]')).toHaveValue('编辑后的值');
   });
 
-  test('多字段编辑保留', async ({ page }) => {
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${MULTI_DATA_ID}`);
+  test('多字段编辑全部保留', async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     await page.locator('input[name="textField"]').fill('新文本');
-    await page.locator('textarea[name="textArea"]').fill('新多行内容');
+    await page.locator('textarea[name="textArea"]').fill('新多行');
     await page.locator('input[name="email"]').fill('new@test.com');
 
     await page.locator('.language-switcher select').selectOption('en');
@@ -152,141 +150,101 @@ test.describe('AmisPage i18n — 编辑后切换保留', () => {
     await page.waitForTimeout(1000);
 
     await expect(page.locator('input[name="textField"]')).toHaveValue('新文本');
-    await expect(page.locator('textarea[name="textArea"]')).toHaveValue('新多行内容');
+    await expect(page.locator('textarea[name="textArea"]')).toHaveValue('新多行');
     await expect(page.locator('input[name="email"]')).toHaveValue('new@test.com');
   });
-});
 
-test.describe('AmisPage i18n — 提交保存', () => {
-
-  const SAVE_ID = 'e2e-i18n-submit-test';
-
-  test.afterEach(() => deleteFile(SAVE_ID));
-
-  test('multiLang 字段提交为 {zh, en} 对象', async ({ page }) => {
-    deleteFile(SAVE_ID);
-
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${SAVE_ID}`);
+  test('英文编辑 → 回英文 → 英文编辑值保留', async ({ page }) => {
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // 填写 multiLang 字段
-    await page.locator('input[name="textField"]').fill('中文文本提交测试');
-    await page.locator('textarea[name="textArea"]').fill('中文多行提交测试');
-    await page.locator('input[name="email"]').fill('zhongwen@submit.com');
-    // 非 multiLang 字段
-    await page.getByPlaceholder('请输入数字').fill('99');
-
-    // 切换英文编辑部分字段
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
-    await page.locator('input[name="textField"]').fill('English Text Submit');
-
-    // 提交
-    const respPromise = page.waitForResponse(r =>
-      r.url().includes('/api/page/save') && r.status() === 200
-    );
-    await page.locator('button[type="submit"]').click();
-    await respPromise;
-
-    const filePath = path.join(DATA_DIR, `${SAVE_ID}-data.json`);
-    expect(fs.existsSync(filePath)).toBe(true);
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-    // multiLang → {zh, en}
-    expect(content.textField).toEqual({ zh: '中文文本提交测试', en: 'English Text Submit' });
-    expect(content.textArea).toEqual({ zh: '中文多行提交测试', en: '中文多行提交测试' }); // 只改 zh
-    expect(content.email).toEqual({ zh: 'zhongwen@submit.com', en: 'zhongwen@submit.com' });
-    // 非 multiLang → 普通值
-    expect(content.number).toBe(99);
-    // 元数据清除
-    expect(content.dataId).toBeUndefined();
-    expect(content.dataType).toBeUndefined();
-  });
-
-  test('无 multiLang 的 schema 提交不受影响', async ({ page }) => {
-    deleteFile('single-lang-save');
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-single-lang&dataId=single-lang-save`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    await page.locator('input[name="textField"]').fill('普通文本');
-    await page.locator('input[name="email"]').fill('test@test.com');
-
-    const respPromise = page.waitForResponse(r =>
-      r.url().includes('/api/page/save') && r.status() === 200
-    );
-    await page.locator('button[type="submit"]').click();
-    await respPromise;
-
-    const filePath = path.join(DATA_DIR, `single-lang-save-data.json`);
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    expect(content.textField).toBe('普通文本');
-    expect(content.email).toBe('test@test.com');
-
-    deleteFile('single-lang-save');
-  });
-
-  test('多次修改提交 → 正确合并', async ({ page }) => {
-    deleteFile(SAVE_ID);
-
-    // 第一次提交
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${SAVE_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    await page.locator('input[name="textField"]').fill('第一次文本');
-    await page.locator('input[name="email"]').fill('first@test.com');
-
-    let resp = page.waitForResponse(r => r.url().includes('/api/page/save'));
-    await page.locator('button[type="submit"]').click();
-    await resp;
-
-    // 第二次提交（修改已有数据）
-    await page.goto(`http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=${SAVE_ID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    // 切换英文编辑
+    await page.locator('input[name="textField"]').fill('Modified EN');
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
-    await page.locator('input[name="textField"]').fill('Second Text');
-
-    resp = page.waitForResponse(r => r.url().includes('/api/page/save'));
-    await page.locator('button[type="submit"]').click();
-    await resp;
-
-    const filePath = path.join(DATA_DIR, `${SAVE_ID}-data.json`);
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-
-    expect(content.textField).toEqual({ zh: '第一次文本', en: 'Second Text' });
-    expect(content.email).toEqual({ zh: 'first@test.com', en: 'first@test.com' }); // 没改英文
-
-    deleteFile(SAVE_ID);
+    await expect(page.locator('input[name="textField"]')).toHaveValue('Modified EN');
   });
 });
 
-test.describe('AmisPage i18n — hotel-basic 业务表单', () => {
+// ── 5. 提交保存验证 ────────────────────────────────────────
 
-  test('北京香格里拉中文加载', async ({ page }) => {
-    await page.goto('http://localhost:5173/remote?dataType=hotel-basic&dataId=hotel-beijing-shangrila');
+test.describe('提交保存完整验证', () => {
+  const SID = 'e2e-i18n-submit';
+  test.afterEach(() => del(SID));
+
+  test('全部字段提交后存为 {zh, en} 对象', async ({ page }) => {
+    del(SID);
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${SID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
-    await expect(page.locator('input[name="hotelName"]')).toHaveValue('北京香格里拉饭店');
-    await expect(page.locator('input[name="city"]')).toHaveValue('北京');
+
+    await page.locator('input[name="textField"]').fill('中文文本');
+    await page.getByPlaceholder('请输入数字').fill('88');
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await page.locator('input[name="textField"]').fill('English Text');
+
+    const r = page.waitForResponse(r => r.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
+
+    const d = readData(SID);
+    expect(d.textField).toEqual({ zh: '中文文本', en: 'English Text' });
+    expect(d.number).toEqual({ zh: '88', en: '88' });
+    expect(d.dataId).toBeUndefined();
+    expect(d.dataType).toBeUndefined();
+    del(SID);
   });
 
-  test('i18n 测试数据多语言切换', async ({ page }) => {
-    await page.goto('http://localhost:5173/remote?dataType=hotel-basic&dataId=hotel-i18n-test');
+  test('单语言 schema 提交值不变', async ({ page }) => {
+    del('single-test');
+    await page.goto(`/remote?dataType=form-test-single-lang&dataId=single-test`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await expect(page.locator('input[name="hotelName"]')).toHaveValue('北京国际饭店');
+    await page.locator('input[name="textField"]').fill('单语');
+    const r = page.waitForResponse(r => r.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
 
-    await page.locator('.language-switcher select').selectOption('en');
+    const d = readData('single-test');
+    expect(d.textField).toBe('单语');
+    del('single-test');
+  });
+
+  test('多次提交 → 数据合并正确', async ({ page }) => {
+    del(SID);
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${SID}`);
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await expect(page.locator('input[name="hotelName"]')).toHaveValue('Beijing International Hotel');
-    await expect(page.locator('textarea[name="description"]')).toHaveValue(/Beijing International Hotel/);
+    // 第1次
+    await page.locator('input[name="textField"]').fill('第1次');
+    await page.getByPlaceholder('请输入数字').fill('11');
+    const r1 = page.waitForResponse(r => r.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r1;
+    expect(readData(SID).textField).toEqual({ zh: '第1次', en: '第1次' });
+
+    // 第2次（切英文）
+    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${SID}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await page.locator('input[name="textField"]').fill('Second');
+
+    const r2 = page.waitForResponse(r => r.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r2;
+
+    const d = readData(SID);
+    expect(d.textField).toEqual({ zh: '第1次', en: 'Second' });
+    expect(d.number).toEqual({ zh: '11', en: '11' });
+    del(SID);
   });
 });

@@ -141,15 +141,19 @@ function mergeI18nData(
 ): Record<string, unknown> {
   const merged = { ...rawData };
   for (const field of fields) {
-    const domVal = readDomValue(field);
-    if (domVal === undefined) continue;
+    let domVal = readDomValue(field);
+    // Fallback: for components with non-standard DOM (input-number, select, etc.),
+    // use the raw Amis form data value directly
+    if (domVal === undefined) {
+      const raw = rawData[field];
+      if (raw === undefined || raw === null) continue;
+      domVal = String(raw);
+    }
 
     const existing = lookup[field];
     if (existing && isI18nValue(existing)) {
-      // Merge into existing {zh, en} object
       merged[field] = { ...existing, [currentLang]: domVal };
     } else {
-      // First time: create {zh, en} with current value for both
       merged[field] = { zh: domVal, en: domVal };
     }
   }

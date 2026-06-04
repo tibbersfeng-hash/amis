@@ -6,11 +6,12 @@
   "horizontal": { "left": 4, "right": 8 },
   "body": [
     { "type": "input-text", "name": "textField", "label": "单行文本", "placeholder": "请输入文本", "clearable": true },
-    { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "minRows": 2 },
+    { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "minRows": 3 },
     { "type": "input-email", "name": "email", "label": "邮箱", "placeholder": "请输入邮箱", "clearable": true },
     { "type": "input-url", "name": "url", "label": "网址", "placeholder": "https://", "clearable": true },
     { "type": "input-password", "name": "password", "label": "密码" },
     { "type": "input-number", "name": "number", "label": "数字", "placeholder": "请输入数字", "min": 0 },
+    { "type": "input-rich-text", "name": "richText", "label": "富文本", "language": "zh" },
     { "type": "select", "name": "select", "label": "下拉选择", "options": [
       { "label": "选项一", "value": "opt1" },
       { "label": "选项二", "value": "opt2" }
@@ -26,9 +27,11 @@
     { "type": "switch", "name": "switch", "label": "开关" },
     { "type": "input-date", "name": "date", "label": "日期" },
     { "type": "input-time", "name": "time", "label": "时间" },
+    { "type": "input-month", "name": "month", "label": "月份" },
     { "type": "input-color", "name": "color", "label": "颜色" },
     { "type": "input-rating", "name": "rating", "label": "评分", "count": 5 },
-    { "type": "input-tag", "name": "tag", "label": "标签", "placeholder": "输入标签按回车" }
+    { "type": "input-tag", "name": "tag", "label": "标签", "placeholder": "输入标签按回车" },
+    { "type": "input-image", "name": "image", "label": "图片上传", "receiver": "/api/upload", "accept": "image/*" }
   ],
   "actions": [
     { "type": "submit", "label": "提交保存", "level": "primary" },
