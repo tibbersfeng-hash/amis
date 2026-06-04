@@ -134,9 +134,9 @@ function buildCrudSchema(dataType: string, listSchema: ListSchema, items: Array<
     mode: 'table',
     syncLocation: false,
     loadDataOnce: true,
-    data: {
-      items,
-      total,
+    api: {
+      method: 'get',
+      url: '/api/crud-placeholder',
     },
     ...(filter ? { filter } : {}),
     columns: [...columns, operationCol],
@@ -192,12 +192,15 @@ const ListPage: React.FC = () => {
 
   // Render Amis CRUD schema when data is loaded
   useEffect(() => {
+    console.log('[ListPage] useEffect fired', { hasContainer: !!containerRef.current, hasData: !!listData });
     if (!containerRef.current || !listData) return;
 
     containerRef.current.innerHTML = '';
 
     const { listSchema, items, total } = listData;
+    console.log('[ListPage] Building CRUD schema with', items.length, 'items');
     const amisSchema = buildCrudSchema(dataType, listSchema, items, total);
+    console.log('[ListPage] CRUD schema:', JSON.stringify(amisSchema).slice(0, 200));
 
     const amisScoped = renderAmis(
       amisSchema as any,
@@ -212,6 +215,12 @@ const ListPage: React.FC = () => {
         locale: getLocale(),
         fetcher: (api: any) => {
           const { url, method = 'get', data, config } = api;
+
+          // Return list data for CRUD's loadDataOnce
+          if (url === '/api/crud-placeholder') {
+            return Promise.resolve({ status: 0, data: { items, total } });
+          }
+
           let fetchUrl = url;
           let fetchConfig: RequestInit = {
             method: method.toUpperCase(),

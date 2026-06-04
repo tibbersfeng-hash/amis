@@ -99,6 +99,10 @@ function readDomValue(
   field: string,
   fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
 ): string | undefined {
+  // Special fields where input[name] doesn't represent the actual value
+  if (field === 'tag') return undefined;             // input is for new tags, not the values
+  if (field === 'image') return undefined;            // upload widget, no text value
+
   // ① Native input/textarea with name attribute
   const input = document.querySelector(
     `input[name="${field}"], textarea[name="${field}"]`,
@@ -108,20 +112,16 @@ function readDomValue(
   // ② Label→value mapping for select/radio/checkbox
   const opts = fieldOptions?.[field];
   if (opts?.length) {
-    // Radio / checkbox: find checked label → match label text → return value
-    const radioChecked = document.querySelector(
-      '.cxd-Checkbox--radio--default.checked',
-    );
+    // Radio: find checked label → match label text → return value
+    const radioChecked = document.querySelector('.cxd-Checkbox--radio--default.checked');
     if (radioChecked) {
       const label = radioChecked.textContent?.trim() ?? '';
       const match = opts.find((o) => o.label === label);
       if (match) return match.value;
     }
 
-    // Checkbox (multi-select) — only return when match found
-    const cbChecked = document.querySelectorAll(
-      '.cxd-Checkbox--checkbox--default.checked',
-    );
+    // Checkbox: only return when match found (avoid returning '' for other fields)
+    const cbChecked = document.querySelectorAll('.cxd-Checkbox--checkbox--default.checked');
     if (cbChecked.length > 0) {
       const values: string[] = [];
       cbChecked.forEach((el) => {
@@ -141,21 +141,24 @@ function readDomValue(
     }
   }
 
-  // ③ Date/month picker: match by placeholder containing the field name
+  // ③ Date / time / month pickers: match by placeholder
   const pickers = document.querySelectorAll('.cxd-DatePicker-input');
   for (const p of pickers) {
     const inp = p as HTMLInputElement;
-    if (inp.value && (field === 'date' || field === 'time' || field === 'month')) {
-      // Heuristic: the field name is often part of the surrounding form item label
-      // but we can't reliably match without schema. Return first matching date-value.
-      // Best effort: if placeholder contains a clue, use it.
-      if (field === 'date' && inp.placeholder?.includes('日期')) return inp.value;
-      if (field === 'month' && inp.placeholder?.includes('月份')) return inp.value;
-      if (field === 'time' && inp.placeholder?.includes('时间')) return inp.value;
-    }
+    if (!inp.value) continue;
+    if (field === 'date' && inp.placeholder?.includes('日期')) return inp.value;
+    if (field === 'month' && inp.placeholder?.includes('月份')) return inp.value;
+    if (field === 'time' && inp.placeholder?.includes('时间')) return inp.value;
   }
 
-  // ④ Switch
+  // ④ Color picker
+  if (field === 'color') {
+    const colorInput = document.querySelector('.cxd-ColorPicker-input') as HTMLInputElement | null
+      ?? document.querySelector('.cxd-ColorPicker input') as HTMLInputElement | null;
+    if (colorInput?.value) return colorInput.value;
+  }
+
+  // ⑤ Switch
   if (field === 'switch') {
     return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
   }
