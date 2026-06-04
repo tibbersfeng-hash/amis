@@ -19,7 +19,7 @@
   "rating": { "zh": 2, "en": 2 },
   "tag": { "zh": "", "en": "Tag One" },
   "image": { "zh": "", "en": "" },
-  "excludeField": { "zh": ["x"], "en": ["x"] },
+  "excludeField": { "zh": ["x", "y"], "en": ["x", "y"] },
   "excludeFieldExclude": { "zh": false, "en": false },
   "excludeFieldCheckbox": { "zh": false, "en": false }
 }

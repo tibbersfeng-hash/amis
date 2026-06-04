@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { registerRenderer } from 'amis';
-import type { FormControlProps, RenderSchema } from 'amis';
+import type { FormControlProps } from 'amis';
 
 /**
- * FieldWithExcludeV2 — Amis custom form control built from native Amis components.
+ * FieldWithExcludeV2 — Amis custom form control with select + Exclude checkbox.
  *
- * Uses render() to compose a native checkbox (Exclude toggle) + native select.
- * When Exclude is checked, selected values are written to excludeName instead of name.
+ * Renders a custom label row with Exclude checkbox, then uses Amis native select
+ * for the dropdown. When Exclude is toggled, values are written to excludeName
+ * instead of the base name field.
  *
  * Schema usage:
  * {
@@ -14,7 +15,7 @@ import type { FormControlProps, RenderSchema } from 'amis';
  *   "name": "marketCodes",
  *   "label": "Market Code",
  *   "excludeName": "marketCodesExclude",
- *   "excludeLabel": "Exclude",
+ *   "excludeCheckboxName": "marketCodeExclude",
  *   "multiple": true,
  *   "searchable": true,
  *   "options": [...]
@@ -53,8 +54,8 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
     multiple = false,
     searchable = false,
     placeholder = 'Please Select',
-    value,
     onChange,
+    onBulkChange,
     data,
     render,
     valueField = 'value',
@@ -65,12 +66,12 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
   const checkboxName = excludeCheckboxName || `${name}Exclude`;
   const effectiveExcludeName = excludeName || `${name}Exclude`;
 
-  // Determine exclude state from data
+  // Read exclude state from data
   const dataExcluded = !!(data as Record<string, unknown>)?.[checkboxName];
   const [isExcluded, setIsExcluded] = useState(dataExcluded);
   const lastDataExcludedRef = useRef(dataExcluded);
 
-  // Sync when data changes externally
+  // Sync when data changes externally (language switch, etc.)
   useEffect(() => {
     if (dataExcluded !== lastDataExcludedRef.current) {
       lastDataExcludedRef.current = dataExcluded;
@@ -88,40 +89,24 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
       : options;
   }, [source, options, labelField, valueField]);
 
-  // Determine which field name to use based on exclude state
+  // Determine active field name based on exclude state
   const activeFieldName = isExcluded ? effectiveExcludeName : name;
 
-  // Build select schema — use Amis native select
-  const selectSchema: RenderSchema = {
-    type: 'select',
-    name: activeFieldName,
-    label: false, // we render our own label row
-    placeholder,
-    multiple,
-    searchable,
-    options: resolvedOptions,
-    className: className,
-  };
-
-  // Build checkbox schema — use Amis native checkbox
-  const checkboxSchema: RenderSchema = {
-    type: 'checkbox',
-    name: checkboxName,
-    label: excludeLabel,
-    className: 'field-with-exclude-v2-checkbox',
-    option: excludeLabel,
-    trueValue: true,
-    falseValue: false,
-  };
-
-  const handleCheckboxChange = useCallback((newValue: unknown, fieldName: string) => {
-    const next = !!newValue;
+  const handleCheckboxToggle = useCallback(() => {
+    const next = !isExcluded;
     setIsExcluded(next);
-    // Also update the checkbox field in data
-    if (onChange) {
-      onChange(newValue, fieldName);
+
+    if (onBulkChange) {
+      onBulkChange({ [checkboxName]: next });
     }
-  }, [onChange]);
+    if (onChange) {
+      onChange(next, checkboxName);
+    }
+  }, [isExcluded, checkboxName, onBulkChange, onChange]);
+
+  if (!render) {
+    return <div style={{ color: 'red' }}>ERROR: render function not available</div>;
+  }
 
   return (
     <div className="field-with-exclude-v2" style={{ marginBottom: 16 }}>
@@ -139,31 +124,44 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
         }}>
           {label}
         </label>
-        {render ? (
-          <div className="field-with-exclude-v2-checkbox-wrap">
-            {render('checkbox', checkboxSchema, {
-              data: { [checkboxName]: isExcluded },
-              onChange: handleCheckboxChange,
-            })}
-          </div>
-        ) : (
-          <div style={{ color: 'red' }}>ERROR: render not available</div>
-        )}
+        <label
+          className="field-with-exclude-v2-checkbox-wrap"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            cursor: 'pointer',
+            fontSize: 14,
+            color: '#666',
+            userSelect: 'none',
+          }}
+          onClick={handleCheckboxToggle}
+        >
+          <input
+            type="checkbox"
+            checked={isExcluded}
+            readOnly
+            style={{ margin: 0, cursor: 'pointer' }}
+          />
+          {excludeLabel}
+        </label>
       </div>
 
-      {/* Amis native select */}
-      {render ? (
-        <div className="field-with-exclude-v2-select-wrap">
-          {render('select', selectSchema, {
-            data: {
-              ...(data as Record<string, unknown>),
-              [activeFieldName]: value,
-            },
-          })}
-        </div>
-      ) : (
-        <div style={{ color: 'red' }}>ERROR: render not available</div>
-      )}
+      {/* Amis native select — uses activeFieldName to switch between name and excludeName */}
+      <div className="field-with-exclude-v2-select-wrap">
+        {render('select', {
+          type: 'select',
+          name: activeFieldName,
+          label: false,
+          placeholder,
+          multiple,
+          searchable,
+          options: resolvedOptions,
+          className: className || '',
+        }, {
+          data: data as Record<string, unknown>,
+        })}
+      </div>
 
       {/* Exclude indicator */}
       {isExcluded && (

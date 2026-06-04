@@ -1,85 +1,120 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('FieldWithExcludeV2 Component', () => {
-  test('showcase: renders with Amis native styling', async ({ page }) => {
-    await page.goto('http://localhost:5173/showcase#amis-field-with-exclude-v2');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    // Component wrapper visible
-    await expect(page.locator('.field-with-exclude-v2').first()).toBeVisible();
-
-    // Label row with label + checkbox
-    await expect(page.locator('.field-with-exclude-v2-label-row').first()).toBeVisible();
-    await expect(page.getByText('Market Code').first()).toBeVisible();
-    await expect(page.getByText('Exclude').first()).toBeVisible();
-
-    // Amis native select
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
-
-    // Both field-with-exclude-v2 components visible (Market Code + Rate Code)
-    await expect(page.locator('.field-with-exclude-v2')).toHaveCount(2);
-
-    await page.screenshot({
-      path: 'tests/e2e/screenshots/field-exclude-v2-showcase.png',
-      fullPage: true,
-    });
-  });
-
-  test('remote: renders from multiLang schema with correct data', async ({ page }) => {
+test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', () => {
+  test('exclude checkbox: click toggles state, indicator appears', async ({ page }) => {
     await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    // Component visible
-    await expect(page.locator('.field-with-exclude-v2').first()).toBeVisible();
+    // Initial: Exclude indicator should NOT be visible (checkbox is false)
+    await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
 
-    // Label visible
-    await expect(page.getByText('排除选择').first()).toBeVisible();
+    // Click Exclude checkbox
+    await page.locator('.field-with-exclude-v2 input[type="checkbox"]').first().click();
+    await page.waitForTimeout(1000);
 
-    // Exclude checkbox visible
-    await expect(page.getByText('Exclude').first()).toBeVisible();
+    // After click: indicator should be visible
+    await expect(page.getByText('Values selected above will be excluded')).toBeVisible();
 
-    // Amis native select visible
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
+    // Click again to uncheck
+    await page.locator('.field-with-exclude-v2 input[type="checkbox"]').first().click();
+    await page.waitForTimeout(1000);
+
+    // After uncheck: indicator should disappear
+    await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
 
     await page.screenshot({
-      path: 'tests/e2e/screenshots/field-exclude-v2-remote-zh.png',
+      path: 'tests/e2e/screenshots/field-exclude-v2-checkbox-toggle.png',
       fullPage: true,
     });
   });
 
-  test('multiLang: language switch preserves selection', async ({ page }) => {
+  test('select: initial value matches test data', async ({ page }) => {
     await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    // Get initial select display
-    const selectValue = page.locator('.cxd-Select-value').first();
-    const initialText = await selectValue.textContent();
-    console.log('Initial select value (zh):', initialText);
+    // Find select inside field-with-exclude-v2 component
+    const v2Select = page.locator('.field-with-exclude-v2 .cxd-Select').first();
+
+    // Initial value should be "选项X, 选项Y" (from test data: ["x", "y"])
+    await expect(v2Select).toContainText('选项X');
+    await expect(v2Select).toContainText('选项Y');
+
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/field-exclude-v2-initial-value.png',
+      fullPage: true,
+    });
+  });
+
+  test('exclude mode: checkbox state toggles correctly', async ({ page }) => {
+    await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    // Initial: checkbox should be unchecked
+    const checkbox = page.locator('.field-with-exclude-v2 input[type="checkbox"]').first();
+    const isChecked = await checkbox.evaluate((el) => el.checked);
+    expect(isChecked).toBe(false);
+
+    // Click checkbox to check it
+    await checkbox.click();
+    await page.waitForTimeout(1000);
+
+    // After check: indicator should appear
+    await expect(page.getByText('Values selected above will be excluded')).toBeVisible();
+
+    // Verify checkbox is now checked
+    const isCheckedAfter = await checkbox.evaluate((el) => el.checked);
+    expect(isCheckedAfter).toBe(true);
+
+    // Uncheck again
+    await checkbox.click();
+    await page.waitForTimeout(1000);
+
+    // Indicator should disappear
+    await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
+
+    // Verify checkbox is unchecked
+    const isCheckedFinal = await checkbox.evaluate((el) => el.checked);
+    expect(isCheckedFinal).toBe(false);
+
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/field-exclude-v2-exclude-mode.png',
+      fullPage: true,
+    });
+  });
+
+  test('multiLang data: correct values loaded for zh and en', async ({ page }) => {
+    await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    // Find select inside field-with-exclude-v2
+    const v2Select = page.locator('.field-with-exclude-v2 .cxd-Select').first();
+
+    // Chinese: should show "选项X, 选项Y"
+    await expect(v2Select).toContainText('选项X');
+    await expect(v2Select).toContainText('选项Y');
 
     // Switch to English
     await page.locator('.language-select').first().selectOption('en');
     await page.waitForTimeout(2000);
 
-    // Check select display after language switch
-    const afterText = await selectValue.textContent();
-    console.log('Select value after switch (en):', afterText);
+    // English: should still show the same values
+    await expect(v2Select).toContainText('选项X');
+    await expect(v2Select).toContainText('选项Y');
 
     // Switch back to Chinese
     await page.locator('.language-select').first().selectOption('zh');
     await page.waitForTimeout(2000);
 
-    // Check select display after switching back
-    const backText = await selectValue.textContent();
-    console.log('Select value after switch back (zh):', backText);
-
-    // Value should be preserved (initial === back)
-    expect(backText).toBe(initialText);
+    // Should still show "选项X, 选项Y"
+    await expect(v2Select).toContainText('选项X');
+    await expect(v2Select).toContainText('选项Y');
 
     await page.screenshot({
-      path: 'tests/e2e/screenshots/field-exclude-v2-multilang.png',
+      path: 'tests/e2e/screenshots/field-exclude-v2-multilang-values.png',
       fullPage: true,
     });
   });

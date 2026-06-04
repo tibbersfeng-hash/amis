@@ -8,6 +8,7 @@ import '../FieldWithExcludeV2';
 import '../ClosableTabs';
 import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';
+import { processSchemaMultiLang, flattenDataMultiLang } from '../../utils/multiLang';
 
 // ── i18n helpers ──────────────────────────────────────────────
 
@@ -395,15 +396,14 @@ export const AmisPage: React.FC<AmisPageProps> = ({
 
     const abortController = new AbortController();
 
-    const amisData = {
-      ...displayData,
-      previewLanguage: currentLang,
-    };
+    // Process schema and data for multiLang support
+    const processedSchema = processSchemaMultiLang(schema, currentLang);
+    const processedData = flattenDataMultiLang({ ...displayData, previewLanguage: currentLang }, currentLang);
 
     const amisElement = renderAmis(
-      schema,
+      processedSchema as any,
       {
-        data: amisData,
+        data: processedData,
         locale,
         theme: 'cxd',
       },
