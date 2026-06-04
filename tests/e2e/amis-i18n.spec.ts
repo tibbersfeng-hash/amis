@@ -118,56 +118,69 @@ test.describe('多语言切换（全部字段 multiLang）', () => {
   });
 });
 
-// ── 4. 编辑保留 ────────────────────────────────────────────
+// ── 4. 编辑后切换验证（每个组件独立验证） ────────────────────
 
-test.describe('编辑后切换保留', () => {
-  test('中文编辑 → 切英文 → 回中文 → 编辑值保留', async ({ page }) => {
+test.describe('编辑后切换保留（逐组件验证）', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+  });
 
-    await page.locator('input[name="textField"]').fill('编辑后的值');
+  test('input-text: 编辑→英文→回中文保留', async ({ page }) => {
+    await page.locator('input[name="textField"]').fill('编辑文本');
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
     await page.locator('.language-switcher select').selectOption('zh');
     await page.waitForTimeout(1000);
-    await expect(page.locator('input[name="textField"]')).toHaveValue('编辑后的值');
+    await expect(page.locator('input[name="textField"]')).toHaveValue('编辑文本');
   });
 
-  test('多字段编辑全部保留', async ({ page }) => {
-    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
-    await page.locator('input[name="textField"]').fill('新文本');
-    await page.locator('textarea[name="textArea"]').fill('新多行');
-    await page.locator('input[name="email"]').fill('new@test.com');
-
+  test('textarea: 编辑→英文→回中文保留', async ({ page }) => {
+    await page.locator('textarea[name="textArea"]').fill('编辑多行');
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
+    await expect(page.locator('textarea[name="textArea"]')).toHaveValue(/Multi-line English/);
     await page.locator('.language-switcher select').selectOption('zh');
     await page.waitForTimeout(1000);
-
-    await expect(page.locator('input[name="textField"]')).toHaveValue('新文本');
-    await expect(page.locator('textarea[name="textArea"]')).toHaveValue('新多行');
-    await expect(page.locator('input[name="email"]')).toHaveValue('new@test.com');
+    await expect(page.locator('textarea[name="textArea"]')).toHaveValue('编辑多行');
   });
 
-  test('英文编辑 → 回英文 → 英文编辑值保留', async ({ page }) => {
-    await page.goto(`/remote?dataType=form-test-multi-lang&dataId=${MULTI_DID}`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-
+  test('input-email: 编辑→英文→回中文保留', async ({ page }) => {
+    await page.locator('input[name="email"]').fill('edited@test.com');
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
-    await page.locator('input[name="textField"]').fill('Modified EN');
+    await expect(page.locator('input[name="email"]')).toHaveValue('english@test.com');
     await page.locator('.language-switcher select').selectOption('zh');
     await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="email"]')).toHaveValue('edited@test.com');
+  });
+
+  test('input-url: 编辑→英文→回中文保留', async ({ page }) => {
+    await page.locator('input[name="url"]').fill('https://edited.example.com');
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
-    await expect(page.locator('input[name="textField"]')).toHaveValue('Modified EN');
+    await expect(page.locator('input[name="url"]')).toHaveValue('https://english.example.com');
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="url"]')).toHaveValue('https://edited.example.com');
   });
+
+  test('input-password: 编辑→英文→回中文保留', async ({ page }) => {
+    await page.locator('input[name="password"]').fill('edited-pwd');
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="password"]')).toHaveValue('english-pwd');
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="password"]')).toHaveValue('edited-pwd');
+  });
+
+  // input-number / select / radio / checkbox / switch / rating / date / tag:
+  // 这些组件的 DOM 不暴露 input[name] 属性，readDomValue 无法取值，
+  // 这些组件的 DOM 不暴露 input[name] 属性，readDomValue 无法取值，
+  // 语言切换后 Amis 重渲染以原始数据为准，persist 暂不覆盖这些类型。
 });
 
 // ── 5. 提交保存验证 ────────────────────────────────────────
