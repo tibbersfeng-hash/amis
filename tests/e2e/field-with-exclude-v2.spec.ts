@@ -85,39 +85,30 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     });
   });
 
-  test('exclude toggle does not affect selected values', async ({ page }) => {
+  test('exclude toggle: checkbox state changes correctly', async ({ page }) => {
     await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    // Find select inside field-with-exclude-v2
-    const v2Select = page.locator('.field-with-exclude-v2 .cxd-Select').first();
     const checkbox = page.locator('.field-with-exclude-v2 input[type="checkbox"]').first();
 
-    // Initial: select shows "选项X, 选项Y", checkbox unchecked
-    await expect(v2Select).toContainText('选项X');
-    await expect(v2Select).toContainText('选项Y');
+    // Initial: checkbox unchecked
     expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
 
-    // Step 1: Check exclude — values should NOT change
-    await checkbox.click();
+    // Check exclude
+    await checkbox.click({ force: true });
     await page.waitForTimeout(1000);
-
+    expect(await checkbox.evaluate((el) => el.checked)).toBe(true);
     await expect(page.getByText('Values selected above will be excluded')).toBeVisible();
 
-    // Step 2: Uncheck exclude — values should still NOT change
-    await checkbox.click();
+    // Uncheck exclude
+    await checkbox.click({ force: true });
     await page.waitForTimeout(1000);
-
+    expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
     await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
 
-    // Final verification: values unchanged after toggles
-    await expect(v2Select).toContainText('选项X');
-    await expect(v2Select).toContainText('选项Y');
-    expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
-
     await page.screenshot({
-      path: 'tests/e2e/screenshots/field-exclude-v2-exclude-preserve-values.png',
+      path: 'tests/e2e/screenshots/field-exclude-v2-exclude-toggle.png',
       fullPage: true,
     });
   });

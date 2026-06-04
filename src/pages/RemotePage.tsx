@@ -61,6 +61,7 @@ const RemotePage: React.FC = () => {
       schema={data.schema}
       formData={enhancedFormData}
       locale={getLocale()}
+      previewLanguage={getLocale() === 'zh-CN' ? 'zh' : 'en'}
     />
   );
 };
