@@ -1,24 +1,170 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { render as renderAmis } from 'amis';
 import ReactDOM from 'react-dom';
-import '../PhoneMockup'; // Registers phone-mockup renderer
-import '../DateRangePicker'; // Registers date-range-picker renderer
-import '../FieldWithExclude'; // Registers field-with-exclude renderer
-import '../ClosableTabs'; // Registers closable-tab renderer
+import '../PhoneMockup';
+import '../DateRangePicker';
+import '../FieldWithExclude';
+import '../ClosableTabs';
+import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';
 
-/**
- * Default fetcher for Amis API requests.
- * Uses fetch with abort support.
- */
+// ── i18n helpers ──────────────────────────────────────────────
+
+/** Check if a value is a {zh, en} multi-language object */
+function isI18nValue(val: unknown): val is Record<string, string> {
+  return !!val && typeof val === 'object' && 'zh' in (val as object) && Object.keys(val as object).length >= 2;
+}
+
+/** Recursively collect all fields with "multiLang: true" from an Amis schema */
+function collectMultiLangFields(schema: unknown): string[] {
+  const fields: string[] = [];
+  function walk(node: unknown) {
+    if (!node || typeof node !== 'object') return;
+    const obj = node as Record<string, unknown>;
+    if (obj.multiLang === true && typeof obj.name === 'string') {
+      fields.push(obj.name);
+    }
+    for (const val of Object.values(obj)) {
+      if (Array.isArray(val)) val.forEach(walk);
+      else walk(val);
+    }
+  }
+  walk(schema);
+  return fields;
+}
+
+/** Build a lookup of original {zh, en} values for the given fields */
+function buildLookup(data: Record<string, unknown>, fields: string[]): Record<string, Record<string, string>> {
+  const lookup: Record<string, Record<string, string>> = {};
+  for (const field of fields) {
+    const val = data[field];
+    if (isI18nValue(val)) lookup[field] = val;
+  }
+  return lookup;
+}
+
+/** Flatten {zh, en} → single language string for Amis display */
+function flattenData(
+  data: Record<string, unknown>,
+  fields: string[],
+  lookup: Record<string, Record<string, string>>,
+  lang: string
+): Record<string, unknown> {
+  if (!fields.length) return data;
+  const result = { ...data };
+  for (const field of fields) {
+    const orig = lookup[field];
+    if (orig) {
+      result[field] = orig[lang] || orig['zh'];
+    }
+  }
+  return result;
+}
+
+/** Read current DOM value for a field (native input first, then Amis store) */
+function readDomValue(field: string): string | undefined {
+  const input = document.querySelector(
+    `input[name="${field}"], textarea[name="${field}"]`
+  ) as HTMLInputElement | HTMLTextAreaElement | null;
+  if (input) return input.value;
+
+  const store = (window as any).amisStore;
+  if (store?.data && field in store.data) {
+    const val = store.data[field];
+    if (val !== null && val !== undefined) return String(val);
+  }
+  return undefined;
+}
+
+/** Write a value into the DOM for a field */
+function writeDomValue(field: string, value: string): void {
+  const input = document.querySelector(
+    `input[name="${field}"], textarea[name="${field}"]`
+  ) as HTMLInputElement | HTMLTextAreaElement | null;
+  if (input) {
+    const proto = input instanceof HTMLTextAreaElement
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (nativeSetter) {
+      nativeSetter.call(input, value);
+    } else {
+      input.value = value;
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return;
+  }
+
+  const store = (window as any).amisStore;
+  if (store?.changeValue) {
+    store.changeValue(field, value);
+  }
+}
+
+/** Persist current DOM values into the lookup, returning the updated lookup */
+function persistToLookup(
+  lookup: Record<string, Record<string, string>>,
+  fields: string[],
+  lang: string
+): Record<string, Record<string, string>> {
+  const updated = { ...lookup };
+  for (const field of fields) {
+    const currentVal = readDomValue(field);
+    if (currentVal !== undefined) {
+      const prev = updated[field] || { zh: '', en: '' };
+      updated[field] = { ...prev, [lang]: currentVal };
+    }
+  }
+  return updated;
+}
+
+/** Apply a language's values from the lookup into the DOM */
+function applyFromLookup(
+  lookup: Record<string, Record<string, string>>,
+  fields: string[],
+  lang: string
+): void {
+  for (const field of fields) {
+    const vals = lookup[field];
+    if (!vals) continue;
+    const value = vals[lang] || vals['zh'];
+    if (value !== undefined) writeDomValue(field, value);
+  }
+}
+
+/** Merge current DOM values into {zh, en} for all multiLang fields */
+function mergeI18nData(
+  rawData: Record<string, unknown>,
+  lookup: Record<string, Record<string, string>>,
+  fields: string[],
+  currentLang: string
+): Record<string, unknown> {
+  const merged = { ...rawData };
+  for (const field of fields) {
+    const domVal = readDomValue(field);
+    if (domVal === undefined) continue;
+
+    const existing = lookup[field];
+    if (existing && isI18nValue(existing)) {
+      // Merge into existing {zh, en} object
+      merged[field] = { ...existing, [currentLang]: domVal };
+    } else {
+      // First time: create {zh, en} with current value for both
+      merged[field] = { zh: domVal, en: domVal };
+    }
+  }
+  return merged;
+}
+
+// ── Default fetcher (Amis API requests) ─────────────────────
+
 function defaultFetcher(
   api: { url: string; method?: string; data?: unknown; config?: RequestInit },
-  props?: { data?: Record<string, unknown> }
+  _props?: unknown
 ): Promise<{ status: number; data: unknown; msg?: string }> {
   const { url, method = 'get', data, config } = api;
-
   let fetchUrl = url;
-  let fetchConfig: RequestInit = {
+  const fetchConfig: RequestInit = {
     method: method.toUpperCase(),
     headers: { 'Content-Type': 'application/json' },
     ...config,
@@ -32,12 +178,12 @@ function defaultFetcher(
   }
 
   return fetch(fetchUrl, fetchConfig).then((res) => {
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     return res.json();
   });
 }
+
+// ── AmisPage component ──────────────────────────────────────
 
 interface AmisPageProps {
   schema: Record<string, unknown>;
@@ -53,35 +199,79 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   previewLanguage,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [currentLang, setCurrentLang] = useState<Language>(previewLanguage || 'zh');
+  const langRef = useRef(currentLang);
+  langRef.current = currentLang;
 
+  // Extract multiLang fields from schema
+  const i18nFields = useMemo(() => collectMultiLangFields(schema), [schema]);
+  const hasI18n = i18nFields.length > 0;
+
+  // Build + persist lookup via ref (so fetcher always has latest)
+  const [lookup, setLookup] = useState<Record<string, Record<string, string>>>(() =>
+    buildLookup(formData, i18nFields)
+  );
+  const lookupRef = useRef(lookup);
+  lookupRef.current = lookup;
+
+  // Flatten formData for Amis display
+  const displayData = useMemo(
+    () => flattenData(formData, i18nFields, lookup, currentLang),
+    [formData, i18nFields, lookup, currentLang]
+  );
+
+  // i18n-aware fetcher — merges multiLang fields before POST
+  const fetcher = useCallback(
+    (api: { url: string; method?: string; data?: unknown; config?: RequestInit }, props?: unknown) => {
+      if (api.data && i18nFields.length > 0) {
+        const merged = mergeI18nData(
+          api.data as Record<string, unknown>,
+          lookupRef.current,
+          i18nFields,
+          langRef.current
+        );
+        api = { ...api, data: merged };
+      }
+      return defaultFetcher(api, props);
+    },
+    [i18nFields]
+  );
+
+  // Language switch handler
+  const handleLanguageChange = useCallback(
+    (newLang: Language) => {
+      if (newLang === langRef.current) return;
+      // Persist current DOM values into lookup
+      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current);
+      setLookup(updated);
+      // Apply new language values to DOM
+      applyFromLookup(updated, i18nFields, newLang);
+      langRef.current = newLang;
+      setCurrentLang(newLang);
+    },
+    [i18nFields]
+  );
+
+  // Render Amis
   useEffect(() => {
     if (!containerRef.current || !schema) return;
 
-    // Clear previous content
     containerRef.current.innerHTML = '';
-
-    // Abort controller for fetch cancellation
     const abortController = new AbortController();
 
-    // Merge formData with previewLanguage for Amis data context
     const amisData = {
-      ...formData,
-      previewLanguage: previewLanguage || 'zh',
+      ...displayData,
+      previewLanguage: currentLang,
     };
 
-    // Render Amis schema with data
     const amisElement = renderAmis(
       schema,
-      {
-        data: amisData,
-        locale,
-        theme: 'cxd',
-      },
+      { data: amisData, locale, theme: 'cxd' },
       {
         session: 'mission-cms',
         theme: 'cxd',
         locale,
-        fetcher: defaultFetcher,
+        fetcher,
         isCancel: (value: unknown) => (value as Error)?.message === 'cancel',
         confirm: (msg: string) => Promise.resolve(confirm(msg)),
         notify: (type: string, msg: string) => console.log(`[amis] ${type}: ${msg}`),
@@ -90,18 +280,27 @@ export const AmisPage: React.FC<AmisPageProps> = ({
       ''
     );
 
-    // Mount the React element
     ReactDOM.render(amisElement, containerRef.current);
 
-    // Cleanup on unmount
     return () => {
       abortController.abort();
       if (containerRef.current) {
         ReactDOM.unmountComponentAtNode(containerRef.current);
       }
     };
+    // fetcher is stable via useCallback; displayData/currentLang change triggers re-render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema, formData, locale]); // Don't include previewLanguage - i18n updates are handled via DOM manipulation in App.tsx
+  }, [schema, displayData, locale, currentLang]);
 
-  return <div ref={containerRef} className="amis-scope" />;
+  return (
+    <>
+      {hasI18n && (
+        <LanguageSwitcher
+          language={currentLang}
+          onLanguageChange={handleLanguageChange}
+        />
+      )}
+      <div ref={containerRef} className="amis-scope" />
+    </>
+  );
 };

@@ -176,8 +176,10 @@ test.describe('Remote Page — POST /api/page/save 提交保存', () => {
     expect(fs.existsSync(createdFile)).toBe(true);
 
     const fileContent = JSON.parse(fs.readFileSync(createdFile, 'utf-8'));
-    expect(fileContent.hotelName).toBe('E2E新建酒店');
+    // multiLang 字段自动存为 {zh, en} 对象
+    expect(fileContent.hotelName).toEqual({ zh: 'E2E新建酒店', en: 'E2E新建酒店' });
     expect(fileContent.hotelCode).toBe('E2ECRT001');
+    expect(fileContent.city).toEqual({ zh: '南京', en: '南京' });
 
     // 验证元数据字段未被写入
     expect(fileContent.dataId).toBeUndefined();
@@ -228,12 +230,13 @@ test.describe('Remote Page — POST /api/page/save 提交保存', () => {
 
     // 验证: 文件包含合并后数据（新字段 + 旧字段保留）
     const fileContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    expect(fileContent.hotelName).toBe('E2E更新酒店');   // 未修改
-    expect(fileContent.hotelCode).toBe('E2EUPD001');      // 未修改
-    expect(fileContent.city).toBe('更新后的城市');          // 被更新
-    expect(fileContent.contactPhone).toBe('099-88887777'); // 新增
-    expect(fileContent.contactPerson).toBe('初始联系人');    // 未修改，保留
-    expect(fileContent.hotelBrand).toBe('shangri-la');     // 未修改，保留
+    // multiLang 字段自动转为 {zh, en} 格式
+    expect(fileContent.hotelName).toEqual({ zh: 'E2E更新酒店', en: 'E2E更新酒店' });
+    expect(fileContent.hotelCode).toBe('E2EUPD001');           // 非 multiLang，不变
+    expect(fileContent.city).toEqual({ zh: '更新后的城市', en: '更新后的城市' });
+    expect(fileContent.contactPhone).toBe('099-88887777');     // 新增，非 multiLang
+    expect(fileContent.contactPerson).toEqual({ zh: '初始联系人', en: '初始联系人' });
+    expect(fileContent.hotelBrand).toBe('shangri-la');         // 非 multiLang，不变
 
     // 清理本测试创建的文件
     deleteFile(UPDATE_DATA_ID);

@@ -9,6 +9,7 @@
       "name": "name",
       "label": "姓名",
       "placeholder": "请输入姓名",
+      "multiLang": true,
       "required": true
     },
     {
@@ -41,6 +42,7 @@
       "name": "description",
       "label": "描述",
       "placeholder": "请输入描述信息",
+      "multiLang": true,
       "minRows": 3,
       "maxRows": 6
     }

@@ -13,6 +13,7 @@
       "name": "hotelName",
       "label": "酒店名称",
       "placeholder": "请输入酒店名称",
+      "multiLang": true,
       "required": true,
       "clearable": true
     },
@@ -43,6 +44,7 @@
       "name": "address",
       "label": "酒店地址",
       "placeholder": "请输入酒店地址",
+      "multiLang": true,
       "clearable": true
     },
     {
@@ -50,6 +52,7 @@
       "name": "city",
       "label": "所在城市",
       "placeholder": "请输入城市",
+      "multiLang": true,
       "clearable": true
     },
     {
@@ -57,6 +60,7 @@
       "name": "contactPerson",
       "label": "联系人",
       "placeholder": "请输入联系人姓名",
+      "multiLang": true,
       "clearable": true
     },
     {
@@ -86,6 +90,7 @@
       "name": "description",
       "label": "酒店描述",
       "placeholder": "请输入酒店简介",
+      "multiLang": true,
       "minRows": 3,
       "maxRows": 6,
       "clearable": true

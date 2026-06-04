@@ -13,6 +13,7 @@
       "name": "restaurantName",
       "label": "餐厅名称",
       "placeholder": "请输入餐厅名称",
+      "multiLang": true,
       "required": true,
       "clearable": true
     },
@@ -59,6 +60,7 @@
       "name": "cuisine",
       "label": "菜系",
       "placeholder": "例如: 粤菜、川菜",
+      "multiLang": true,
       "clearable": true
     },
     {
@@ -87,6 +89,7 @@
       "name": "description",
       "label": "餐厅描述",
       "placeholder": "请输入餐厅简介",
+      "multiLang": true,
       "minRows": 3,
       "maxRows": 6,
       "clearable": true
