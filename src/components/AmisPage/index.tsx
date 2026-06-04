@@ -169,7 +169,19 @@ function readDomValue(
     if (colorInput?.value) return colorInput.value;
   }
 
-  // ⑥ Switch
+  // ⑥ Field-with-exclude: read from hidden data div
+  const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
+  if (excludeData) {
+    try {
+      const parsed = JSON.parse(excludeData.textContent || '{}');
+      if (parsed && typeof parsed === 'object' && field in parsed) {
+        const val = parsed[field];
+        if (val !== null && val !== undefined) return String(val);
+      }
+    } catch { /* ignore parse errors */ }
+  }
+
+  // ⑦ Switch
   if (field === 'switch') {
     return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
   }

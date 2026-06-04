@@ -179,13 +179,39 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
     await sw(page, 'en'); await sw(page, 'zh');
     await expect(page.locator('input[name="tag"]')).toBeVisible();
   });
-  test('input-datetime 初始值', async ({ page }) => {
-    await expect(page.getByPlaceholder('请选择日期以及时间')).toHaveValue('2026-06-04 14:30:00');
-    await sw(page, 'en'); await sw(page, 'zh');
-    await expect(page.getByPlaceholder('请选择日期以及时间')).toHaveValue('2026-06-04 14:30:00');
+  test('input-datetime', async ({ page }) => {
+    await assertPersist(page,
+      () => page.evaluate(() => {
+        const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+        for (const p of pickers) {
+          const inp = p as HTMLInputElement;
+          if (inp.placeholder?.includes('日期以及时间')) return inp.value;
+        }
+        return '';
+      }),
+      async () => {
+        await page.evaluate(() => {
+          const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+          for (const p of pickers) {
+            const inp = p as HTMLInputElement;
+            if (!inp.placeholder?.includes('日期以及时间')) continue;
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+            if (setter) setter.call(inp, '2026-07-15 10:00:00');
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+            inp.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        await page.waitForTimeout(500);
+      },
+      '2026-07-15 10:00:00');
   });
-  test('input-date-range 初始值', async ({ page }) => {
+  test('input-date-range', async ({ page }) => {
     await sw(page, 'en'); await sw(page, 'zh');
     await expect(page.locator('.cxd-DateRangePicker')).toBeVisible();
+  });
+  test('field-with-exclude 切换不崩', async ({ page }) => {
+    await expect(page.locator('.field-with-exclude')).toBeVisible();
+    await sw(page, 'en'); await sw(page, 'zh');
+    await expect(page.locator('.field-with-exclude')).toBeVisible();
   });
 });
