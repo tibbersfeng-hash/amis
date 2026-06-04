@@ -3,6 +3,7 @@ import { Loading } from './components/Loading';
 import { initLocale, getLocale } from './utils/locale';
 import ShowcaseApp from './showcase/ShowcaseApp';
 import ListPage from './pages/ListPage';
+import TestDashboard from './pages/TestDashboard';
 
 const RemotePage = React.lazy(() => import('./pages/RemotePage'));
 
@@ -30,10 +31,9 @@ function App() {
     return <ListPage />;
   }
 
-  // Default fallback: redirect to hotel list
+  // Root route: test dashboard
   if (window.location.pathname === '/' || window.location.pathname === '') {
-    window.location.href = '/list?dataType=hotel-basic';
-    return <Loading />;
+    return <TestDashboard />;
   }
 
   // Unknown route

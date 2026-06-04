@@ -22,8 +22,8 @@ test.describe('List Page — 列表页渲染与交互', () => {
     await expect(page.getByText('上海浦东嘉里大酒店')).toBeVisible();
     await expect(page.getByText('北京嘉里大酒店')).toBeVisible();
 
-    // 总数 + 分页信息
-    await expect(page.getByText('共 6 条记录，第 1/1 页')).toBeVisible();
+    // 总数 + 分页信息（含 i18n 测试数据）
+    await expect(page.getByText('共 7 条记录，第 1/1 页')).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/list-page-hotels.png',
