@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { render as renderAmis } from 'amis';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { AmisPage } from '../components/AmisPage';
 import { Loading, ErrorDisplay } from '../components/Loading';
 import { getLocale } from '../utils/locale';
-import '../components/ClosableTabs'; // Register closable-tab renderer
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -134,10 +132,7 @@ function buildCrudSchema(dataType: string, listSchema: ListSchema, items: Array<
     mode: 'table',
     syncLocation: false,
     loadDataOnce: true,
-    api: {
-      method: 'get',
-      url: '/api/crud-placeholder',
-    },
+    data: { items, total },
     ...(filter ? { filter } : {}),
     columns: [...columns, operationCol],
     headerToolbar: ['filter-toggler'],
@@ -158,8 +153,6 @@ const ListPage: React.FC = () => {
   const [listData, setListData] = useState<ListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch list data from API
   useEffect(() => {
@@ -190,70 +183,11 @@ const ListPage: React.FC = () => {
       });
   }, [dataType]);
 
-  // Render Amis CRUD schema when data is loaded
-  useEffect(() => {
-    console.log('[ListPage] useEffect fired', { hasContainer: !!containerRef.current, hasData: !!listData });
-    if (!containerRef.current || !listData) return;
-
-    containerRef.current.innerHTML = '';
-
+  // Build Amis CRUD schema from list data
+  const amisSchema = useMemo(() => {
+    if (!listData) return null;
     const { listSchema, items, total } = listData;
-    console.log('[ListPage] Building CRUD schema with', items.length, 'items');
-    const amisSchema = buildCrudSchema(dataType, listSchema, items, total);
-    console.log('[ListPage] CRUD schema:', JSON.stringify(amisSchema).slice(0, 200));
-
-    const amisScoped = renderAmis(
-      amisSchema as any,
-      {
-        data: {},
-        locale: getLocale(),
-        theme: 'cxd',
-      },
-      {
-        session: 'list-page',
-        theme: 'cxd',
-        locale: getLocale(),
-        fetcher: (api: any) => {
-          const { url, method = 'get', data, config } = api;
-
-          // Return list data for CRUD's loadDataOnce
-          if (url === '/api/crud-placeholder') {
-            return Promise.resolve({ status: 0, data: { items, total } });
-          }
-
-          let fetchUrl = url;
-          let fetchConfig: RequestInit = {
-            method: method.toUpperCase(),
-            headers: { 'Content-Type': 'application/json' },
-            ...config,
-          };
-
-          if (method === 'get' && data) {
-            const params = new URLSearchParams(data as Record<string, string>);
-            fetchUrl += (fetchUrl.includes('?') ? '&' : '?') + params.toString();
-          } else if (data) {
-            fetchConfig.body = JSON.stringify(data);
-          }
-
-          return fetch(fetchUrl, fetchConfig).then((res) => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            return res.json();
-          });
-        },
-        isCancel: (value: unknown) => (value as Error)?.message === 'cancel',
-        confirm: (msg: string) => Promise.resolve(confirm(msg)),
-        notify: (type: string, msg: string) => console.log(`[amis] ${type}: ${msg}`),
-      },
-      ''
-    );
-
-    ReactDOM.render(amisScoped, containerRef.current);
-
-    return () => {
-      if (containerRef.current) {
-        ReactDOM.unmountComponentAtNode(containerRef.current);
-      }
-    };
+    return buildCrudSchema(dataType, listSchema, items, total);
   }, [dataType, listData]);
 
   if (!dataType) {
@@ -268,9 +202,19 @@ const ListPage: React.FC = () => {
     return <ErrorDisplay message={error} />;
   }
 
+  if (!amisSchema) {
+    return null;
+  }
+
+  const { items, total } = listData!;
+
   return (
     <div className="amis-list-page">
-      <div ref={containerRef} className="amis-scope" />
+      <AmisPage
+        schema={amisSchema}
+        formData={{ items, total }}
+        locale={getLocale()}
+      />
     </div>
   );
 };

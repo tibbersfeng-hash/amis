@@ -66,7 +66,7 @@ test.describe('全部组件中文回显（所有字段 multiLang）', () => {
     await expect(page.locator('.cxd-Select')).toBeVisible();
   });
   test('input-date 日期', async ({ page }) => {
-    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
+    await expect(page.getByRole('textbox', { name: '请选择日期', exact: true })).toHaveValue('2026-06-04');
   });
   // input-time 的渲染结构因 Amis 版本而异, 跳过可视化断言
   test('input-month 月份', async ({ page }) => {
@@ -103,7 +103,7 @@ test.describe('多语言切换（全部字段 multiLang）', () => {
 
     // 同值字段（zh=en） → 值不变
     await expect(page.getByPlaceholder('请输入数字')).toHaveValue('42');
-    await expect(page.getByPlaceholder('请选择日期')).toHaveValue('2026-06-04');
+    await expect(page.getByRole('textbox', { name: '请选择日期', exact: true })).toHaveValue('2026-06-04');
   });
 
   test('中英来回多次切换，值一致', async ({ page }) => {

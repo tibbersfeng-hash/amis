@@ -28,10 +28,16 @@
     { "type": "input-date", "name": "date", "label": "日期", "multiLang": true },
     { "type": "input-time", "name": "time", "label": "时间", "multiLang": true },
     { "type": "input-month", "name": "month", "label": "月份", "multiLang": true },
+    { "type": "input-datetime", "name": "datetime", "label": "日期时间", "multiLang": true, "format": "YYYY-MM-DD HH:mm:ss" },
+    { "type": "input-date-range", "name": "dateRange", "label": "日期范围", "multiLang": true, "format": "YYYY-MM-DD" },
     { "type": "input-color", "name": "color", "label": "颜色", "multiLang": true },
     { "type": "input-rating", "name": "rating", "label": "评分", "multiLang": true, "count": 5 },
     { "type": "input-tag", "name": "tag", "label": "标签", "multiLang": true, "placeholder": "输入标签按回车" },
-    { "type": "input-image", "name": "image", "label": "图片上传", "multiLang": true, "receiver": "/api/upload", "accept": "image/*" }
+    { "type": "input-image", "name": "image", "label": "图片上传", "multiLang": true, "receiver": "/api/upload", "accept": "image/*" },
+    { "type": "field-with-exclude", "name": "excludeField", "label": "排除选择", "multiLang": true, "options": [
+      { "label": "选项X", "value": "x" },
+      { "label": "选项Y", "value": "y" }
+    ] }
   ],
   "actions": [
     { "type": "submit", "label": "提交保存", "level": "primary" },

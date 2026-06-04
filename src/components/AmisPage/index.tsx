@@ -141,24 +141,35 @@ function readDomValue(
     }
   }
 
-  // ③ Date / time / month pickers: match by placeholder
+  // ③ Date / time / month / datetime pickers: match by placeholder
   const pickers = document.querySelectorAll('.cxd-DatePicker-input');
   for (const p of pickers) {
     const inp = p as HTMLInputElement;
     if (!inp.value) continue;
-    if (field === 'date' && inp.placeholder?.includes('日期')) return inp.value;
+    if (field === 'date' && inp.placeholder?.includes('日期') && !inp.placeholder?.includes('时间')) return inp.value;
     if (field === 'month' && inp.placeholder?.includes('月份')) return inp.value;
     if (field === 'time' && inp.placeholder?.includes('时间')) return inp.value;
+    if (field === 'datetime' && inp.placeholder?.includes('日期以及时间')) return inp.value;
   }
 
-  // ④ Color picker
+  // ④ Date range picker: read start,end combo
+  if (field === 'dateRange') {
+    const rangeInputs = document.querySelectorAll('.cxd-DateRangePicker-input');
+    if (rangeInputs.length >= 2) {
+      const start = (rangeInputs[0] as HTMLInputElement).value;
+      const end = (rangeInputs[1] as HTMLInputElement).value;
+      if (start && end) return start + ',' + end;
+    }
+  }
+
+  // ⑤ Color picker
   if (field === 'color') {
     const colorInput = document.querySelector('.cxd-ColorPicker-input') as HTMLInputElement | null
       ?? document.querySelector('.cxd-ColorPicker input') as HTMLInputElement | null;
     if (colorInput?.value) return colorInput.value;
   }
 
-  // ⑤ Switch
+  // ⑥ Switch
   if (field === 'switch') {
     return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
   }

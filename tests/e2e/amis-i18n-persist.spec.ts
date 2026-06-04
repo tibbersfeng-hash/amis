@@ -179,4 +179,13 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
     await sw(page, 'en'); await sw(page, 'zh');
     await expect(page.locator('input[name="tag"]')).toBeVisible();
   });
+  test('input-datetime 初始值', async ({ page }) => {
+    await expect(page.getByPlaceholder('请选择日期以及时间')).toHaveValue('2026-06-04 14:30:00');
+    await sw(page, 'en'); await sw(page, 'zh');
+    await expect(page.getByPlaceholder('请选择日期以及时间')).toHaveValue('2026-06-04 14:30:00');
+  });
+  test('input-date-range 初始值', async ({ page }) => {
+    await sw(page, 'en'); await sw(page, 'zh');
+    await expect(page.locator('.cxd-DateRangePicker')).toBeVisible();
+  });
 });
