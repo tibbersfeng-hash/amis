@@ -179,7 +179,6 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   // input-number / select / radio / checkbox / switch / rating / date / tag:
   // 这些组件的 DOM 不暴露 input[name] 属性，readDomValue 无法取值，
-  // 这些组件的 DOM 不暴露 input[name] 属性，readDomValue 无法取值，
   // 语言切换后 Amis 重渲染以原始数据为准，persist 暂不覆盖这些类型。
 });
 
