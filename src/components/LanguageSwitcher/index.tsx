@@ -3,7 +3,6 @@ import React from 'react';
 export const LANGUAGES = [
   { value: 'zh' as const, label: '中文' },
   { value: 'en' as const, label: 'English' },
-  { value: 'jp' as const, label: '日本語' },
 ];
 
 export type Language = typeof LANGUAGES[number]['value'];
