@@ -1,25 +1,98 @@
 {
-  "textField": { "zh": "中文文本", "en": "English Text" },
-  "textArea": { "zh": "多行中文内容，用于测试。", "en": "Multi-line English content for testing." },
-  "email": { "zh": "zhongwen@test.com", "en": "english@test.com" },
-  "url": { "zh": "https://zhongwen.example.com", "en": "https://english.example.com" },
-  "password": { "zh": "zhongwen-pwd", "en": "english-pwd" },
-  "number": { "zh": 42, "en": 42 },
-  "richText": { "zh": "<p>中文富文本内容</p>", "en": "<p>English rich text content</p>" },
-  "select": { "zh": "opt1", "en": "opt1" },
-  "radio": { "zh": "yes", "en": "yes" },
-  "checkbox": { "zh": "a", "en": "a" },
-  "switch": { "zh": true, "en": true },
-  "date": { "zh": "2026-06-04", "en": "2026-06-04" },
-  "time": { "zh": "14:30", "en": "14:30" },
-  "month": { "zh": "2026-06", "en": "2026-06" },
-  "datetime": { "zh": "2026-06-04 14:30:00", "en": "2026-06-04 14:30:00" },
-  "dateRange": { "zh": "2026-06-01,2026-06-15", "en": "2026-06-01,2026-06-15" },
-  "color": { "zh": "#4A5CBF", "en": "#4A5CBF" },
-  "rating": { "zh": 2, "en": 2 },
-  "tag": { "zh": "", "en": "Tag One" },
-  "image": { "zh": "", "en": "" },
-  "excludeField": { "zh": ["x", "y"], "en": ["x", "y"] },
-  "excludeFieldExclude": { "zh": false, "en": false },
-  "excludeFieldCheckbox": { "zh": false, "en": false }
+  "textField": {
+    "zh": "中文文本",
+    "en": "English Text"
+  },
+  "textArea": {
+    "zh": "多行中文内容，用于测试。",
+    "en": "Multi-line English content for testing."
+  },
+  "email": {
+    "zh": "zhongwen@test.com",
+    "en": "english@test.com"
+  },
+  "url": {
+    "zh": "https://zhongwen.example.com",
+    "en": "https://english.example.com"
+  },
+  "password": {
+    "zh": "zhongwen-pwd",
+    "en": "english-pwd"
+  },
+  "number": {
+    "zh": "42",
+    "en": 42
+  },
+  "richText": {
+    "zh": "<p>中文富文本内容</p>",
+    "en": "<p>English rich text content</p>"
+  },
+  "select": {
+    "zh": "opt1",
+    "en": "opt1"
+  },
+  "radio": {
+    "zh": "yes",
+    "en": "yes"
+  },
+  "checkbox": {
+    "zh": "a",
+    "en": "a"
+  },
+  "switch": {
+    "zh": "false",
+    "en": true
+  },
+  "date": {
+    "zh": "2026-06-04",
+    "en": "2026-06-04"
+  },
+  "time": {
+    "zh": "08:00",
+    "en": "14:30"
+  },
+  "month": {
+    "zh": "2026-06",
+    "en": "2026-06"
+  },
+  "datetime": {
+    "zh": "2026-06-04 14:30:00",
+    "en": "2026-06-04 14:30:00"
+  },
+  "dateRange": {
+    "zh": "2026-06-01,2026-06-15",
+    "en": "2026-06-01,2026-06-15"
+  },
+  "color": {
+    "zh": "#4A5CBF",
+    "en": "#4A5CBF"
+  },
+  "rating": {
+    "zh": "2",
+    "en": 2
+  },
+  "tag": {
+    "zh": "",
+    "en": "Tag One"
+  },
+  "image": {
+    "zh": "",
+    "en": ""
+  },
+  "excludeField": {
+    "zh": [
+      "x",
+      "y"
+    ],
+    "en": [
+      "x",
+      "y"
+    ]
+  },
+  "excludeFieldExclude": false,
+  "excludeFieldCheckbox": {
+    "zh": "false",
+    "en": false
+  },
+  "previewLanguage": "zh"
 }

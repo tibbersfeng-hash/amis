@@ -23,8 +23,12 @@ function collectMultiLangFields(schema: unknown): string[] {
   function walk(node: unknown) {
     if (!node || typeof node !== 'object') return;
     const obj = node as Record<string, unknown>;
-    if (obj.multiLang === true && typeof obj.name === 'string') {
-      fields.push(obj.name);
+    if (obj.multiLang === true) {
+      if (typeof obj.name === 'string') {
+        fields.push(obj.name);
+      }
+      // Also include excludeCheckboxName so mergeI18nData preserves {zh, en} format
+      if (typeof obj.excludeCheckboxName === 'string') fields.push(obj.excludeCheckboxName);
     }
     for (const val of Object.values(obj)) {
       if (Array.isArray(val)) val.forEach(walk);
@@ -48,12 +52,18 @@ function collectFieldOptions(
       Array.isArray(obj.options) &&
       obj.options.length > 0
     ) {
-      options[obj.name] = obj.options.map(
-        (o: Record<string, unknown>) => ({
-          label: String(o.label ?? ''),
-          value: String(o.value ?? ''),
-        }),
-      );
+      const mapped = obj.options.map((o: Record<string, unknown>) => ({
+        label: String(o.label ?? ''),
+        value: String(o.value ?? ''),
+      }));
+      options[obj.name] = mapped;
+      // For field-with-exclude-v2, also register sub-fields with same options
+      if (
+        obj.type === 'field-with-exclude-v2' &&
+        typeof obj.excludeName === 'string'
+      ) {
+        options[obj.excludeName] = mapped;
+      }
     }
     for (const val of Object.values(obj)) {
       if (Array.isArray(val)) val.forEach(walk);
@@ -134,12 +144,16 @@ function readDomValue(
       if (values.length > 0) return values.join(',');
     }
 
-    // Select: read display text from the value span
-    const selValue = document.querySelector('.cxd-Select-value');
-    if (selValue) {
-      const label = selValue.textContent?.trim() ?? '';
-      const match = opts.find((o) => o.label === label);
-      if (match) return match.value;
+    // Select: read display text from value span(s) — supports multi-select
+    const selValues = document.querySelectorAll('.cxd-Select-value');
+    if (selValues.length > 0) {
+      const matched: string[] = [];
+      selValues.forEach((el) => {
+        const label = el.textContent?.trim() ?? '';
+        const match = opts.find((o) => o.label === label);
+        if (match) matched.push(match.value);
+      });
+      if (matched.length > 0) return matched.join(',');
     }
   }
 
@@ -246,7 +260,13 @@ function persistToLookup(
     const currentVal = readDomValue(field, fieldOptions);
     if (currentVal !== undefined) {
       const prev = updated[field] || { zh: '', en: '' };
-      updated[field] = { ...prev, [lang]: currentVal };
+      // Detect if original value was array → convert comma string back to array
+      const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
+      if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
+        updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
+      } else {
+        updated[field] = { ...prev, [lang]: currentVal };
+      }
     }
   }
   return updated;
@@ -276,14 +296,21 @@ function mergeI18nData(
 ): Record<string, unknown> {
   const merged = { ...rawData };
   for (const field of fields) {
-    // Try DOM first (input[name]), then raw form data as fallback
-    let domVal = readDomValue(field, fieldOptions);
-    if (domVal === undefined) {
-      const raw = rawData[field];
-      if (raw === undefined || raw === null) continue;
-      domVal = typeof raw === 'object' ? raw : String(raw);
+    const rawVal = rawData[field];
+    let domVal: unknown;
+    // If rawVal is already a {zh, en} object, keep it as-is (V2 component data)
+    if (rawVal !== null && typeof rawVal === 'object' && !Array.isArray(rawVal)) {
+      if ('zh' in rawVal || 'en' in rawVal) continue;
     }
-    if (domVal === undefined) continue;
+    if (Array.isArray(rawVal)) {
+      domVal = rawVal;
+    } else {
+      domVal = readDomValue(field, fieldOptions);
+      if (domVal === undefined) {
+        if (rawVal === undefined || rawVal === null) continue;
+        domVal = String(rawVal);
+      }
+    }
 
     const existing = lookup[field];
     if (existing && isI18nValue(existing)) {
