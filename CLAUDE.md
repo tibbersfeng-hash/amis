@@ -185,17 +185,33 @@ public/api/
 | Amis Theme | cxd | 基础主题 |
 | CSS Variables | - | 设计令牌系统 |
 
-## 构建命令
+## 启动与服务
+
+### 启动命令
 
 ```bash
-npm run dev      # 启动开发服务器 (localhost:5173)
-npm run build    # 构建生产版本 → dist/
-npm run preview  # 预览生产构建
-npm run test     # 运行 E2E 测试 (Playwright)
-npm run test:ui  # 运行 E2E 测试（UI 模式）
-npm run test:unit  # 运行单元测试 (Vitest)
+./start.sh          # 启动开发服务器（0.0.0.0:5173，支持外部访问）
+npm run dev         # 等价于 start.sh，但不会检查服务存活
+npm run build       # 构建生产版本 → dist/
+npm run preview     # 预览生产构建
+npm run test        # 运行 E2E 测试 (Playwright)
+npm run test:ui     # 运行 E2E 测试（UI 模式）
+npm run test:unit   # 运行单元测试 (Vitest)
 npm run test:unit:watch  # 运行单元测试（监听模式）
 ```
+
+### start.sh 脚本行为
+
+1. **检查服务存活** — `curl localhost:5173` 返回 200 则直接退出（避免重复启动）
+2. **清理旧进程** — 端口被占用但无响应时 kill 旧进程
+3. **检查依赖** — 无 node_modules 时自动 `npm install`
+4. **启动服务** — `npm run dev`（vite.config.js 已配置 `host: '0.0.0.0'`）
+
+**监听地址**：`0.0.0.0:5173`（允许局域网和外部访问）
+**内部访问**：http://localhost:5173/
+**外部访问**：http://0.0.0.0:5173/
+
+> ⚠️ **必须通过 `./start.sh` 启动服务**，不要直接用 `npm run dev`，以确保服务监听 `0.0.0.0` 而非仅 `localhost`。
 
 ## 数据流
 
