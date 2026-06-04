@@ -82,16 +82,19 @@
   "excludeField": {
     "zh": [
       "x",
-      "y",
-      "z"
+      "y"
     ],
     "en": [
-      "x"
+      "x",
+      "y"
     ]
   },
-  "excludeFieldExclude": "x,y,z",
+  "excludeFieldExclude": {
+    "zh": false,
+    "en": false
+  },
   "excludeFieldCheckbox": {
-    "zh": "false",
+    "zh": false,
     "en": false
   },
   "previewLanguage": "zh"

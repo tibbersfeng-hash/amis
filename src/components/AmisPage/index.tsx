@@ -110,16 +110,19 @@ function flattenData(
 function readDomValue(
   field: string,
   fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
+  isRichText?: boolean,
 ): string | unknown[] | unknown | undefined {
   // Special fields where input[name] doesn't represent the actual value
   if (field === 'tag') return undefined;             // input is for new tags, not the values
   if (field === 'image') return undefined;            // upload widget, no text value
 
-  // ① TinyMCE rich text editor — read from active editor
-  const tinymceEditor = (window as any).tinymce?.activeEditor;
-  if (tinymceEditor && tinymceEditor.getContent) {
-    const content = tinymceEditor.getContent();
-    if (content) return content;
+  // ① TinyMCE rich text editor — only read if this field is a rich text field
+  if (isRichText) {
+    const tinymceEditor = (window as any).tinymce?.activeEditor;
+    if (tinymceEditor && tinymceEditor.getContent) {
+      const content = tinymceEditor.getContent();
+      if (content) return content;
+    }
   }
 
   // ② Native input/textarea with name attribute
@@ -260,11 +263,12 @@ function persistToLookup(
   lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   lang: string,
-  fieldOptions?: Record<string, Array<{ label: string; value: string }>>
+  fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
+  richTextFields?: string[]
 ): Record<string, Record<string, unknown>> {
   const updated = { ...lookup };
   for (const field of fields) {
-    const currentVal = readDomValue(field, fieldOptions);
+    const currentVal = readDomValue(field, fieldOptions, richTextFields?.includes(field) || false);
     if (currentVal !== undefined) {
       const prev = updated[field] || { zh: '', en: '' };
       // Detect if original value was array → convert comma string back to array
@@ -315,7 +319,7 @@ function mergeI18nData(
       domVal = readDomValue(field, fieldOptions);
       if (domVal === undefined) {
         if (rawVal === undefined || rawVal === null) continue;
-        domVal = String(rawVal);
+        domVal = typeof rawVal === 'boolean' ? rawVal : String(rawVal);
       }
     }
 
@@ -381,6 +385,25 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const fieldOptions = useMemo(() => collectFieldOptions(schema), [schema]);
   const hasI18n = i18nFields.length > 0;
 
+  // Extract rich text field names from schema
+  const richTextFields = useMemo(() => {
+    const fields: string[] = [];
+    function walk(node: unknown) {
+      if (!node || typeof node !== 'object') return;
+      if (Array.isArray(node)) { node.forEach(walk); return; }
+      const obj = node as Record<string, unknown>;
+      if (obj.type === 'input-rich-text' && typeof obj.name === 'string') {
+        fields.push(obj.name);
+      }
+      for (const val of Object.values(obj)) {
+        if (Array.isArray(val)) val.forEach(walk);
+        else walk(val);
+      }
+    }
+    walk(schema);
+    return fields;
+  }, [schema]);
+
   // Build + persist lookup via ref (so fetcher always has latest)
   const [lookup, setLookup] = useState<Record<string, Record<string, unknown>>>(() =>
     buildLookup(formData, i18nFields)
@@ -416,12 +439,12 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const handleLanguageChange = useCallback(
     (newLang: Language) => {
       if (newLang === langRef.current) return;
-      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current, fieldOptions);
+      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current, fieldOptions, richTextFields);
       setLookup(updated);
       langRef.current = newLang;
       setCurrentLang(newLang);
     },
-    [i18nFields, fieldOptions]
+    [i18nFields, fieldOptions, richTextFields]
   );
 
   // Render Amis

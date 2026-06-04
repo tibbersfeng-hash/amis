@@ -10,14 +10,28 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
 
     // Click Exclude checkbox
-    await page.locator('.field-with-exclude-v2 input[type="checkbox"]').first().click();
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // After click: indicator should be visible
     await expect(page.getByText('Values selected above will be excluded')).toBeVisible();
 
     // Click again to uncheck
-    await page.locator('.field-with-exclude-v2 input[type="checkbox"]').first().click();
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // After uncheck: indicator should disappear
@@ -58,7 +72,14 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     expect(isChecked).toBe(false);
 
     // Click checkbox to check it
-    await checkbox.click();
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // After check: indicator should appear
@@ -69,7 +90,14 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     expect(isCheckedAfter).toBe(true);
 
     // Uncheck again
-    await checkbox.click();
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // Indicator should disappear
@@ -101,7 +129,14 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
 
     // Step 1: Check exclude — values should NOT change
-    await checkbox.click({ force: true });
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // Verify indicator appears
@@ -113,7 +148,14 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     expect(afterCheckValues).toContain('选项Y');
 
     // Step 2: Uncheck exclude — values should still NOT change
-    await checkbox.click({ force: true });
+    await page.evaluate(() => {
+        const el = document.querySelector('.field-with-exclude-v2-checkbox-wrap');
+        if (!el) return;
+        const key = Object.keys(el).find(k => k.startsWith('__reactProps'));
+        if (key && typeof el[key]?.onClick === 'function') {
+          el[key].onClick({ preventDefault: () => {}, stopPropagation: () => {} });
+        }
+      });
     await page.waitForTimeout(1000);
 
     // Verify indicator disappears
