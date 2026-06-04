@@ -21,7 +21,7 @@
   },
   "number": {
     "zh": "42",
-    "en": 42
+    "en": "42"
   },
   "richText": {
     "zh": "<p>中文富文本内容</p>",
@@ -41,7 +41,7 @@
   },
   "switch": {
     "zh": "false",
-    "en": true
+    "en": "true"
   },
   "date": {
     "zh": "2026-06-04",
@@ -49,7 +49,7 @@
   },
   "time": {
     "zh": "08:00",
-    "en": "14:30"
+    "en": "08:00"
   },
   "month": {
     "zh": "2026-06",
@@ -82,14 +82,14 @@
   "excludeField": {
     "zh": [
       "x",
-      "y"
+      "y",
+      "z"
     ],
     "en": [
-      "x",
-      "y"
+      "x"
     ]
   },
-  "excludeFieldExclude": false,
+  "excludeFieldExclude": "x,y,z",
   "excludeFieldCheckbox": {
     "zh": "false",
     "en": false
