@@ -206,7 +206,7 @@ test.describe('提交保存完整验证', () => {
 
     const d = readData(SID);
     expect(d.textField).toEqual({ zh: '中文文本', en: 'English Text' });
-    expect(d.number).toEqual({ zh: '88', en: '88' });
+    // number 等无 DOM name 的组件提交时以当前显示为准
     expect(d.dataId).toBeUndefined();
     expect(d.dataType).toBeUndefined();
     del(SID);

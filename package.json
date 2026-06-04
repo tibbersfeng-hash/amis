@@ -13,7 +13,7 @@
     "test:e2e:headed": "npx playwright test --headed"
   },
   "dependencies": {
-    "amis": "^3.6.0",
+    "amis": "^6.13.0",
     "mobx": "^6.15.4",
     "mobx-react": "^9.2.2",
     "react": "^17.0.2",
