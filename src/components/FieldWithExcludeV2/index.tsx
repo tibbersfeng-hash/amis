@@ -6,8 +6,8 @@ import type { FormControlProps } from 'amis';
  * FieldWithExcludeV2 — Amis custom form control with select + Exclude checkbox.
  *
  * Renders a custom label row with Exclude checkbox, then uses Amis native select
- * for the dropdown. When Exclude is toggled, values are written to excludeName
- * instead of the base name field.
+ * for the dropdown. When Exclude is toggled, selected values are transferred
+ * between the base name field and the excludeName field.
  *
  * Schema usage:
  * {
@@ -92,17 +92,33 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
   // Determine active field name based on exclude state
   const activeFieldName = isExcluded ? effectiveExcludeName : name;
 
+  // Read current value from the active field
+  const activeFieldValue = (data as Record<string, unknown>)?.[activeFieldName];
+
   const handleCheckboxToggle = useCallback(() => {
     const next = !isExcluded;
+    const sourceField = isExcluded ? effectiveExcludeName : name;
+    const targetField = next ? effectiveExcludeName : name;
+
+    // Copy current values to target field to preserve selection
+    const currentValues = (data as Record<string, unknown>)?.[sourceField];
+
+    const bulkUpdate: Record<string, unknown> = {
+      [checkboxName]: next,
+    };
+    if (currentValues !== undefined) {
+      bulkUpdate[targetField] = currentValues;
+    }
+
     setIsExcluded(next);
 
     if (onBulkChange) {
-      onBulkChange({ [checkboxName]: next });
+      onBulkChange(bulkUpdate);
     }
     if (onChange) {
-      onChange(next, checkboxName);
+      onChange(bulkUpdate[checkboxName], checkboxName);
     }
-  }, [isExcluded, checkboxName, onBulkChange, onChange]);
+  }, [isExcluded, name, effectiveExcludeName, checkboxName, data, onBulkChange, onChange]);
 
   if (!render) {
     return <div style={{ color: 'red' }}>ERROR: render function not available</div>;
@@ -147,7 +163,7 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
         </label>
       </div>
 
-      {/* Amis native select — uses activeFieldName to switch between name and excludeName */}
+      {/* Amis native select */}
       <div className="field-with-exclude-v2-select-wrap">
         {render('select', {
           type: 'select',
@@ -158,6 +174,7 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
           searchable,
           options: resolvedOptions,
           className: className || '',
+          value: activeFieldValue,
         }, {
           data: data as Record<string, unknown>,
         })}

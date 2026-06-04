@@ -85,30 +85,47 @@ test.describe('FieldWithExcludeV2 Component — Operations & Data Assertions', (
     });
   });
 
-  test('exclude toggle: checkbox state changes correctly', async ({ page }) => {
+  test('exclude toggle does not affect selected values', async ({ page }) => {
     await page.goto('http://localhost:5173/remote?dataType=form-test-multi-lang&dataId=form-test-multi-lang');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
+    // Find select inside field-with-exclude-v2
+    const v2Select = page.locator('.field-with-exclude-v2 .cxd-Select').first();
     const checkbox = page.locator('.field-with-exclude-v2 input[type="checkbox"]').first();
 
-    // Initial: checkbox unchecked
+    // Initial: select shows "选项X, 选项Y", checkbox unchecked
+    const initialValues = await v2Select.locator('.cxd-Select-value').allTextContents();
+    expect(initialValues).toContain('选项X');
+    expect(initialValues).toContain('选项Y');
     expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
 
-    // Check exclude
+    // Step 1: Check exclude — values should NOT change
     await checkbox.click({ force: true });
     await page.waitForTimeout(1000);
-    expect(await checkbox.evaluate((el) => el.checked)).toBe(true);
+
+    // Verify indicator appears
     await expect(page.getByText('Values selected above will be excluded')).toBeVisible();
 
-    // Uncheck exclude
+    // Verify select values preserved after check
+    const afterCheckValues = await v2Select.locator('.cxd-Select-value').allTextContents();
+    expect(afterCheckValues).toContain('选项X');
+    expect(afterCheckValues).toContain('选项Y');
+
+    // Step 2: Uncheck exclude — values should still NOT change
     await checkbox.click({ force: true });
     await page.waitForTimeout(1000);
-    expect(await checkbox.evaluate((el) => el.checked)).toBe(false);
+
+    // Verify indicator disappears
     await expect(page.getByText('Values selected above will be excluded')).not.toBeVisible();
 
+    // Verify select values preserved after uncheck
+    const finalValues = await v2Select.locator('.cxd-Select-value').allTextContents();
+    expect(finalValues).toContain('选项X');
+    expect(finalValues).toContain('选项Y');
+
     await page.screenshot({
-      path: 'tests/e2e/screenshots/field-exclude-v2-exclude-toggle.png',
+      path: 'tests/e2e/screenshots/field-exclude-v2-exclude-preserve-values.png',
       fullPage: true,
     });
   });
