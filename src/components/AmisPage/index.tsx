@@ -63,8 +63,8 @@ function collectFieldOptions(
 }
 
 /** Build a lookup of original {zh, en} values for the given fields */
-function buildLookup(data: Record<string, unknown>, fields: string[]): Record<string, Record<string, string>> {
-  const lookup: Record<string, Record<string, string>> = {};
+function buildLookup(data: Record<string, unknown>, fields: string[]): Record<string, Record<string, unknown>> {
+  const lookup: Record<string, Record<string, unknown>> = {};
   for (const field of fields) {
     const val = data[field];
     if (isI18nValue(val)) lookup[field] = val;
@@ -72,11 +72,11 @@ function buildLookup(data: Record<string, unknown>, fields: string[]): Record<st
   return lookup;
 }
 
-/** Flatten {zh, en} → single language string for Amis display */
+/** Flatten {zh, en} → single language value for Amis display */
 function flattenData(
   data: Record<string, unknown>,
   fields: string[],
-  lookup: Record<string, Record<string, string>>,
+  lookup: Record<string, Record<string, unknown>>,
   lang: string
 ): Record<string, unknown> {
   if (!fields.length) return data;
@@ -93,12 +93,12 @@ function flattenData(
 
 /**
  * Read current DOM value for a field.
- * 4-level fallback: name attr → label→value mapping → amis store → undefined
+ * Returns string for text fields, or raw array/object for FieldWithExclude.
  */
 function readDomValue(
   field: string,
   fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
-): string | undefined {
+): string | unknown[] | unknown | undefined {
   // Special fields where input[name] doesn't represent the actual value
   if (field === 'tag') return undefined;             // input is for new tags, not the values
   if (field === 'image') return undefined;            // upload widget, no text value
@@ -169,14 +169,14 @@ function readDomValue(
     if (colorInput?.value) return colorInput.value;
   }
 
-  // ⑥ Field-with-exclude: read from hidden data div
+  // ⑥ Field-with-exclude: read from hidden data div — preserve raw type for multiLang
   const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
   if (excludeData) {
     try {
       const parsed = JSON.parse(excludeData.textContent || '{}');
       if (parsed && typeof parsed === 'object' && field in parsed) {
         const val = parsed[field];
-        if (val !== null && val !== undefined) return String(val);
+        if (val !== null && val !== undefined) return val; // return raw (array/object/string)
       }
     } catch { /* ignore parse errors */ }
   }
@@ -190,7 +190,8 @@ function readDomValue(
 }
 
 /** Write a value into the DOM for a field */
-function writeDomValue(field: string, value: string): void {
+function writeDomValue(field: string, value: string | unknown): void {
+  // Try native input/textarea first
   const input = document.querySelector(
     `input[name="${field}"], textarea[name="${field}"]`
   ) as HTMLInputElement | HTMLTextAreaElement | null;
@@ -202,9 +203,26 @@ function writeDomValue(field: string, value: string): void {
     if (nativeSetter) {
       nativeSetter.call(input, value);
     } else {
-      input.value = value;
+      input.value = value as string;
     }
     input.dispatchEvent(new Event('input', { bubbles: true }));
+    return;
+  }
+
+  // Field-with-exclude: write to hidden data div
+  const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
+  if (excludeData && excludeData.textContent) {
+    try {
+      const parsed = JSON.parse(excludeData.textContent || '{}');
+      if (parsed && typeof parsed === 'object') {
+        // Update the value for this field (keep checkbox state intact)
+        parsed[field] = value;
+        excludeData.textContent = JSON.stringify(parsed);
+        return;
+      }
+    } catch { /* ignore parse errors */ }
+    // Fallback: replace entire content
+    excludeData.textContent = JSON.stringify({ [field]: value });
     return;
   }
 
@@ -216,11 +234,11 @@ function writeDomValue(field: string, value: string): void {
 
 /** Persist current DOM values into the lookup, returning the updated lookup */
 function persistToLookup(
-  lookup: Record<string, Record<string, string>>,
+  lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   lang: string,
   fieldOptions?: Record<string, Array<{ label: string; value: string }>>
-): Record<string, Record<string, string>> {
+): Record<string, Record<string, unknown>> {
   const updated = { ...lookup };
   for (const field of fields) {
     const currentVal = readDomValue(field, fieldOptions);
@@ -234,7 +252,7 @@ function persistToLookup(
 
 /** Apply a language's values from the lookup into the DOM */
 function applyFromLookup(
-  lookup: Record<string, Record<string, string>>,
+  lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   lang: string
 ): void {
@@ -249,7 +267,7 @@ function applyFromLookup(
 /** Merge current values into {zh, en} for all multiLang fields */
 function mergeI18nData(
   rawData: Record<string, unknown>,
-  lookup: Record<string, Record<string, string>>,
+  lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   currentLang: string,
   fieldOptions?: Record<string, Array<{ label: string; value: string }>>
@@ -261,7 +279,7 @@ function mergeI18nData(
     if (domVal === undefined) {
       const raw = rawData[field];
       if (raw === undefined || raw === null) continue;
-      domVal = String(raw);
+      domVal = typeof raw === 'object' ? raw : String(raw);
     }
     if (domVal === undefined) continue;
 
@@ -328,10 +346,10 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const hasI18n = i18nFields.length > 0;
 
   // Build + persist lookup via ref (so fetcher always has latest)
-  const [lookup, setLookup] = useState<Record<string, Record<string, string>>>(() =>
+  const [lookup, setLookup] = useState<Record<string, Record<string, unknown>>>(() =>
     buildLookup(formData, i18nFields)
   );
-  const lookupRef = useRef(lookup);
+  const lookupRef = useRef<Record<string, Record<string, unknown>>>(lookup);
   lookupRef.current = lookup;
 
   // Flatten formData for Amis display

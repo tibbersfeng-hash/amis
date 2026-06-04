@@ -215,46 +215,64 @@ Save 按钮 → 输出 zh/en 双版本 JSON
 
 ## 多语言策略
 
-### 业务 i18n（业务内容）
-- 所有可翻译字段在 formData 中存储为 `{zh, en, jp, ...}` 对象
-- `pageRegistry` 定义每个页面的 i18n 字段列表
-- `App.tsx` 通过 DOM 操作切换语言值（避免重新渲染 Amis）
-- 保存时输出完整的多版本 JSON
+### 核心区分：内容多语言 vs 展示多语言
 
-### 组件内容多语言（multiLang 内容值）
+项目存在 **三层独立的多语言机制**，互不干扰：
 
-`multiLang: true` 是表单字段级别的标记，用于声明**该字段的数据值**使用 `{zh, en, jp}` 多语言对象格式。
+| 层级 | 机制 | 管理对象 | 文件 |
+|------|------|----------|------|
+| **① 业务内容多语言** | multiLang | 表单字段的数据值 | `multiLang: true` |
+| **② 组件静态文本** | i18n-config | 按钮/标签/提示等 UI 文字 | `src/utils/i18n-config.ts` |
+| **③ 展示语言切换** | LanguageSwitcher | 当前页面展示语言 | `src/components/LanguageSwitcher/` |
 
-- **触发条件**：Schema 中字段配置 `multiLang: true`，表示该字段的**数据值**（而非 label/options label 等静态文本）支持多语言
-- **数据格式**：字段值使用 `{zh: 'GDS,BAR', en: 'GDS,BAR'}` 对象格式
-- **渲染逻辑**：`src/utils/multiLang.ts` 的 `processSchemaMultiLang` 递归处理 schema，当字段有 `multiLang: true` 时，自动将其内容字段（`value`, `label`, `placeholder`, `title`, `description`, `remark`, `text`, `content`）及 `options` 中的 `label` 按当前语言扁平化
-- **数据扁平化**：`flattenDataMultiLang` 将表单数据中的 `{zh,en} → 单语言值`，传入 Amis 渲染
+### ① 业务内容多语言（multiLang）
+
+**multiLang 管理的是"配置内容"的多语言，不是"展示内容"的多语言。**
+
+**含义**：声明某个表单字段的**数据值**使用 `{zh, en, jp}` 多语言对象格式存储。
+
+**典型场景**：活动名称"夏季推广"，中文和英文各自存储一份：
+```json
+// 提交保存后 data.json 中的格式
+{
+  "missionName": { "zh": "夏季推广", "en": "Summer Campaign" }
+}
+```
+
+**不是**翻译 Amis 的 label/placeholder/button 等 UI 文字——那些属于 **i18n-config** 管理的范围。
+
+**工作原理**：
+- **触发条件**：Schema 中字段配置 `multiLang: true`
+- **数据格式**：字段值为 `{zh: '中文值', en: '英文值', ...}` 对象
+- **渲染**：`src/utils/multiLang.ts` 的 `processSchemaMultiLang` 按当前语言将 `{zh,en} → 单语言值` 扁平化传入 Amis
+- **切换语言**：App.tsx 通过 DOM 操作直接修改输入框值（避免重新渲染 Amis 丢失用户输入）
+- **保存**：fetcher 拦截 POST → `mergeI18nData()` 将当前值合并回 `{zh, en}` 结构
 - **isI18nValue 判定**：`keys.includes('zh') && keys.length >= 2` — 自动支持任意语言数量
-- **语言扩展**：新增语言只需在 `src/components/LanguageSwitcher/index.tsx` 的 `LANGUAGES` 数组中添加一项，所有下拉框自动生效
-
-**重要**：`multiLang: true` 控制的是**表单数据值**的多语言，不是 label 本身的国际化。options 的 label 如果是 `{zh, en}` 格式也会在渲染时按语言扁平化，但 options label 本身不需要加 `multiLang` 标记（继承自父字段）。
+- **语言扩展**：新增语言只需在 `LANGUAGES` 数组中添加一项
 
 **示例**：
 ```json
 {
-  "type": "field-with-exclude",
-  "name": "marketCodes",
+  "type": "input-text",
+  "name": "missionName",
   "multiLang": true,
-  "options": [
-    { "label": "GDS", "value": "GDS" }
-  ]
+  "label": "活动名称"
 }
-// 对应测试数据：
-{ "marketCodes": { "zh": "GDS,BAR", "en": "GDS,BAR" } }
+// 对应数据：{ "missionName": { "zh": "夏季推广", "en": "Summer Campaign" } }
 ```
 
-### i18n-config（基础设施组件文本）
-- 定义在 `src/utils/i18n-config.ts`，管理非业务组件的静态 UI 文本
+**multiLang 处理的属性列表**（schema 中的这些字段值会被多语言扁平化）：
+`value`, `label`, `placeholder`, `title`, `description`, `remark`, `text`, `content`，以及 `options` 中的 `label`。
+
+### ② 组件静态文本（i18n-config）
+
+管理**基础设施组件的 UI 文字**（非业务内容），与 multiLang 完全独立。
+
+- 定义在 `src/utils/i18n-config.ts`
 - 支持语言：`zh`（中文）、`en`（English）、`jp`（日本語）
-- 适用范围：StickyFooter（按钮文字）、Loading（加载提示）、DateRangePicker（月份/星期/操作按钮）、I18nConfigPanel（标签）、LanguageSwitcher（标签）
-- 语言切换时，`App.tsx` 调用 `setComponentLanguage(lang)` 同步
-- 组件通过 `getComponentI18n()` 读取当前语言的字符串
-- 组件监听 `previewLanguageChange` 事件自动更新显示
+- 适用范围：StickyFooter 按钮文字、Loading 加载提示、DateRangePicker 月份/星期标签、LanguageSwitcher 标签等
+- 切换时通过 `setComponentLanguage(lang)` + `previewLanguageChange` 事件同步
+- 组件通过 `getComponentI18n()` 读取当前语言字符串
 
 ## Showcase 系统
 
