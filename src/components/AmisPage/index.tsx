@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import '../PhoneMockup';
 import '../DateRangePicker';
 import '../FieldWithExclude';
+import '../FieldWithExcludeV2';
 import '../ClosableTabs';
 import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';

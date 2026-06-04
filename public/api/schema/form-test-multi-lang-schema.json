@@ -34,7 +34,7 @@
     { "type": "input-rating", "name": "rating", "label": "评分", "multiLang": true, "count": 5 },
     { "type": "input-tag", "name": "tag", "label": "标签", "multiLang": true, "placeholder": "输入标签按回车" },
     { "type": "input-image", "name": "image", "label": "图片上传", "multiLang": true, "receiver": "/api/upload", "accept": "image/*" },
-    { "type": "field-with-exclude", "name": "excludeField", "label": "排除选择", "multiLang": true,
+    { "type": "field-with-exclude-v2", "name": "excludeField", "label": "排除选择", "multiLang": true,
       "excludeName": "excludeFieldExclude", "excludeCheckboxName": "excludeFieldCheckbox",
       "multiple": true, "searchable": true,
       "options": [

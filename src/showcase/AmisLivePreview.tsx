@@ -10,6 +10,7 @@ import type { Language } from '../components/LanguageSwitcher';
 import '../components/PhoneMockup';
 import '../components/DateRangePicker';
 import '../components/FieldWithExclude';
+import '../components/FieldWithExcludeV2';
 // Import ClosableTabs to register the closable-tab renderer
 import ClosableTabsModule from '../components/ClosableTabs';
 
