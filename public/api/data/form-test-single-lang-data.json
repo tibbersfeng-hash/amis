@@ -1,0 +1,16 @@
+{
+  "textField": "中文字段值",
+  "textArea": "多行文本内容",
+  "email": "test@test.com",
+  "url": "https://example.com",
+  "password": "password123",
+  "number": 99,
+  "select": "opt2",
+  "radio": "no",
+  "checkbox": "b",
+  "switch": false,
+  "date": "2026-06-05",
+  "time": "10:00",
+  "color": "#FF0000",
+  "rating": 3
+}

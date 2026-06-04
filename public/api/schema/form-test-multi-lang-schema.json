@@ -1,0 +1,37 @@
+{
+  "type": "form",
+  "title": "多语言测试 — 全部文本字段 multiLang",
+  "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
+  "mode": "horizontal",
+  "horizontal": { "left": 4, "right": 8 },
+  "body": [
+    { "type": "input-text", "name": "textField", "label": "单行文本", "placeholder": "请输入文本", "multiLang": true, "clearable": true },
+    { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "multiLang": true, "minRows": 2 },
+    { "type": "input-email", "name": "email", "label": "邮箱", "placeholder": "请输入邮箱", "multiLang": true, "clearable": true },
+    { "type": "input-url", "name": "url", "label": "网址", "placeholder": "https://", "multiLang": true, "clearable": true },
+    { "type": "input-password", "name": "password", "label": "密码", "multiLang": true },
+    { "type": "input-number", "name": "number", "label": "数字", "placeholder": "请输入数字", "min": 0 },
+    { "type": "select", "name": "select", "label": "下拉选择", "options": [
+      { "label": "选项一", "value": "opt1" },
+      { "label": "选项二", "value": "opt2" }
+    ], "clearable": true },
+    { "type": "radios", "name": "radio", "label": "单选", "options": [
+      { "label": "是", "value": "yes" },
+      { "label": "否", "value": "no" }
+    ] },
+    { "type": "checkboxes", "name": "checkbox", "label": "多选", "options": [
+      { "label": "选项A", "value": "a" },
+      { "label": "选项B", "value": "b" }
+    ] },
+    { "type": "switch", "name": "switch", "label": "开关" },
+    { "type": "input-date", "name": "date", "label": "日期" },
+    { "type": "input-time", "name": "time", "label": "时间" },
+    { "type": "input-color", "name": "color", "label": "颜色" },
+    { "type": "input-rating", "name": "rating", "label": "评分", "count": 5 },
+    { "type": "input-tag", "name": "tag", "label": "标签", "multiLang": true, "placeholder": "输入标签按回车" }
+  ],
+  "actions": [
+    { "type": "submit", "label": "提交保存", "level": "primary" },
+    { "type": "reset", "label": "重置" }
+  ]
+}

@@ -241,11 +241,11 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const handleLanguageChange = useCallback(
     (newLang: Language) => {
       if (newLang === langRef.current) return;
-      // Persist current DOM values into lookup
+      // Persist current DOM values into lookup, then trigger Amis re-render
+      // with updated displayData. The Amis re-render handles value display,
+      // so no direct DOM manipulation needed here.
       const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current);
       setLookup(updated);
-      // Apply new language values to DOM
-      applyFromLookup(updated, i18nFields, newLang);
       langRef.current = newLang;
       setCurrentLang(newLang);
     },
@@ -256,7 +256,6 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   useEffect(() => {
     if (!containerRef.current || !schema) return;
 
-    containerRef.current.innerHTML = '';
     const abortController = new AbortController();
 
     const amisData = {

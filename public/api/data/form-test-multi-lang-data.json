@@ -1,0 +1,17 @@
+{
+  "textField": { "zh": "中文文本", "en": "English Text" },
+  "textArea": { "zh": "多行中文内容，用于测试。", "en": "Multi-line English content for testing." },
+  "email": { "zh": "zhongwen@test.com", "en": "english@test.com" },
+  "url": { "zh": "https://zhongwen.example.com", "en": "https://english.example.com" },
+  "password": { "zh": "zhongwen-pwd", "en": "english-pwd" },
+  "number": 42,
+  "select": "opt1",
+  "radio": "yes",
+  "checkbox": "a",
+  "switch": true,
+  "date": "2026-06-04",
+  "time": "14:30",
+  "color": "#4A5CBF",
+  "rating": 4,
+  "tag": { "zh": "标签一", "en": "Tag One" }
+}

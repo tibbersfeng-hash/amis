@@ -1,0 +1,14 @@
+{
+  "title": "多语言测试列表",
+  "dataIdPrefix": "form-test-multi-lang-",
+  "linkTemplate": "/remote?dataType=form-test-multi-lang&dataId=${dataId}",
+  "columns": [
+    { "name": "textField", "label": "文本" },
+    { "name": "email", "label": "邮箱" },
+    { "name": "number", "label": "数字" },
+    { "name": "select", "label": "选择" }
+  ],
+  "searchFields": [
+    { "name": "keyword", "label": "搜索", "type": "text", "placeholder": "文本 / 邮箱" }
+  ]
+}

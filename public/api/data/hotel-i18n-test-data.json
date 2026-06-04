@@ -1,0 +1,11 @@
+{
+  "hotelName": { "zh": "北京国际饭店", "en": "Beijing International Hotel", "jp": "北京国際ホテル" },
+  "hotelBrand": "shangri-la",
+  "hotelCode": "CNI18NTST",
+  "address": { "zh": "北京市东城区建国门内大街9号", "en": "9 Jianguomen Inner Street, Dongcheng, Beijing" },
+  "city": { "zh": "北京", "en": "Beijing" },
+  "contactPerson": { "zh": "张经理", "en": "Manager Zhang" },
+  "contactPhone": "010-88886666",
+  "roomCount": 500,
+  "description": { "zh": "北京国际饭店位于北京市中心，交通便利。", "en": "Beijing International Hotel is located in the city center." }
+}
