@@ -33,6 +33,35 @@ function collectMultiLangFields(schema: unknown): string[] {
   return fields;
 }
 
+/** Extract label→value option mappings from schema for select/radio/checkbox fields */
+function collectFieldOptions(
+  schema: unknown,
+): Record<string, Array<{ label: string; value: string }>> {
+  const options: Record<string, Array<{ label: string; value: string }>> = {};
+  function walk(node: unknown) {
+    if (!node || typeof node !== 'object') return;
+    const obj = node as Record<string, unknown>;
+    if (
+      typeof obj.name === 'string' &&
+      Array.isArray(obj.options) &&
+      obj.options.length > 0
+    ) {
+      options[obj.name] = obj.options.map(
+        (o: Record<string, unknown>) => ({
+          label: String(o.label ?? ''),
+          value: String(o.value ?? ''),
+        }),
+      );
+    }
+    for (const val of Object.values(obj)) {
+      if (Array.isArray(val)) val.forEach(walk);
+      else walk(val);
+    }
+  }
+  walk(schema);
+  return options;
+}
+
 /** Build a lookup of original {zh, en} values for the given fields */
 function buildLookup(data: Record<string, unknown>, fields: string[]): Record<string, Record<string, string>> {
   const lookup: Record<string, Record<string, string>> = {};
@@ -62,18 +91,61 @@ function flattenData(
   return result;
 }
 
-/** Read current DOM value for a field (native input first, then Amis store) */
-function readDomValue(field: string): string | undefined {
+/**
+ * Read current DOM value for a field.
+ * 4-level fallback: name attr → label→value mapping → amis store → undefined
+ */
+function readDomValue(
+  field: string,
+  fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
+): string | undefined {
+  // ① Native input/textarea with name attribute
   const input = document.querySelector(
-    `input[name="${field}"], textarea[name="${field}"]`
+    `input[name="${field}"], textarea[name="${field}"]`,
   ) as HTMLInputElement | HTMLTextAreaElement | null;
   if (input) return input.value;
 
-  const store = (window as any).amisStore;
-  if (store?.data && field in store.data) {
-    const val = store.data[field];
-    if (val !== null && val !== undefined) return String(val);
+  // ② Label→value mapping for select/radio/checkbox
+  const opts = fieldOptions?.[field];
+  if (opts?.length) {
+    // Radio / checkbox: find checked label → match label text → return value
+    const radioChecked = document.querySelector(
+      '.cxd-Checkbox--radio--default.checked',
+    );
+    if (radioChecked) {
+      const label = radioChecked.textContent?.trim() ?? '';
+      const match = opts.find((o) => o.label === label);
+      if (match) return match.value;
+    }
+
+    // Checkbox (multi-select)
+    const cbChecked = document.querySelectorAll(
+      '.cxd-Checkbox--checkbox--default.checked',
+    );
+    if (cbChecked.length > 0) {
+      const values: string[] = [];
+      cbChecked.forEach((el) => {
+        const label = el.textContent?.trim() ?? '';
+        const match = opts.find((o) => o.label === label);
+        if (match) values.push(match.value);
+      });
+      return values.join(',');
+    }
+
+    // Select: read display text from the value span
+    const selValue = document.querySelector('.cxd-Select-value');
+    if (selValue) {
+      const label = selValue.textContent?.trim() ?? '';
+      const match = opts.find((o) => o.label === label);
+      if (match) return match.value;
+    }
   }
+
+  // ③ Switch
+  if (field === 'switch') {
+    return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
+  }
+
   return undefined;
 }
 
@@ -106,11 +178,12 @@ function writeDomValue(field: string, value: string): void {
 function persistToLookup(
   lookup: Record<string, Record<string, string>>,
   fields: string[],
-  lang: string
+  lang: string,
+  fieldOptions?: Record<string, Array<{ label: string; value: string }>>
 ): Record<string, Record<string, string>> {
   const updated = { ...lookup };
   for (const field of fields) {
-    const currentVal = readDomValue(field);
+    const currentVal = readDomValue(field, fieldOptions);
     if (currentVal !== undefined) {
       const prev = updated[field] || { zh: '', en: '' };
       updated[field] = { ...prev, [lang]: currentVal };
@@ -138,12 +211,13 @@ function mergeI18nData(
   rawData: Record<string, unknown>,
   lookup: Record<string, Record<string, string>>,
   fields: string[],
-  currentLang: string
+  currentLang: string,
+  fieldOptions?: Record<string, Array<{ label: string; value: string }>>
 ): Record<string, unknown> {
   const merged = { ...rawData };
   for (const field of fields) {
     // Try DOM first (input[name]), then raw form data as fallback
-    let domVal = readDomValue(field);
+    let domVal = readDomValue(field, fieldOptions);
     if (domVal === undefined) {
       const raw = rawData[field];
       if (raw === undefined || raw === null) continue;
@@ -208,8 +282,9 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const langRef = useRef(currentLang);
   langRef.current = currentLang;
 
-  // Extract multiLang fields from schema
+  // Extract multiLang fields and option mappings from schema
   const i18nFields = useMemo(() => collectMultiLangFields(schema), [schema]);
+  const fieldOptions = useMemo(() => collectFieldOptions(schema), [schema]);
   const hasI18n = i18nFields.length > 0;
 
   // Build + persist lookup via ref (so fetcher always has latest)
@@ -233,25 +308,26 @@ export const AmisPage: React.FC<AmisPageProps> = ({
           api.data as Record<string, unknown>,
           lookupRef.current,
           i18nFields,
-          langRef.current
+          langRef.current,
+          fieldOptions,
         );
         api = { ...api, data: merged };
       }
       return defaultFetcher(api, props);
     },
-    [i18nFields]
+    [i18nFields, fieldOptions]
   );
 
   // Language switch handler
   const handleLanguageChange = useCallback(
     (newLang: Language) => {
       if (newLang === langRef.current) return;
-      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current);
+      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current, fieldOptions);
       setLookup(updated);
       langRef.current = newLang;
       setCurrentLang(newLang);
     },
-    [i18nFields]
+    [i18nFields, fieldOptions]
   );
 
   // Render Amis
