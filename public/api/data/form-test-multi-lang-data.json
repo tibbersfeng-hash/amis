@@ -1,7 +1,7 @@
 {
   "textField": {
     "zh": "中文文本",
-    "en": "EN only submit"
+    "en": "English Text"
   },
   "textArea": {
     "zh": "多行中文内容，用于测试。",
@@ -40,16 +40,16 @@
     "en": "a"
   },
   "switch": {
-    "zh": "false",
-    "en": "false"
+    "zh": true,
+    "en": true
   },
   "date": {
     "zh": "2026-06-04",
     "en": "2026-06-04"
   },
   "time": {
-    "zh": "08:00",
-    "en": "08:00"
+    "zh": "14:30",
+    "en": "14:30"
   },
   "month": {
     "zh": "2026-06",
