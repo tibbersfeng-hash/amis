@@ -194,8 +194,48 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
     const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
     const sv = saved.image;
     expect(sv).toBeTruthy();
-    // 值应包含上传的 URL，且是 {zh, en} 格式
     expect(sv.zh || sv.en).toBeTruthy();
     expect(typeof sv.zh === 'string' || typeof sv.en === 'string').toBeTruthy();
+  });
+
+  test('4. 英文下上传 → 切中文 → 图片保留', async ({ page }) => {
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+
+    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    await fileInput.setInputFiles(TEST_PNG);
+    await page.waitForTimeout(1000);
+
+    const img = page.locator('.cxd-ImageControl img');
+    await expect(img).toBeVisible({ timeout: 5000 });
+    const srcEn = await img.getAttribute('src');
+
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
+
+    await expect(img).toBeVisible({ timeout: 5000 });
+    const srcZh = await img.getAttribute('src');
+    expect(srcZh).toBe(srcEn);
+  });
+
+  test('5. 上传 + 编辑字段 → 提交 → 数据一致', async ({ page }) => {
+    // 上传图片
+    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    await fileInput.setInputFiles(TEST_PNG);
+    await page.waitForTimeout(1000);
+
+    // 同时编辑文本字段
+    await page.locator('input[name="textField"]').fill('图片+文本提交');
+
+    // 提交
+    const r = page.waitForResponse((resp: any) => resp.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
+
+    const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    // 图片 URL 保存
+    expect(saved.image?.zh || saved.image?.en).toBeTruthy();
+    // 文本字段正常（互不干扰）
+    expect(saved.textField?.zh).toBe('图片+文本提交');
   });
 });

@@ -280,12 +280,17 @@ function persistToLookup(
     const currentVal = readDomValue(field, fieldOptions, richTextFields?.includes(field) || false);
     if (currentVal !== undefined) {
       const prev = updated[field] || { zh: '', en: '' };
-      // Detect if original value was array → convert comma string back to array
-      const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
-      if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
-        updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
+      // Image URL is not language-specific — sync to both languages
+      if (field === 'image') {
+        updated[field] = { zh: currentVal, en: currentVal };
       } else {
-        updated[field] = { ...prev, [lang]: currentVal };
+        // Detect if original value was array → convert comma string back to array
+        const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
+        if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
+          updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
+        } else {
+          updated[field] = { ...prev, [lang]: currentVal };
+        }
       }
     }
   }
@@ -334,9 +339,8 @@ function mergeI18nData(
 
     const existing = lookup[field];
     if (existing && isI18nValue(existing)) {
-      // For boolean/array values (component state: checkbox toggle, multi-select),
-      // the change applies to ALL languages, not just the current one.
-      if (typeof domVal === 'boolean' || Array.isArray(domVal)) {
+      // For boolean/array/image values (component state, not language-specific)
+      if (typeof domVal === 'boolean' || Array.isArray(domVal) || field === 'image') {
         merged[field] = { zh: domVal, en: domVal };
       } else {
         merged[field] = { ...existing, [currentLang]: domVal };
