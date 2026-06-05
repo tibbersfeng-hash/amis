@@ -212,6 +212,6 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
   test('field-with-exclude 切换不崩', async ({ page }) => {
     await expect(page.locator('.field-with-exclude-v2')).toBeVisible();
     await sw(page, 'en'); await sw(page, 'zh');
-    await expect(page.locator('.field-with-exclude')).toBeVisible();
+    await expect(page.locator('.field-with-exclude-v2')).toBeVisible();
   });
 });

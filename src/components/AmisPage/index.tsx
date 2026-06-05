@@ -114,9 +114,17 @@ function readDomValue(
 ): string | unknown[] | unknown | undefined {
   // Special fields where input[name] doesn't represent the actual value
   if (field === 'tag') return undefined;             // input is for new tags, not the values
-  if (field === 'image') return undefined;            // upload widget, no text value
 
-  // ① TinyMCE rich text editor — only read if this field is a rich text field
+  // ① Image upload: read the img src or hidden value from the image component
+  if (field === 'image') {
+    const img = document.querySelector('.cxd-ImageControl img') as HTMLImageElement | null;
+    if (img?.src && img.src !== window.location.href) return img.src;
+    const hiddenInput = document.querySelector('input[name="image"]') as HTMLInputElement | null;
+    if (hiddenInput?.value) return hiddenInput.value;
+    return undefined;
+  }
+
+  // ③ TinyMCE rich text editor — only read if this field is a rich text field
   if (isRichText) {
     const tinymceEditor = (window as any).tinymce?.activeEditor;
     if (tinymceEditor && tinymceEditor.getContent) {
@@ -125,13 +133,13 @@ function readDomValue(
     }
   }
 
-  // ② Native input/textarea with name attribute
+  // ④ Native input/textarea with name attribute
   const input = document.querySelector(
     `input[name="${field}"], textarea[name="${field}"]`,
   ) as HTMLInputElement | HTMLTextAreaElement | null;
   if (input) return input.value;
 
-  // ③ Label→value mapping for select/radio/checkbox
+  // ⑤ Label→value mapping for select/radio/checkbox
   const opts = fieldOptions?.[field];
   if (opts?.length) {
     // Radio: find checked label → match label text → return value
@@ -168,7 +176,7 @@ function readDomValue(
     }
   }
 
-  // ④ Date / time / month / datetime pickers: match by placeholder
+  // ⑥ Date / time / month / datetime pickers: match by placeholder
   const pickers = document.querySelectorAll('.cxd-DatePicker-input');
   for (const p of pickers) {
     const inp = p as HTMLInputElement;
@@ -179,7 +187,7 @@ function readDomValue(
     if (field === 'datetime' && inp.placeholder?.includes('日期以及时间')) return inp.value;
   }
 
-  // ⑤ Date range picker: read start,end combo
+  // ⑦ Date range picker: read start,end combo
   if (field === 'dateRange') {
     const rangeInputs = document.querySelectorAll('.cxd-DateRangePicker-input');
     if (rangeInputs.length >= 2) {
@@ -189,14 +197,14 @@ function readDomValue(
     }
   }
 
-  // ⑥ Color picker
+  // ⑧ Color picker
   if (field === 'color') {
     const colorInput = document.querySelector('.cxd-ColorPicker-input') as HTMLInputElement | null
       ?? document.querySelector('.cxd-ColorPicker input') as HTMLInputElement | null;
     if (colorInput?.value) return colorInput.value;
   }
 
-  // ⑦ Field-with-exclude: read from hidden data div — preserve raw type for multiLang
+  // ⑨ Field-with-exclude: read from hidden data div — preserve raw type for multiLang
   const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
   if (excludeData) {
     try {
@@ -208,7 +216,7 @@ function readDomValue(
     } catch { /* ignore parse errors */ }
   }
 
-  // ⑧ Switch
+  // ⑩ Switch
   if (field === 'switch') {
     return document.querySelector('.cxd-Switch.is-checked') ? true : false;
   }
