@@ -229,23 +229,74 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
   });
 
   test('5. 上传 + 编辑字段 → 提交 → 数据一致', async ({ page }) => {
-    // 上传图片
     const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
-
-    // 同时编辑文本字段
     await page.locator('input[name="textField"]').fill('图片+文本提交');
 
-    // 提交
     const r = page.waitForResponse((resp: any) => resp.url().includes('/api/page/save'));
     await page.locator('button[type="submit"]').click();
     await r;
 
     const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-    // 图片 URL 保存
     expect(saved.image?.zh || saved.image?.en).toBeTruthy();
-    // 文本字段正常（互不干扰）
     expect(saved.textField?.zh).toBe('图片+文本提交');
   });
+});
+
+const CLEAR_BACKUP = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+
+test.describe('清除/重置对多语言的影响', () => {
+  test.beforeEach(async ({ page }) => {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(CLEAR_BACKUP, null, 2) + '\n', 'utf-8');
+    await page.goto(MULTI_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+  });
+
+  test('1. 中文清除文本 → 切英文 → en 值完整 → 回中文 → zh 为空', async ({ page }) => {
+    await expect(page.locator('input[name="textField"]')).toHaveValue('中文文本');
+
+    // 清除文本（置空）
+    await page.locator('input[name="textField"]').fill('');
+    await page.waitForTimeout(300);
+
+    // 切英文 → en 值不受影响
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
+
+    // 回中文 → zh 已清除
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="textField"]')).toHaveValue('');
+  });
+
+  test('2. 清除 → 提交 → zh 为空, en 保持原始', async ({ page }) => {
+    await page.locator('input[name="textField"]').fill('');
+    const r = page.waitForResponse((resp: any) => resp.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
+
+    const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    expect(saved.textField?.zh).toBe('');
+    expect(saved.textField?.en).toBe('English Text');
+  });
+
+  test('3. 中文清除 + 英文填写 → 提交 → zh空, en有值', async ({ page }) => {
+    await page.locator('input[name="textField"]').fill('');
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await page.locator('input[name="textField"]').fill('English only');
+
+    const r = page.waitForResponse((resp: any) => resp.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
+
+    const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    expect(saved.textField?.zh).toBe('');
+    expect(saved.textField?.en).toBe('English only');
+  });
+
+
 });
