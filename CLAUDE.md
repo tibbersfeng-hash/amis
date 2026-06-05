@@ -651,6 +651,50 @@ config.missionRule.ruleSetup.missionCode → formData.missionCode
 - 修改某个组件 → 只跑 `npx vitest run src/components/<组件名>/test.tsx`
 - 修改 utils/hooks → 只跑对应文件测试
 
+## Superpowers 工作流
+
+本项目使用 Superpowers 技能体系驱动开发流程。技能文件位于 `.claude/skills/`，通过 `Skill` 工具触发。
+
+### 技能触发一览
+
+| 阶段 | 技能 | 触发条件 |
+|------|------|---------|
+| 🧠 需求 | `brainstorming` | 新功能/新组件/新行为，创建任何东西之前自动触发 |
+| 📋 规划 | `writing-plans` | 有明确需求后，需要制定实施计划 |
+| 🚀 执行 | `executing-plans` | 已有书面计划，需要在独立会话中执行 |
+| 🔧 开发 | `test-driven-development` | 需要写代码时—红(测试)→绿(实现)→重构 |
+| 👥 并行 | `dispatching-parallel-agents` | 2个以上独立任务，无共享状态或顺序依赖 |
+| 🔍 审查 | `receiving-code-review` | 收到外部代码审查反馈时 |
+| 📤 提交 | `requesting-code-review` | 代码完成需要提交审查时 |
+| ✅ 完成 | `verification-before-completion` | 实现完成、测试通过后 |
+| 🏁 收尾 | `finishing-a-development-branch` | 分支开发完成，决定合并/PR/清理 |
+| 🐛 调试 | `systematic-debugging` | 遇到 Bug 需要系统化排查 |
+| ✍️ 编写 | `writing-skills` | 需要创建或修改技能文件时 |
+
+### 调用方式
+
+```bash
+/skill-name               # 在对话中直接输入斜杠命令
+Skill({ name: "..." })    # 通过工具调用
+```
+
+核心规则：**只要你觉得有 1% 可能某个技能适用，就先触发它再说。** 如果触发了但发现不适用，忽略即可。
+
+### 全流程示例
+
+```
+用户说"加一个用户管理功能"
+  ↓ 自动触发 brainstorming
+需求明确
+  ↓ 触发 writing-plans
+生成实施计划
+  ↓ TDD 开发 → 测试通过
+  ↓ 触发 verification-before-completion
+确认完成
+  ↓ 触发 finishing-a-development-branch
+选择合并策略或创建 PR
+```
+
 ## 开发规则
 
 1. **零代码改动约束**：所有优化、功能扩展不得要求新增类型时修改 TypeScript/React 代码。方案如不满足此约束，必须重新设计。例外：新增底层渲染能力（新组件类型、新交互模式）可改代码，但必须确保已有类型的 JSON 配置继续零代码工作。
