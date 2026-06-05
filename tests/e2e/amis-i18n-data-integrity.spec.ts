@@ -198,24 +198,34 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
     expect(typeof sv.zh === 'string' || typeof sv.en === 'string').toBeTruthy();
   });
 
-  test('4. 英文下上传 → 切中文 → 图片保留', async ({ page }) => {
-    await page.locator('.language-switcher select').selectOption('en');
-    await page.waitForTimeout(1000);
-
+  test('4. 上传 → 切英文编辑文本 → 回中文 → 图片和文本都保留', async ({ page }) => {
+    // 中文下上传图片
     const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
 
     const img = page.locator('.cxd-ImageControl img');
     await expect(img).toBeVisible({ timeout: 5000 });
-    const srcEn = await img.getAttribute('src');
+    const srcBefore = await img.getAttribute('src');
 
+    // 切英文，修改文本
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await page.locator('input[name="textField"]').fill('EN text with image');
+
+    // 切回中文
     await page.locator('.language-switcher select').selectOption('zh');
     await page.waitForTimeout(1000);
 
+    // 图片保留
     await expect(img).toBeVisible({ timeout: 5000 });
-    const srcZh = await img.getAttribute('src');
-    expect(srcZh).toBe(srcEn);
+    const srcAfter = await img.getAttribute('src');
+    expect(srcAfter).toBe(srcBefore);
+
+    // 文本保留（英文编辑的值 persist 到 en）
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+    await expect(page.locator('input[name="textField"]')).toHaveValue('EN text with image');
   });
 
   test('5. 上传 + 编辑字段 → 提交 → 数据一致', async ({ page }) => {
