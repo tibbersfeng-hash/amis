@@ -119,3 +119,83 @@ test.describe('表单提交数据完整性 — 页面显示值 = 提交保存值
     restoreSingle();
   });
 });
+
+test.describe('input-image 上传 → 切换 → 保留', () => {
+  const TEST_PNG = '/tmp/test-image.png';
+  const DATA_BACKUP = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+
+  test.beforeEach(async ({ page }) => {
+    // Mock image upload endpoint
+    await page.route('**/api/upload**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 0,
+          msg: '上传成功',
+          data: { value: '/uploads/test-image.png', filename: 'test-image.png' },
+        }),
+      });
+    });
+    await page.goto(MULTI_URL);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+  });
+
+  test.afterEach(() => {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(DATA_BACKUP, null, 2) + '\n', 'utf-8');
+  });
+
+  test('1. 上传图片后组件显示缩略图', async ({ page }) => {
+    // 文件 input 是隐藏的 (display:none), 直接用 setInputFiles
+    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    await fileInput.setInputFiles(TEST_PNG);
+    await page.waitForTimeout(1000);
+
+    // 验证图片已上传（缩略图出现）
+    const img = page.locator('.cxd-ImageControl img');
+    await expect(img).toBeVisible({ timeout: 5000 });
+    const src = await img.getAttribute('src');
+    expect(src).toBeTruthy();
+  });
+
+  test('2. 上传后切换语言 → 图片保留', async ({ page }) => {
+    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    await fileInput.setInputFiles(TEST_PNG);
+    await page.waitForTimeout(1000);
+
+    const img = page.locator('.cxd-ImageControl img');
+    await expect(img).toBeVisible({ timeout: 5000 });
+    const srcBefore = await img.getAttribute('src');
+
+    // 切换英文
+    await page.locator('.language-switcher select').selectOption('en');
+    await page.waitForTimeout(1000);
+
+    // 切换回中文
+    await page.locator('.language-switcher select').selectOption('zh');
+    await page.waitForTimeout(1000);
+
+    // 图片仍然可见
+    await expect(img).toBeVisible({ timeout: 5000 });
+    const srcAfter = await img.getAttribute('src');
+    expect(srcAfter).toBe(srcBefore);
+  });
+
+  test('3. 上传后提交 → URL 保存到文件', async ({ page }) => {
+    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    await fileInput.setInputFiles(TEST_PNG);
+    await page.waitForTimeout(1000);
+
+    const r = page.waitForResponse((resp: any) => resp.url().includes('/api/page/save'));
+    await page.locator('button[type="submit"]').click();
+    await r;
+
+    const saved = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    const sv = saved.image;
+    expect(sv).toBeTruthy();
+    // 值应包含上传的 URL，且是 {zh, en} 格式
+    expect(sv.zh || sv.en).toBeTruthy();
+    expect(typeof sv.zh === 'string' || typeof sv.en === 'string').toBeTruthy();
+  });
+});
