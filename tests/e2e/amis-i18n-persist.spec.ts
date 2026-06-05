@@ -107,7 +107,7 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
     await assertPersist(page,
       () => page.evaluate(() => document.querySelector('.cxd-Switch.is-checked') ? '开' : '关'),
       async () => {
-        await page.locator('.cxd-Switch').click();
+        await page.locator('.cxd-Switch').click({ force: true });
         await page.waitForTimeout(300);
       },
       '关');

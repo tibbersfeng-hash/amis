@@ -8,13 +8,12 @@ import '../FieldWithExcludeV2';
 import '../ClosableTabs';
 import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';
-import { processSchemaMultiLang, flattenDataMultiLang } from '../../utils/multiLang';
 
 // ── i18n helpers ──────────────────────────────────────────────
 
-/** Check if a value is a {zh, en} multi-language object (at minimum has a zh key) */
-function isI18nValue(val: unknown): val is Record<string, string> {
-  return !!val && typeof val === 'object' && 'zh' in (val as object);
+/** Check if a value is a {zh, en} multi-language object */
+function isI18nValue(val: unknown): val is Record<string, unknown> {
+  return !!val && typeof val === 'object' && 'zh' in (val as object) && Object.keys(val as object).length >= 2;
 }
 
 /** Recursively collect all fields with "multiLang: true" from an Amis schema */
@@ -155,8 +154,9 @@ function readDomValue(
       if (values.length > 0) return values.join(',');
     }
 
-    // Select: read display text from value span(s) — supports multi-select
-    const selValues = document.querySelectorAll('.cxd-Select-value');
+    // Select: read display text from value span(s) — excludes V2 component's selects
+    const selValues = Array.from(document.querySelectorAll('.cxd-Select-value'))
+        .filter(el => !el.closest('.field-with-exclude-v2'));
     if (selValues.length > 0) {
       const matched: string[] = [];
       selValues.forEach((el) => {
@@ -210,7 +210,7 @@ function readDomValue(
 
   // ⑧ Switch
   if (field === 'switch') {
-    return document.querySelector('.cxd-Switch.is-checked') ? 'true' : 'false';
+    return document.querySelector('.cxd-Switch.is-checked') ? true : false;
   }
 
   return undefined;
@@ -460,14 +460,13 @@ export const AmisPage: React.FC<AmisPageProps> = ({
 
     const abortController = new AbortController();
 
-    // Process schema and data for multiLang support
-    const processedSchema = processSchemaMultiLang(schema, currentLang);
-    const processedData = flattenDataMultiLang({ ...displayData, previewLanguage: currentLang }, currentLang);
-
     const amisElement = renderAmis(
-      processedSchema as any,
+      schema,
       {
-        data: processedData,
+        data: {
+          ...displayData,
+          previewLanguage: currentLang,
+        },
         locale,
         theme: 'cxd',
       },

@@ -63,7 +63,7 @@ test.describe('全部组件中文回显（所有字段 multiLang）', () => {
     await expect(page.locator('.cxd-RichText, .tox-tinymce, [class*="editor"]').first()).toBeVisible();
   });
   test('select 下拉', async ({ page }) => {
-    await expect(page.locator('.cxd-Select')).toBeVisible();
+    await expect(page.locator('.cxd-Select').first()).toBeVisible();
   });
   test('input-date 日期', async ({ page }) => {
     await expect(page.getByRole('textbox', { name: '请选择日期', exact: true })).toHaveValue('2026-06-04');

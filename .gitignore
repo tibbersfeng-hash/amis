@@ -49,3 +49,6 @@ pnpm-debug.log*
 .cache/
 temp/
 tmp/
+
+# Claude Code skills / config
+.claude/
