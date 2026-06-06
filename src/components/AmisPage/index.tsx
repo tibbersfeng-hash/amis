@@ -115,13 +115,18 @@ function readDomValue(
   // Special fields where input[name] doesn't represent the actual value
   if (field === 'tag') return undefined;             // input is for new tags, not the values
 
-  // ① Image upload: read the img src or hidden value from the image component
-  if (field === 'image') {
-    const img = document.querySelector('.cxd-ImageControl img') as HTMLImageElement | null;
+  // ① Image/file upload: find ImageControl whose parent has data-amis-name matching the field
+  let imgControl: Element | null = document.querySelector(
+    `[data-amis-name="${field}"] .cxd-ImageControl`
+  );
+
+  if (imgControl) {
+    const img = imgControl.querySelector('img') as HTMLImageElement | null;
     if (img?.src && img.src !== window.location.href) return img.src;
-    const hiddenInput = document.querySelector('input[name="image"]') as HTMLInputElement | null;
+    const hiddenInput = imgControl.querySelector('input[type="hidden"]') as HTMLInputElement | null;
     if (hiddenInput?.value) return hiddenInput.value;
-    return undefined;
+    // Image was cleared — return empty string so lookup gets updated with ""
+    return '';
   }
 
   // ③ TinyMCE rich text editor — only read if this field is a rich text field
@@ -174,6 +179,11 @@ function readDomValue(
       });
       if (matched.length > 0) return matched.join(',');
     }
+
+    // Select exists but no value visible (cleared or placeholder only) — return empty string
+    // so lookup gets updated with "" instead of skipping persistence
+    const hasSelectControl = document.querySelector('.cxd-SelectControl');
+    if (hasSelectControl) return '';
   }
 
   // ⑥ Date / time / month / datetime pickers: match by placeholder
@@ -244,6 +254,16 @@ function writeDomValue(field: string, value: string | unknown): void {
     return;
   }
 
+  // Image/file upload component: update via Amis store (no native input[name] to write to)
+  const imgControl = document.querySelector(`.cxd-ImageControl input[name="${field}"]`);
+  if (imgControl) {
+    const store = (window as any).amisStore;
+    if (store?.changeValue) {
+      store.changeValue(field, value);
+    }
+    return;
+  }
+
   // Field-with-exclude: write to hidden data div
   const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
   if (excludeData && excludeData.textContent) {
@@ -280,17 +300,12 @@ function persistToLookup(
     const currentVal = readDomValue(field, fieldOptions, richTextFields?.includes(field) || false);
     if (currentVal !== undefined) {
       const prev = updated[field] || { zh: '', en: '' };
-      // Image URL is not language-specific — sync to both languages
-      if (field === 'image') {
-        updated[field] = { zh: currentVal, en: currentVal };
+      // Detect if original value was array → convert comma string back to array
+      const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
+      if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
+        updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
       } else {
-        // Detect if original value was array → convert comma string back to array
-        const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
-        if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
-          updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
-        } else {
-          updated[field] = { ...prev, [lang]: currentVal };
-        }
+        updated[field] = { ...prev, [lang]: currentVal };
       }
     }
   }
@@ -306,7 +321,8 @@ function applyFromLookup(
   for (const field of fields) {
     const vals = lookup[field];
     if (!vals) continue;
-    const value = vals[lang] || vals['zh'];
+    // Use ?? instead of || so empty string '' is NOT treated as missing
+    const value = vals[lang] ?? vals['zh'];
     if (value !== undefined) writeDomValue(field, value);
   }
 }
@@ -339,8 +355,8 @@ function mergeI18nData(
 
     const existing = lookup[field];
     if (existing && isI18nValue(existing)) {
-      // For boolean/array/image values (component state, not language-specific)
-      if (typeof domVal === 'boolean' || Array.isArray(domVal) || field === 'image') {
+      // For boolean/array values (component state, not language-specific)
+      if (typeof domVal === 'boolean' || Array.isArray(domVal)) {
         merged[field] = { zh: domVal, en: domVal };
       } else {
         merged[field] = { ...existing, [currentLang]: domVal };
@@ -466,11 +482,16 @@ export const AmisPage: React.FC<AmisPageProps> = ({
     [i18nFields, fieldOptions, richTextFields]
   );
 
-  // Render Amis
+  // Render Amis into a detached DOM node to keep it as a separate React root.
+  // This avoids the "unmountComponentAtNode: node rendered by React and not a top-level container"
+  // error that occurs when ReactDOM.render targets a div already managed by the parent React tree.
   useEffect(() => {
     if (!containerRef.current || !schema) return;
 
-    const abortController = new AbortController();
+    // Create a detached div that is NOT part of the React-managed DOM.
+    // This becomes a proper top-level container for ReactDOM.render.
+    const detachedDiv = document.createElement('div');
+    detachedDiv.className = 'amis-scope-inner';
 
     const amisElement = renderAmis(
       schema,
@@ -495,13 +516,13 @@ export const AmisPage: React.FC<AmisPageProps> = ({
       ''
     );
 
-    ReactDOM.render(amisElement, containerRef.current);
+    ReactDOM.render(amisElement, detachedDiv);
+    containerRef.current.appendChild(detachedDiv);
 
     return () => {
-      abortController.abort();
-      if (containerRef.current) {
-        ReactDOM.unmountComponentAtNode(containerRef.current);
-      }
+      // Unmount from the detached div (which IS a top-level container)
+      ReactDOM.unmountComponentAtNode(detachedDiv);
+      detachedDiv.remove();
     };
     // fetcher is stable via useCallback; displayData/currentLang change triggers re-render
     // eslint-disable-next-line react-hooks/exhaustive-deps

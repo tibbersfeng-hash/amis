@@ -1,11 +1,11 @@
 {
   "textField": {
-    "zh": "",
-    "en": "English only"
+    "zh": "中文文本",
+    "en": "English Text"
   },
   "textArea": {
-    "zh": "多行中文内容，用于测试。",
-    "en": "Multi-line English content for testing."
+    "zh": "多行中文内容",
+    "en": "Multi-line English content"
   },
   "email": {
     "zh": "zhongwen@test.com",
@@ -20,12 +20,12 @@
     "en": "english-pwd"
   },
   "number": {
-    "zh": "42",
-    "en": "42"
+    "zh": 42,
+    "en": 42
   },
   "richText": {
-    "zh": "<p>中文富文本内容</p>",
-    "en": "<p>English rich text content</p>"
+    "zh": "<p>中文富文本</p>",
+    "en": "<p>English rich text</p>"
   },
   "select": {
     "zh": "opt1",
@@ -48,8 +48,8 @@
     "en": "2026-06-04"
   },
   "time": {
-    "zh": "08:00",
-    "en": "08:00"
+    "zh": "14:30",
+    "en": "14:30"
   },
   "month": {
     "zh": "2026-06",
@@ -68,16 +68,16 @@
     "en": "#4A5CBF"
   },
   "rating": {
-    "zh": "2",
-    "en": "2"
+    "zh": 2,
+    "en": 2
   },
   "tag": {
     "zh": "",
     "en": "Tag One"
   },
   "image": {
-    "zh": "",
-    "en": ""
+    "zh": "/uploads/test-zh.svg",
+    "en": "/uploads/test-en.svg"
   },
   "excludeField": {
     "zh": [
@@ -90,12 +90,11 @@
     ]
   },
   "excludeFieldExclude": {
-    "zh": "x,y",
-    "en": "x,y"
+    "zh": false,
+    "en": false
   },
   "excludeFieldCheckbox": {
     "zh": false,
     "en": false
-  },
-  "previewLanguage": "en"
+  }
 }

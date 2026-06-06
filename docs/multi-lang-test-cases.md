@@ -1,261 +1,251 @@
 # 多语言（i18n）测试场景文档
 
-## 测试类型定义
+## 核心抽象
 
-### 测试 Schema
+所有支持 multiLang 的组件，本质上都是**一个可保存的语言状态**：
 
-| Schema | 文件 | 说明 |
-|--------|------|------|
-| 多语言测试表单 | `public/api/schema/form-test-multi-lang-schema.json` | 21 种组件，全部 `multiLang: true` |
-| 单语言测试表单 | `public/api/schema/form-test-single-lang-schema.json` | 同结构，无 `multiLang`（基线对照） |
-
-### 测试数据
-
-```json
-public/api/data/form-test-multi-lang-data.json
-{
-  "textField": { "zh": "中文文本", "en": "English Text" },
-  "textArea":  { "zh": "多行中文内容", "en": "Multi-line English content" },
-  "email":     { "zh": "zhongwen@test.com", "en": "english@test.com" },
-  "url":       { "zh": "https://zhongwen.example.com", "en": "https://english.example.com" },
-  "password":  { "zh": "zhongwen-pwd", "en": "english-pwd" },
-  "number":    { "zh": 42, "en": 42 },
-  "richText":  { "zh": "<p>中文富文本</p>", "en": "<p>English rich text</p>" },
-  "select":    { "zh": "opt1", "en": "opt1" },
-  "radio":     { "zh": "yes", "en": "yes" },
-  "checkbox":  { "zh": "a", "en": "a" },
-  "switch":    { "zh": true, "en": true },
-  "date":      { "zh": "2026-06-04", "en": "2026-06-04" },
-  "time":      { "zh": "14:30", "en": "14:30" },
-  "month":     { "zh": "2026-06", "en": "2026-06" },
-  "datetime":  { "zh": "2026-06-04 14:30:00", "en": "2026-06-04 14:30:00" },
-  "dateRange": { "zh": "2026-06-01,2026-06-15", "en": "2026-06-01,2026-06-15" },
-  "color":     { "zh": "#4A5CBF", "en": "#4A5CBF" },
-  "rating":    { "zh": 2, "en": 2 },
-  "tag":       { "zh": "", "en": "Tag One" },
-  "image":     { "zh": "", "en": "" },
-  "excludeField":          { "zh": ["x", "y"], "en": ["x", "y"] },
-  "excludeFieldExclude":   { "zh": false, "en": false },
-  "excludeFieldCheckbox":  { "zh": false, "en": false }
-}
+```
+{ "fieldName": { "zh": <中文值>, "en": <英文值> } }
 ```
 
+全部测试场景围绕这个状态的 5 种行为展开：
+
+```
+S1 切换器可见性  →  工具本身的存在条件
+S2 状态回显      →  状态 → UI 渲染
+S3 语言切换      →  状态键切换 (zh↔en)
+S4 编辑后保留    →  UI 编辑 → 状态持久化（跨语言切换不变）
+S5 提交/清空     →  状态 → 持久层
+```
+
+组件类型的差异**只决定**如何从 DOM 读写这个状态（即 `readDomValue` 策略），不影响行为分类。
+
+## 基线保护（重要）
+
+一个字段若 `multiLang: false`（或未设置），则**不应受 multiLang 机制的任何影响**。这是 multiLang 功能的**回归底线**：无论表单中其他字段是否开启 multiLang，非 multiLang 字段的行为必须和原生 Amis 组件完全一致。
+
+全部的 S1~S5 场景只适用于 `multiLang: true` 的字段。对于非 multiLang 字段，需要额外验证以下条目：
+
 ---
 
-## 测试文件清单
+## 组件取值策略（readDomValue）
 
-| 文件 | 覆盖 | 数量 |
-|------|------|------|
-| `tests/e2e/amis-i18n.spec.ts` | 基础回显、语言切换、提交保存 | 25 |
-| `tests/e2e/amis-i18n-persist.spec.ts` | 编辑后切换保留 | 16 |
-| `tests/e2e/field-with-exclude-v2.spec.ts` | FieldWithExcludeV2 全流程 | 5 |
-| **合计** | | **46** |
+| 策略 | 读取方式 | 适用组件 |
+|------|---------|---------|
+| **V1: 标准 input** | `input[name]` / `textarea[name]` .value | text, textarea, email, url, password, number |
+| **V2: 选项映射** | radio .checked → label→value 映射；checkboxes .checked 标签集合；select .cxd-Select-value 文本 → options 反向映射 | select, radios, checkboxes, chained-select, tree-select, transfer |
+| **V3: placeholder 定位** | `.cxd-DatePicker-input[placeholder*="关键词"]` value | input-date, input-time, input-month, input-datetime |
+| **V4: 区间拼接** | `.cxd-DateRangePicker-input` value × 2 拼接 | input-date-range |
+| **V5: 状态 class** | `.cxd-Switch.is-checked` | switch |
+| **V6: 子元素计数** | `.is-active` 子元素数量 | rating |
+| **V7: 颜色 input** | `.cxd-ColorPicker input` .value | color |
+| **V8: 富文本 API** | TinyMCE `getContent()` / `setContent()` | rich-text |
+| **V9: 标签/数组** | 已选项 DOM 状态/标签列表 | tag, transfer, cascader |
+| **V10: 文件上传/图片** | 上传成功后从 DOM 读取图片 URL / 文件名，本质同 V1 字符串 | image, file |
+| **V11: 数据属性** | `div[data-field-data]` JSON 解析 | field-with-exclude（复合结构） |
+
+> **新增组件时**：先确定它属于哪个取值策略，只需补充策略中没有的 DOM 读取方式即可。
 
 ---
 
-## 1. 语言切换器
+## 行为场景（S1~S5）
 
-测试目标：判断语言切换器在有无 `multiLang` 字段时的显示/隐藏。
+### B: `multiLang=false` —— 基线保护
+
+验证：`multiLang: false`（或未设置）的字段不受 multiLang 机制影响。
 
 | # | 场景 | 步骤 | 预期 |
 |---|------|------|------|
-| 1.1 | multiLang schema 显示切换器 | 加载 multi-lang 表单 | `.language-switcher` 可见 |
-| 1.2 | 无 multiLang schema 隐藏切换器 | 加载 single-lang 表单 | `.language-switcher` 不可见 |
+| B1 | 与非 multiLang 字段共存在同一表单 | 加载同时包含 `multiLang: true` 和 `multiLang: false` 字段的 schema | 非 multiLang 字段正常渲染，值正常显示 |
+| B2 | 非 multiLang 字段不受语言切换影响 | 加载 mixed schema → 切换语言 (zh↔en) | 非 multiLang 字段值始终不变 |
+| B3 | 非 multiLang 字段提交为纯值 | 编辑非 multiLang 字段 → 提交 | body 中该字段为纯字符串/数值/数组，**不是** `{zh, en}` 格式 |
+| B4 | 初始数据含 `{zh, en}` 时后备 | 非 multiLang 字段的初始数据为 `{zh, en}` 对象（异常情况） | 组件不崩溃，取当前语言对应值或显示原始 JSON |
+| B5 | 编辑非 multiLang 字段 → 切换到 multiLang 字段编辑 | 编辑非 multiLang 字段 → 切语言 → 编辑 multiLang 字段 | 非 multiLang 字段值不受影响，multiLang 字段正常工作 |
 
----
+> **场景用例生成**：对各取值策略 V1~V11，选取至少一个非 multiLang 字段，执行 B1~B5。
 
-## 2. 各组件中文回显
-
-测试目标：所有组件在中文状态下正确显示 `{zh}` 值。
-
-| # | 组件 | 断言 | 初始值 |
-|---|------|------|--------|
-| 2.1 | input-text | `toHaveValue('中文文本')` | `{zh: "中文文本"}` |
-| 2.2 | textarea | `toHaveValue(/多行中文内容/)` | `{zh: "多行中文内容"}` |
-| 2.3 | input-email | `toHaveValue('zhongwen@test.com')` | `{zh: "zhongwen@test.com"}` |
-| 2.4 | input-url | `toHaveValue('https://zhongwen.example.com')` | `{zh: "https://zhongwen.example.com"}` |
-| 2.5 | input-password | `toHaveValue('zhongwen-pwd')` | `{zh: "zhongwen-pwd"}` |
-| 2.6 | input-number | `toHaveValue('42')` | `{zh: 42}` |
-| 2.7 | select | `.cxd-Select-valueWrap` 可见 | `{zh: "opt1"}` |
-| 2.8 | input-date | 日期框显示 `2026-06-04` | `{zh: "2026-06-04"}` |
-| 2.9 | input-time | 时间框可见 | `{zh: "14:30"}` |
-| 2.10 | input-month | 月份框显示 `2026-06` | `{zh: "2026-06"}` |
-| 2.11 | input-datetime | 日期时间框显示 `2026-06-04 14:30:00` | `{zh: "2026-06-04 14:30:00"}` |
-| 2.12 | input-rating | `.cxd-Rating` 可见 | `{zh: 2}` |
-| 2.13 | input-tag | `input[name="tag"]` 可见 | `{zh: ""}` |
-| 2.14 | input-image | 图片上传组件可见 | `{zh: ""}` |
-| 2.15 | switch | `.cxd-Switch` 可见 | `{zh: true}` |
-| 2.16 | radios | radio 组可见 | `{zh: "yes"}` |
-| 2.17 | checkboxes | checkbox 组可见 | `{zh: "a"}` |
-| 2.18 | input-color | 颜色选择器可见 | `{zh: "#4A5CBF"}` |
-
----
-
-## 3. 多语言切换
-
-测试目标：切换语言时，`zh≠en` 的字段值正确变化，`zh=en` 的字段值不变。
+### S1: 语言切换器可见性
 
 | # | 场景 | 步骤 | 预期 |
 |---|------|------|------|
-| 3.1 | 切英文 → 文本字段变化 | zh→en | textField 显示 English Text，email 显示 english@test.com |
-| 3.2 | 同值字段不变 | zh→en | number 显示 42，date 显示 2026-06-04 |
-| 3.3 | 中英来回 3 次切换 | zh→en→zh→en→zh | 每次值都正确 |
+| 1.1 | 表单含 multiLang 字段 | 加载多语言表单 | `.language-switcher` 可见 |
+| 1.2 | 表单无 multiLang 字段 | 加载单语言表单（基线对照） | `.language-switcher` 不可见 |
 
 ---
 
-## 4. 编辑后切换保留（persist）
+### S2: 状态回显
 
-测试目标：中文下编辑字段 → 切换英文 → 切换回中文 → 编辑值保留。
+验证：可保存状态中的 `{zh}` 值正确渲染到 UI。
 
-### 4.1 有 `input[name]` 属性的组件（persist 通过 DOM 读取）
+| # | 场景 |
+|---|------|
+| 2.1 | 中文状态下，状态值正确显示到对应组件 |
+| 2.2 | 空值/空字符串不导致组件报错或崩溃 |
+| 2.3 | null/undefined 字段组件正常渲染 |
 
-| # | 组件 | 编辑操作 | persist |
-|---|------|---------|---------|
-| 4.1.1 | input-text | `.fill('编辑文本')` | ✅ 切回中文显示"编辑文本" |
-| 4.1.2 | textarea | `.fill('编辑多行')` | ✅ 切回中文显示"编辑多行" |
-| 4.1.3 | input-email | `.fill('edit@t.com')` | ✅ |
-| 4.1.4 | input-url | `.fill('https://edit.com')` | ✅ |
-| 4.1.5 | input-password | `.fill('edit-pwd')` | ✅ |
-| 4.1.6 | input-number | `.fill('777')` | ✅（6.13 新增 name）|
+**对各取值策略的校验方式**：
 
-### 4.2 通过 options label→value 映射的组件
+| 策略 | 校验方式 |
+|------|---------|
+| V1 标准 input | `toHaveValue(String(zh值))` |
+| V2 选项映射 | 选中项文本匹配 zh 对应的 label |
+| V3 placeholder 定位 | 输入框显示 zh 格式值 |
+| V4 区间拼接 | 两个输入框值拼接 = zh 值（如 `2026-06-01,2026-06-15`） |
+| V5 状态 class | `.is-checked` = zh 值 |
+| V6 子元素计数 | `.is-active` 数量 = zh 值 |
+| V7 颜色 input | `toHaveValue(zh值)` |
+| V8 富文本 API | `getContent()` = zh 值 |
+| V9 标签/数组 | 已选项列表匹配 zh 值 |
+| V10 文件上传/图片 | 上传后图片 URL 匹配 zh 值；空值时显示占位/空状态 |
+| V11 数据属性 | 解析 JSON → zh 值匹配 |
 
-| # | 组件 | 编辑操作 | persist |
-|---|------|---------|---------|
-| 4.2.1 | select | 点开下拉 → 选"选项二" | ✅ `readDomValue` 读取 `.cxd-Select-value` → options 匹配 |
-| 4.2.2 | radios | 点击"否" | ✅ `.checked` label → options 匹配 |
-| 4.2.3 | checkboxes | 点击"选项B" | ✅ 同上 |
+---
 
-### 4.3 通过 placeholder 匹配的组件
+### S3: 语言切换
 
-| # | 组件 | 编辑操作 | persist |
-|---|------|---------|---------|
-| 4.3.1 | input-date | evaluate 设值 `2026-12-25` | ✅ `.cxd-DatePicker-input[placeholder*="日期"]` |
-| 4.3.2 | input-month | evaluate 设值 `2027-03` | ✅ `.cxd-DatePicker-input[placeholder*="月份"]` |
-| 4.3.3 | input-datetime | evaluate 设值 `2026-07-15 10:00:00` | ✅ `.cxd-DatePicker-input[placeholder*="日期以及时间"]` |
+验证：切换语言时，状态键从 `zh` 切换到 `en`。
 
-### 4.4 其他
+| # | 场景 | 步骤 | 预期 |
+|---|------|------|------|
+| 3.1 | 异值字段切换 | zh→en | `zh≠en` 的字段切换为 en 值 |
+| 3.2 | 同值字段不变 | zh→en | `zh=en` 的字段值不变（如 number） |
+| 3.3 | 多次来回切换 | zh→en→zh→en→zh | 每次切换后所有字段值与当前语言一致 |
 
-| # | 组件 | 编辑操作 | persist |
-|---|------|---------|---------|
-| 4.4.1 | switch | 点击切换 | ✅ `.cxd-Switch.is-checked` |
-| 4.4.2 | input-rating | 点击第 4 颗星 | ✅ `.is-active` 计数 |
-| 4.4.3 | input-color | evaluate 设值 | ✅ `.cxd-ColorPicker input` |
-| 4.4.4 | input-tag | 渲染验证 | ⚠️ 仅验证切换不崩溃 |
+---
 
-### 4.5 不在 DOM 中的字段
+### S4: 编辑后保留（Persist）
 
-| # | 组件 | 说明 |
+验证：编辑当前语言的值 → 切换语言 → 切回 → 编辑内容保留。
+
+这是 multiLang 最核心的行为：**编辑操作写入可保存状态，切换语言只是切换读取的键，不丢失已编辑的数据。**
+
+| # | 场景 | 步骤 |
 |---|------|------|
-| 4.5.1 | richText | TinyMCE 内容不在标准 input 中，跳过 |
-| 4.5.2 | image | 上传组件，无文本值 |
+| 4.1 | 文本/数值编辑后保留 | 中文下编辑 → 切英文 → 切回中文 → 编辑值保留 |
+| 4.2 | 选项选择后保留 | 中文下选择新选项 → 切英文 → 切回中文 → 选择保留 |
+| 4.3 | 日期选择后保留 | 中文下选新日期 → 切英文 → 切回中文 → 日期保留 |
+| 4.4 | 开关/评分后保留 | 中文下改变状态 → 切英文 → 切回中文 → 状态保留 |
+| 4.5 | 富文本编辑后保留 | 中文下编辑富文本 → 切英文 → 切回中文 → 内容保留 |
+| 4.6 | 文件上传后保留 | 中文上传图片 → 切英文 → 切回中文 → 图片 URL 保留 |
 
 ---
 
-## 5. 提交保存验证
+### ABA: 跨语言操作验证
 
-测试目标：提交时 multiLang 字段正确保存为 `{zh, en}`，元数据被剥离，无 multiLang 字段不变。
+ABA 是 multiLang 最核心的完整性验证模式，确保 **两个语言的值在交替操作后各自独立、互不污染**。
 
-### 5.1 multiLang 字段存为 `{zh, en}`
+**ABA 操作链**：
 
-```json
-// 编辑 textField (zh) → 切英文 → 编辑 textField (en) → 提交
-→ { "textField": { "zh": "中文提交", "en": "EN Submit" },
-    "number":   { "zh": "99", "en": "99" } }
+```text
+A: 语言A下操作（编辑/清空/上传）
+B: 切到语言B下操作（编辑/清空/上传，不同于A）
+A: 切回语言A，验证 A 的值独立保留，B 的值仅在 B 中生效
 ```
 
-### 5.2 无 multiLang schema 提交不变
+| # | 场景 | A操作 | B操作 | A验证 |
+|---|------|-------|-------|-------|
+| ABA.0 | **A→修改→B→A**（B 仅过路） | zh 修改值 | en 仅切换，不做操作 | 回 zh → 修改值保留（A→B→A 途中无丢失） |
+| ABA.00 | **A→清理→B→A**（B 仅过路） | zh 清空 | en 仅切换，不做操作 | 回 zh → 仍为空（空值已持久化到 lookup） |
+| ABA.1 | **同字段值独立**（V1~V10） | zh 设值A | en 设值B（与A不同） | 回 zh → 值A 保留；en → 值B 保留；提交 → `{zh: 值A, en: 值B}` |
+| ABA.2 | **同值字段**（number/同值date） | zh 设值A | en 设值B（覆盖同值） | 回 zh → 值A 保留（同值字段同步规则） |
+| ABA.3 | **数组/布尔字段** | zh 选状态A | en 选状态B | 回 zh → 状态A 保留；同步规则：zh=en 共享 |
+| ABA.4 | **跨字段混合 ABA** | zh 编辑文本 + 上传图片A | en 编辑文本 + 上传图片B | 回 zh → 文本值A 保留，图片 URL A 保留；en → 文本值B，图片 B |
+| ABA.5 | **多轮 ABA** | zh 值V1 | en 值V2 | zh 值V1 → en 值V2 → zh 值V1 → en 值V2（3轮以上） |
+| ABA.6 | **ABA + 清空** | zh 清空 | en 设值B | 回 zh → 空；切 en → 值B 保留 |
+| ABA.7 | **ABA + 富文本** | zh 编辑内容A | en 编辑内容B | 回 zh → 内容A；en → 内容B |
+| ABA.8 | **ABA + 图片上传** | zh 上传图片A | en 上传图片B | 回 zh → 图片A；en → 图片B |
+| ABA.9 | **ABA + 提交** | zh 编辑 + 提交 | en 编辑 + 提交 | 回 zh 提交 → 数据合并为 `{zh: 全A, en: 全B}` |
+| ABA.10 | **ABA + 浏览器刷新** | zh 编辑 + 提交 | en 编辑 + 提交 | **关闭页面 → 重新加载** → 数据为 `{zh: 值A, en: 值B}` |
+| ABA.11 | **A→B→A→B 配置完整性** | zh 下检查：表单标题、字段标签、占位提示、提交按钮 | 切 en 检查同上 | 第2轮回 zh + 再切 en，每轮检查**配置内容不丢失、控件不崩溃** |
 
-```json
-// 编辑 textField → 提交（single-lang schema）
-→ { "textField": "单语文", ... }
-```
+> **ABA.11 检查清单**：
+> - 表单标题、字段 label、placeholder 文字不因切换而消失或乱码
+> - 语言切换器自身可见且可选
+> - 提交/重置按钮正常渲染
+> - 所有组件类型（text/select/date/image/…）wrapper 完整
+> - 浏览器控制台无 JS 异常
 
-### 5.3 多次提交合并
-
-```json
-// 第 1 次 (zh): textField = "第1次"
-// 第 2 次 (en): textField = "Second"
-→ { "textField": { "zh": "第1次", "en": "Second" } }
-```
-
-### 5.4 元数据剥离
-
-```json
-// dataId / dataType 不写入文件
-→ { dataId: undefined, dataType: undefined }
-```
+> **ABA 价值**：它验证的不只是"值保留了"，而是"两个语言的值在交替操作后没有被对方覆盖或污染"。V1 字符串字段在持续操作中保持 zh/en 独立能力。
 
 ---
 
-## 6. FieldWithExcludeV2
+### S5: 提交与清空
 
-### 6.1 初始渲染
+验证：可保存状态正确提交到持久层。
 
-| # | 场景 | 步骤 | 预期 |
-|---|------|------|------|
-| 6.1.1 | Exclude 未勾选 | 加载表单 | 组件可见，复选框未勾选 |
-| 6.1.2 | 显示已选项 | 检查 `.cxd-Select-valueWrap` | 显示"选项X, 选项Y" |
+#### S5a: 提交
 
-### 6.2 Exclude 复选框交互
+| # | 场景 | 预期 |
+|---|------|------|
+| 5a.1 | multiLang 字段提交 | body 中字段 = `{ "zh": "...", "en": "..." }` |
+| 5a.2 | 无 multiLang 字段提交 | body 中字段为纯字符串（基线对照） |
+| 5a.3 | 多语言分别编辑后提交 | zh 值 + en 值合并提交为 `{zh, en}` |
+| 5a.4 | 元数据剥离 | `dataId` / `dataType` 不写入文件 |
 
-| # | 场景 | 步骤 | 预期 |
-|---|------|------|------|
-| 6.2.1 | 勾选 Exclude | 点击 Exclude 复选框 | 复选框勾选，红色警告文字出现 |
-| 6.2.2 | 取消 Exclude | 再次点击 | 复选框未勾选，警告消失 |
-| 6.2.3 | 不影响已选值 | 勾选 → 取消整个过程 | 选项 X/Y 保持不变 |
-
-### 6.3 数据提交
+#### S5b: 清空
 
 | # | 场景 | 步骤 | 预期 |
 |---|------|------|------|
-| 6.3.1 | 未勾 Exclude 提交 | 提交 | `excludeField` = {zh, en} 数组 |
-| 6.3.2 | 勾选 Exclude 提交 | 勾选 → 提交 | `excludeFieldExclude` 同步到 zh+en |
-| 6.3.3 | 勾选 Exclude 提交 | 勾选 → 提交 | `excludeFieldCheckbox` = {zh: true, en: true} |
-| 6.3.4 | 提交元数据剥离 | 勾选 → 提交 | dataId/dataType 不写入 |
+| 5b.1 | 中文清空 → 切英文 | zh 下清空字段 → 切 en | en 原值保留 |
+| 5b.2 | 清空后切回 | 接上 → 切回 zh | zh 仍为空（空值已写入状态） |
+| 5b.3 | 另一语言清空 | en 清空 → 切 zh | zh 原值保留 |
+| 5b.4 | 双语言均清空 | zh 清空 → en 清空 → 来回切换 | 空值保持 |
+| 5b.5 | 同值字段清空（zh=en） | zh 清空 → 切 en | en 也为空（状态共享） |
+| 5b.6 | 数组/布尔清空 | zh 清空 → 切 en | 组件正常切换，不崩溃（⚠️ persist 仅对有 `input[name]` 的字段有效；switch/checkboxes 无 DOM 写入能力，切换后以 Amis 原始数据为准） |
+| 5b.7 | 清空后提交 | 清空一个语言 → 提交 | 保存为 `{zh: "", en: "原值"}` |
 
-### 6.4 多语言数据
-
-| # | 场景 | 步骤 | 预期 |
-|---|------|------|------|
-| 6.4.1 | 中文显示 | 加载表单 | 选项 X/Y 显示 |
-| 6.4.2 | 切换英文 | zh→en | 选项 X/Y 仍然显示（值相同） |
-| 6.4.3 | 切回中文 | en→zh | 选项 X/Y 仍然显示 |
+> **同步规则**：字符串类型 zh/en 独立；boolean/数字/数组类型 zh=en 状态共享。
 
 ---
 
-## 7. readDomValue 取值策略
+## 测试覆盖矩阵
 
-`readDomValue(field, fieldOptions)` 的 7 级回退：
+| 取值策略 \ 场景 | S1 切换器 | S2 回显 | S3 切换 | S4 编辑保留 | S5a 提交 | S5b 清空 |
+|----------------|:---------:|:-------:|:-------:|:----------:|:-------:|:--------:|
+| V1 标准 input | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V2 选项映射 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V3 placeholder | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V4 区间拼接 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V5 状态 class | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V6 子元素计数 | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| V7 颜色 input | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| V8 富文本 API | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| V9 标签/数组 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V10 文件上传/图片 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| V11 数据属性 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+---
+
+> **基线保护**：不论取值策略，每个组件类型至少选取一个 `multiLang: false` 字段验证 B1~B5。
+
+## 测试用例生成规则
+
+**新增组件时**：
+1. **确定取值策略** → 对照 V1~V11，看该组件如何从 DOM 读写值；没有现成的就新增一个
+2. **按矩阵生成用例** → 套用 S1~S5b 模板，用实际字段替换
+3. **关注可保存状态** → 所有用例都围绕 `{zh, en}` 这同一个状态模型展开
+
+**修改组件时**：
+- 取值策略不变 → 仅更新预期值
+- 取值策略变化 → 更新策略定义，重新按矩阵生成
+
+---
+
+## 数据流
 
 ```
-① input[name]、textarea[name]          ← 标准文本输入
-② isRichText → TinyMCE API            ← 富文本编辑器
-③ 选项映射: radio .checked → label→value
-   checkboxes .checked 标签→值
-   select .cxd-Select-value 标签→值    ← select/radio/checkbox
-④ .cxd-DatePicker-input + placeholder  ← date/month/time/datetime
-⑤ .cxd-DateRangePicker-input x2 拼接  ← dateRange
-⑥ .cxd-ColorPicker input              ← color
-⑦ .cxd-Switch.is-checked              ← switch
-⑧ div[data-field-data] JSON 解析      ← field-with-exclude
-```
-
-## 8. 数据流
-
-```
-data 文件: { "field": { "zh": "...", "en": "..." } }
-                ↓
-buildLookup → lookup = { field: { zh, en } }
-                ↓
-flattenData → displayData = { field: displayedLangValue }
-                ↓
-AmisPage → renderAmis(schema, { data: displayData })
-                ↓ 用户编辑 → 切换语言 → ...
-persistToLookup → readDomValue → updated[field][lang] = domVal
-                ↓
-mergeI18nData → merged = { ...existing, [currentLang]: domVal }
-                ↓ 字符串 = 仅 currentLang
-                ↓ boolean/数组 = zh + en 同步
-POST /api/page/save → data/{id}-data.json
+    可保存状态: { "field": { "zh": "...", "en": "..." } }
+                      ↓
+buildLookup  →  lookup = { field: { zh, en } }
+                      ↓
+flattenData  →  displayData = { field: currentLangValue }
+                      ↓
+        AmisPage → renderAmis(schema, { data: displayData })
+                      ↓  用户编辑 → 切换语言 → ...
+persistToLookup  →  readDomValue → updated[field][lang] = domVal
+                      ↓
+mergeI18nData  →  merged = { ...existing, [currentLang]: domVal }
+                  ↓ 字符串 = 仅 currentLang
+                  ↓ boolean/数组/数字 = zh+en 同步
+POST /api/page/save  →  data/{id}-data.json
 ```

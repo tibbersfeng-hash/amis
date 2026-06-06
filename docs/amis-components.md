@@ -563,6 +563,31 @@ config.missionRule.ruleSetup.missionCode → formData.missionCode
 { "marketCodes": { "zh": "GDS,BAR", "en": "GDS,BAR" } }
 ```
 
+#### 清空数据后切换语言的影响
+
+当用户在某个语言下将字段值清空（删除为空）后切换语言，行为如下：
+
+| 场景 | 切换后表现 | 说明 |
+|------|-----------|------|
+| 中文清空 → 切英文 | 显示英文原值 | `lookup[field].en` 未被清空，仍保留原始英文值 |
+| 中文清空 → 切英文 → 切回中文 | 中文为空 | 切换前 `persistToLookup` 已将空值存入 `lookup[field].zh` |
+| 中文清空 → 英文也清空 → 切回任一语言 | 两种语言都为空 | 两个语言的 lookup 值均被清空 |
+| 清空后直接提交 | 当前语言值为空字符串 | `mergeI18nData` 将空值写入 `{ ...existing, [currentLang]: '' }` |
+
+**数据流：**
+```
+中文下清空 textField → DOM value = ""
+  → 切换英文 → persistToLookup 保存 { zh: "", en: "English Text" }
+  → 应用英文值 → 显示 "English Text"（zh 的空值不影响 en）
+  → 切换回中文 → 应用中文值 → 显示 ""（zh 已被清空）
+```
+
+**注意事项：**
+- 清空操作只影响当前语言的值，不影响其他语言
+- 如果目标语言的值也不存在（`undefined`），会 fallback 到中文值（`vals[lang] || vals['zh']`）
+- 图片（`image`）字段清空后切换会同步到两种语言（图片 URL 不是语言特定的）
+- boolean / 数组类型字段（如 switch、checkboxes）清空操作不影响语言切换（它们 zh+en 同步）
+
 ## 完整 Schema + Data 示例
 
 ### Schema JSON

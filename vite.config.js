@@ -935,6 +935,46 @@ REMINDER: Output ONLY a single JSON object. No explanations, no markdown code fe
   });
 }
 
+// ─── Multipart Form-Data Parser ──────────────────────────────────
+
+/**
+ * Parse multipart/form-data body buffer into named parts.
+ * Supports single or multiple file uploads.
+ */
+function parseMultipart(buffer, boundary) {
+  const boundaryBytes = Buffer.from(`--${boundary}`);
+  const parts = [];
+  let pos = 0;
+
+  while (pos < buffer.length) {
+    const headerStart = buffer.indexOf(boundaryBytes, pos);
+    if (headerStart === -1) break;
+
+    const headerEnd = buffer.indexOf(Buffer.from('\r\n\r\n'), headerStart);
+    if (headerEnd === -1) break;
+
+    const headerSection = buffer.slice(headerStart + boundaryBytes.length + 2, headerEnd).toString();
+
+    // Find next boundary for data end
+    const dataStart = headerEnd + 4;
+    let dataEnd = buffer.indexOf(boundaryBytes, dataStart);
+    if (dataEnd === -1) break;
+    // Trim trailing \r\n before next boundary
+    if (dataEnd > 2 && buffer[dataEnd - 2] === 13 && buffer[dataEnd - 1] === 10) {
+      dataEnd -= 2;
+    }
+
+    const name = headerSection.match(/name="([^"]+)"/)?.[1];
+    const filename = headerSection.match(/filename="([^"]+)"/)?.[1];
+    const contentType = headerSection.match(/Content-Type:\s*(\S+)/)?.[1];
+
+    parts.push({ name, filename, contentType, data: buffer.slice(dataStart, dataEnd) });
+    pos = dataEnd + boundaryBytes.length;
+  }
+
+  return parts;
+}
+
 // ─ Vite Config ───────────────────────────────────────────────────
 
 export default defineConfig({
@@ -1113,6 +1153,63 @@ export default defineConfig({
               res.writeHead(500, { 'Content-Type': 'application/json' });
               res.end(JSON.stringify({ error: err.message }));
             }
+            return;
+          }
+
+          // POST /api/upload — file upload handler for input-image / input-file receiver
+          if (req.method === 'POST' && req.url && req.url.startsWith('/api/upload')) {
+            const chunks = [];
+            req.on('data', (chunk) => chunks.push(chunk));
+            req.on('end', () => {
+              try {
+                const buffer = Buffer.concat(chunks);
+                const contentType = req.headers['content-type'] || '';
+                const boundary = contentType.match(/boundary=(.+)/)?.[1];
+
+                if (!boundary) {
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ status: 1, msg: '缺少 multipart boundary' }));
+                  return;
+                }
+
+                const parts = parseMultipart(buffer, boundary);
+                const filePart = parts.find(p => p.filename);
+
+                if (!filePart || !filePart.data || filePart.data.length === 0) {
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ status: 1, msg: '未上传文件' }));
+                  return;
+                }
+
+                // Generate unique filename to avoid collisions
+                const ext = path.extname(filePart.filename || '.bin');
+                const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+                const uploadDir = path.resolve(__dirname, 'public', 'uploads');
+                if (!fs.existsSync(uploadDir)) {
+                  fs.mkdirSync(uploadDir, { recursive: true });
+                }
+
+                fs.writeFileSync(path.join(uploadDir, filename), filePart.data);
+
+                const protocol = req.headers['x-forwarded-proto'] || 'http';
+                const rawHost = req.headers['host'] || 'localhost:5173';
+                const ipHost = rawHost.replace(/localhost|127\.0\.0\.1/, '172.25.0.100');
+                const fullUrl = `${protocol}://${ipHost}/uploads/${filename}`;
+
+                console.log(`[API Upload] Saved: ${filename} (${(filePart.data.length / 1024).toFixed(1)} KB) → ${fullUrl}`);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                  status: 0,
+                  msg: '上传成功',
+                  data: { value: fullUrl },
+                }));
+              } catch (err) {
+                console.error(`[API Upload] Error: ${err.message}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 1, msg: err.message }));
+              }
+            });
             return;
           }
 
