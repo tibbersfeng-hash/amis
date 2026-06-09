@@ -6,10 +6,32 @@ import '../DateRangePicker';
 import '../FieldWithExclude';
 import '../FieldWithExcludeV2';
 import '../ClosableTabs';
+import '../InputRichTextQuill';
 import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';
 
 // ── i18n helpers ──────────────────────────────────────────────
+
+const FORM_NAME = 'multiLangForm';
+
+/** 给 schema 中的 form 注入 name 属性，以便 scopeRef + getComponentByName 能定位到表单 */
+function injectFormName(schema: Record<string, unknown>): Record<string, unknown> {
+  if (schema.type === 'form' && !schema.name) {
+    return { ...schema, name: FORM_NAME };
+  }
+  if (schema.type === 'page' && Array.isArray(schema.body)) {
+    return {
+      ...schema,
+      body: schema.body.map(item => {
+        if (typeof item === 'object' && item?.type === 'form' && !item.name) {
+          return { ...(item as Record<string, unknown>), name: FORM_NAME };
+        }
+        return item;
+      }),
+    };
+  }
+  return schema;
+}
 
 /** Check if a value is a {zh, en} multi-language object */
 function isI18nValue(val: unknown): val is Record<string, unknown> {
@@ -117,7 +139,7 @@ function readDomValue(
 
   // ① Image/file upload: find ImageControl whose parent has data-amis-name matching the field
   let imgControl: Element | null = document.querySelector(
-    `[data-amis-name="${field}"] .cxd-ImageControl`
+    `[data-amis-name="${field}"] .antd-ImageControl`
   );
 
   if (imgControl) {
@@ -148,7 +170,7 @@ function readDomValue(
   const opts = fieldOptions?.[field];
   if (opts?.length) {
     // Radio: find checked label → match label text → return value
-    const radioChecked = document.querySelector('.cxd-Checkbox--radio--default.checked');
+    const radioChecked = document.querySelector('.antd-Checkbox--radio--default.checked');
     if (radioChecked) {
       const label = radioChecked.textContent?.trim() ?? '';
       const match = opts.find((o) => o.label === label);
@@ -156,7 +178,7 @@ function readDomValue(
     }
 
     // Checkbox: only return when match found (avoid returning '' for other fields)
-    const cbChecked = document.querySelectorAll('.cxd-Checkbox--checkbox--default.checked');
+    const cbChecked = document.querySelectorAll('.antd-Checkbox--checkbox--default.checked');
     if (cbChecked.length > 0) {
       const values: string[] = [];
       cbChecked.forEach((el) => {
@@ -168,7 +190,7 @@ function readDomValue(
     }
 
     // Select: read display text from value span(s) — excludes V2 component's selects
-    const selValues = Array.from(document.querySelectorAll('.cxd-Select-value'))
+    const selValues = Array.from(document.querySelectorAll('.antd-Select-value'))
         .filter(el => !el.closest('.field-with-exclude-v2'));
     if (selValues.length > 0) {
       const matched: string[] = [];
@@ -182,12 +204,12 @@ function readDomValue(
 
     // Select exists but no value visible (cleared or placeholder only) — return empty string
     // so lookup gets updated with "" instead of skipping persistence
-    const hasSelectControl = document.querySelector('.cxd-SelectControl');
+    const hasSelectControl = document.querySelector('.antd-SelectControl');
     if (hasSelectControl) return '';
   }
 
   // ⑥ Date / time / month / datetime pickers: match by placeholder
-  const pickers = document.querySelectorAll('.cxd-DatePicker-input');
+  const pickers = document.querySelectorAll('.antd-DatePicker-input');
   for (const p of pickers) {
     const inp = p as HTMLInputElement;
     if (!inp.value) continue;
@@ -199,7 +221,7 @@ function readDomValue(
 
   // ⑦ Date range picker: read start,end combo
   if (field === 'dateRange') {
-    const rangeInputs = document.querySelectorAll('.cxd-DateRangePicker-input');
+    const rangeInputs = document.querySelectorAll('.antd-DateRangePicker-input');
     if (rangeInputs.length >= 2) {
       const start = (rangeInputs[0] as HTMLInputElement).value;
       const end = (rangeInputs[1] as HTMLInputElement).value;
@@ -209,8 +231,8 @@ function readDomValue(
 
   // ⑧ Color picker
   if (field === 'color') {
-    const colorInput = document.querySelector('.cxd-ColorPicker-input') as HTMLInputElement | null
-      ?? document.querySelector('.cxd-ColorPicker input') as HTMLInputElement | null;
+    const colorInput = document.querySelector('.antd-ColorPicker-input') as HTMLInputElement | null
+      ?? document.querySelector('.antd-ColorPicker input') as HTMLInputElement | null;
     if (colorInput?.value) return colorInput.value;
   }
 
@@ -228,7 +250,7 @@ function readDomValue(
 
   // ⑩ Switch
   if (field === 'switch') {
-    return document.querySelector('.cxd-Switch.is-checked') ? true : false;
+    return document.querySelector('.antd-Switch.is-checked') ? true : false;
   }
 
   return undefined;
@@ -255,7 +277,7 @@ function writeDomValue(field: string, value: string | unknown): void {
   }
 
   // Image/file upload component: update via Amis store (no native input[name] to write to)
-  const imgControl = document.querySelector(`.cxd-ImageControl input[name="${field}"]`);
+  const imgControl = document.querySelector(`.antd-ImageControl input[name="${field}"]`);
   if (imgControl) {
     const store = (window as any).amisStore;
     if (store?.changeValue) {
@@ -501,11 +523,11 @@ export const AmisPage: React.FC<AmisPageProps> = ({
           previewLanguage: currentLang,
         },
         locale,
-        theme: 'cxd',
+        theme: 'antd',
       },
       {
         session: 'mission-cms',
-        theme: 'cxd',
+        theme: 'antd',
         locale,
         fetcher,
         isCancel: (value: unknown) => (value as Error)?.message === 'cancel',
