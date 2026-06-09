@@ -1,5 +1,5 @@
 /* ===== Amis SDK CSS ===== */
-@import 'amis/lib/themes/cxd.css';
+@import 'amis/lib/themes/antd.css';
 @import 'amis/lib/helper.css';
 
 /* ===== CSS Variables (from Figma) ===== */
@@ -54,7 +54,7 @@ body {
 }
 .page-header-bar .page-title { font-size: 20px; font-weight: 600; color: #1a1a1a; margin: 0 !important; line-height: 1.1 !important; }
 /* Amis wrapper for page-header-bar */
-.amis-scope .page-header-bar > div, .amis-scope .page-header-bar > .cxd-Wrapper, .amis-scope .page-header-bar > .cxd-Wrapper > .cxd-Wrapper-body {
+.amis-scope .page-header-bar > div, .amis-scope .page-header-bar > .antd-Wrapper, .amis-scope .page-header-bar > .antd-Wrapper > .antd-Wrapper-body {
   padding: 0 !important; margin: 0 !important;
 }
 .page-header-bar .return-link {; color: var(--primary); text-decoration: none; cursor: pointer; }
@@ -75,7 +75,7 @@ body {
 .loading-error { color: var(--danger); margin-top: 8px; }
 
 /* ===== Root Card Container (Figma Frame) ===== */
-/* .list-root = .cxd-Page, sets card appearance */
+/* .list-root = .antd-Page, sets card appearance */
 .list-root {
   background: #FFFFFF !important; border-radius: var(--radius-md);
   box-shadow: 0px 1px 4px rgba(79, 74, 131, 0.16);
@@ -140,17 +140,17 @@ body {
 
 /* ===== Tabs: Style 1 - Underline (main tabs) ===== */
 /* No container border, no divider, selected = text color + bottom line */
-.amis-scope .cxd-Tabs--line { border-bottom: none !important; }
-.amis-scope .cxd-Tabs-linksContainer {
+.amis-scope .antd-Tabs--line { border-bottom: none !important; }
+.amis-scope .antd-Tabs-linksContainer {
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
 }
-.amis-scope .cxd-Tabs-links {
+.amis-scope .antd-Tabs-links {
   border: none !important; border-bottom: none !important; gap: 0 !important;
   padding: 0 !important; margin: 0 !important;
 }
-.amis-scope .cxd-Tabs-link {
+.amis-scope .antd-Tabs-link {
   padding: 10px 20px !important; font-size: 15px !important; font-weight: 500 !important;
   color: #666666 !important; background: transparent !important;
   border: none !important; border-right: none !important;
@@ -159,22 +159,22 @@ body {
   transition: none !important; letter-spacing: 0.3px; height: auto !important;
   line-height: 1.4 !important; cursor: pointer !important; white-space: nowrap;
 }
-.amis-scope .cxd-Tabs-link.is-active {
+.amis-scope .antd-Tabs-link.is-active {
   color: var(--primary) !important; background: transparent !important; font-weight: 600 !important;
   z-index: 2 !important;
 }
-.amis-scope .cxd-Tabs-link.is-active::after {
+.amis-scope .antd-Tabs-link.is-active::after {
   content: '' !important;
   position: absolute !important;
   bottom: -2px !important; left: 0 !important; right: 0 !important;
   height: 3px !important;
   background: var(--primary) !important;
 }
-.amis-scope .cxd-Tabs-link:hover:not(.is-active) { background: transparent !important; color: var(--text-primary) !important; }
-.amis-scope .cxd-Tabs-link.is-active:hover { background: transparent !important; color: var(--primary) !important; }
-.amis-scope .cxd-Tabs-link a { pointer-events: none; }
-.amis-scope .cxd-Tabs__indicator { display: none !important; }
-.amis-scope .cxd-Tabs-content { margin-top: 20px; }
+.amis-scope .antd-Tabs-link:hover:not(.is-active) { background: transparent !important; color: var(--text-primary) !important; }
+.amis-scope .antd-Tabs-link.is-active:hover { background: transparent !important; color: var(--primary) !important; }
+.amis-scope .antd-Tabs-link a { pointer-events: none; }
+.amis-scope .antd-Tabs__indicator { display: none !important; }
+.amis-scope .antd-Tabs-content { margin-top: 20px; }
 
 /* ===== Tabs: Style 2 - Solid (sub-tabs) ===== */
 /* Container border + dividers, selected = solid background */
@@ -537,6 +537,58 @@ body {
 }
 .language-select:focus { outline: none; border-color: var(--primary); }
 
+/* ===== Language Switcher inside Amis scope ===== */
+.amis-scope .language-switcher {
+  position: static;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  box-shadow: none;
+  border-bottom: none;
+  border-radius: var(--radius-sm);
+}
+
+.amis-scope .language-switcher .language-buttons,
+.amis-scope .language-switcher .language-tabs {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.amis-scope .language-switcher .language-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.amis-scope .language-switcher .language-btn:hover {
+  background: #f5f5f5;
+}
+
+.amis-scope .language-switcher .language-btn.is-active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.amis-scope .language-switcher .language-tab {
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.amis-scope .language-switcher .language-tab.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
 /* ===== Preview Panel (sticky within tab-right) ===== */
 .preview-panel {
   display: flex; flex-direction: column; align-items: center; width: 100%;
@@ -573,78 +625,78 @@ body {
 .footer-btn--save:hover { background: var(--primary-hover); }
 
 /* ===== Amis Global Overrides ===== */
-.amis-scope .cxd-Page { padding: 0 !important; background: transparent !important; }
-.amis-scope .cxd-Page.list-root { background: #FFFFFF !important; }
+.amis-scope .antd-Page { padding: 0 !important; background: transparent !important; }
+.amis-scope .antd-Page.list-root { background: #FFFFFF !important; }
 /* Make all Amis page wrappers pass through flex + gap */
-.amis-scope .cxd-Page-content, .amis-scope .cxd-Page-main {
+.amis-scope .antd-Page-content, .amis-scope .antd-Page-main {
   padding: 0 !important; display: flex !important; flex-direction: column !important;
   gap: 16px !important; flex: 1 !important;
 }
 /* Apply Figma padding (16px 20px 20px) to the actual content container */
-.amis-scope .cxd-Page-body {
+.amis-scope .antd-Page-body {
   padding: 16px 20px 20px !important; display: flex !important; flex-direction: column !important;
   gap: 16px !important; flex: 1 !important;
 }
-.amis-scope .cxd-Page-subTitle { display: none !important; }
-.amis-scope .cxd-Page-header { display: none !important; }
+.amis-scope .antd-Page-subTitle { display: none !important; }
+.amis-scope .antd-Page-header { display: none !important; }
 /* Remove Amis internal wrapper padding inside page-body */
-.amis-scope .cxd-Page-body > .cxd-Wrapper, .amis-scope .cxd-Page-body > .cxd-Form,
-.amis-scope .cxd-Page-body > .cxd-Divider, .amis-scope .cxd-Page-body > .cxd-Crud {
+.amis-scope .antd-Page-body > .antd-Wrapper, .amis-scope .antd-Page-body > .antd-Form,
+.amis-scope .antd-Page-body > .antd-Divider, .amis-scope .antd-Page-body > .antd-Crud {
   padding: 0 !important; margin: 0 !important;
 }
-.amis-scope .cxd-Form { padding: 0 !important; background: transparent !important; box-shadow: none !important; }
-.amis-scope .cxd-Form .cxd-Form-itemsWrap { padding: 0 !important; margin: 0 !important; }
-.amis-scope .cxd-FormItem { margin-bottom: 16px; }
+.amis-scope .antd-Form { padding: 0 !important; background: transparent !important; box-shadow: none !important; }
+.amis-scope .antd-Form .antd-Form-itemsWrap { padding: 0 !important; margin: 0 !important; }
+.amis-scope .antd-FormItem { margin-bottom: 16px; }
 .amis-scope .amis-form-group-label {
   color: var(--text-label) !important; font-weight: 600; margin-bottom: 6px;
 }
-.amis-scope .cxd-TextControl-input {
+.amis-scope .antd-TextControl-input {
   height: var(--input-height) !important; border-radius: var(--radius-sm) !important;
   border-color: var(--input-border) !important; color: var(--text-primary) !important;
 }
-.amis-scope .cxd-TextControl-input::placeholder { color: var(--text-placeholder) !important; }
-.amis-scope .cxd-TextControl-input:focus {
+.amis-scope .antd-TextControl-input::placeholder { color: var(--text-placeholder) !important; }
+.amis-scope .antd-TextControl-input:focus {
   border-color: var(--input-border-focus) !important; box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-.amis-scope .cxd-SelectControl .cxd-Select {
+.amis-scope .antd-SelectControl .antd-Select {
   height: var(--input-height) !important; border-radius: var(--radius-sm) !important;
   border-color: var(--input-border) !important;
 }
-.amis-scope .cxd-SelectControl .cxd-Select.is-focused {
+.amis-scope .antd-SelectControl .antd-Select.is-focused {
   border-color: var(--input-border-focus) !important; box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-.amis-scope .cxd-Datetime .cxd-Datetime-control {
+.amis-scope .antd-Datetime .antd-Datetime-control {
   height: var(--input-height) !important; border-radius: var(--radius-sm) !important;
   border-color: var(--input-border) !important;
 }
 
 /* ===== Date/Time Picker: minimal overrides to match form input height ===== */
-.amis-scope .cxd-DatePicker-input {
+.amis-scope .antd-DatePicker-input {
   height: var(--input-height) !important;
   border-radius: var(--radius-sm) !important;
   border-color: var(--input-border) !important;
   color: var(--text-primary) !important;
 }
-.amis-scope .cxd-DatePicker-input:focus {
+.amis-scope .antd-DatePicker-input:focus {
   border-color: var(--input-border-focus) !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-.amis-scope .cxd-DatePicker.is-focused .cxd-DatePicker-input {
+.amis-scope .antd-DatePicker.is-focused .antd-DatePicker-input {
   border-color: var(--input-border-focus) !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
 
 /* DateRangePicker: minimal override for height */
-.amis-scope .cxd-DateRangePicker {
+.amis-scope .antd-DateRangePicker {
   height: var(--input-height) !important;
 }
-.amis-scope .cxd-DateRangePicker.is-focused {
+.amis-scope .antd-DateRangePicker.is-focused {
   border-color: var(--input-border-focus) !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
 
 /* ===== Search Form Date Range: background color only ===== */
-.amis-scope .search-form .cxd-DateRangePicker {
+.amis-scope .search-form .antd-DateRangePicker {
   background: #F1F2F7 !important;
   border: 1px solid #CDCDD5 !important;
   border-radius: 4px !important;
@@ -652,51 +704,51 @@ body {
   width: 100% !important;
   min-width: 0 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker-input {
+.amis-scope .search-form .antd-DateRangePicker-input {
   color: #151B26 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker-input::placeholder {
+.amis-scope .search-form .antd-DateRangePicker-input::placeholder {
   color: #A8A8B0 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker:focus-within {
+.amis-scope .search-form .antd-DateRangePicker:focus-within {
   border-color: var(--primary) !important;
   background: #fff !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-/* Uses Amis's built-in .cxd-Form-group--hor class. Controls are grid-aligned as one unified block:
+/* Uses Amis's built-in .antd-Form-group--hor class. Controls are grid-aligned as one unified block:
    - Same Y position (perfectly level)
    - Seamless X alignment (no gap between controls)
    - Shared borders (only leftmost + rightmost borders visible)
    - Label spans full width above both controls */
-.amis-scope .cxd-Form-group--hor {
+.amis-scope .antd-Form-group--hor {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 0 !important;
   align-items: stretch !important;
 }
 /* Label spans both columns on row 1 */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item--normal > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item--inline > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item > .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item--normal > .cxd-Form-label {
+.amis-scope .antd-Form-group--hor > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > .antd-Form-item > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > .antd-Form-item--normal > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > .antd-Form-item--inline > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item > .antd-Form-label,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item--normal > .antd-Form-label {
   grid-column: 1 / -1 !important;
 }
 /* Column wrappers: make them flex to ensure controls align at same Y level */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-groupColumn,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-groupColumn {
+.amis-scope .antd-Form-group--hor > .antd-Form-groupColumn,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-groupColumn {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   min-height: 0 !important;
 }
 /* Form items inside columns: stretch to fill column height, then push datetime to bottom */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-groupColumn > .cxd-Form-item,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-groupColumn > .cxd-Form-item--normal,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-groupColumn > .cxd-Form-item,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-groupColumn > .cxd-Form-item--normal {
+.amis-scope .antd-Form-group--hor > .antd-Form-groupColumn > .antd-Form-item,
+.amis-scope .antd-Form-group--hor > .antd-Form-groupColumn > .antd-Form-item--normal,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-groupColumn > .antd-Form-item,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-groupColumn > .antd-Form-item--normal {
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
@@ -708,107 +760,107 @@ body {
   min-width: 0 !important;
 }
 /* Labels inside form items: reserve equal height so controls align at same Y */
-.amis-scope .cxd-Form-group--hor .cxd-Form-item .cxd-Form-label,
-.amis-scope .cxd-Form-group--hor .cxd-Form-item--normal .cxd-Form-label {
+.amis-scope .antd-Form-group--hor .antd-Form-item .antd-Form-label,
+.amis-scope .antd-Form-group--hor .antd-Form-item--normal .antd-Form-label {
   display: block !important;
   min-height: 22px !important;
 }
 /* Empty labels (right column) still reserve same height */
-.amis-scope .cxd-Form-group--hor .cxd-Form-item .cxd-Form-label:empty,
-.amis-scope .cxd-Form-group--hor .cxd-Form-item--normal .cxd-Form-label:empty {
+.amis-scope .antd-Form-group--hor .antd-Form-item .antd-Form-label:empty,
+.amis-scope .antd-Form-group--hor .antd-Form-item--normal .antd-Form-label:empty {
   min-height: 22px !important;
 }
 /* DatetimeControl inside paired group */
-.amis-scope .cxd-Form-group--hor .cxd-DatetimeControl {
+.amis-scope .antd-Form-group--hor .antd-DatetimeControl {
   width: 100% !important;
   max-width: none !important;
 }
 /* Remove all inner padding so controls sit flush */
-.amis-scope .cxd-Form-group--hor .cxd-DatetimeControl .cxd-Form-value,
-.amis-scope .cxd-Form-group--hor .cxd-DatetimeControl .amis-form-group {
+.amis-scope .antd-Form-group--hor .antd-DatetimeControl .antd-Form-value,
+.amis-scope .antd-Form-group--hor .antd-DatetimeControl .amis-form-group {
   padding: 0 !important;
   margin: 0 !important;
 }
-.amis-scope .cxd-Form-group--hor .cxd-DatetimeControl .amis-form-group-label,
-.amis-scope .cxd-Form-group--hor .cxd-DatetimeControl .amis-form-group-label:empty {
+.amis-scope .antd-Form-group--hor .antd-DatetimeControl .amis-form-group-label,
+.amis-scope .antd-Form-group--hor .antd-DatetimeControl .amis-form-group-label:empty {
   margin: 0 !important;
   padding: 0 !important;
   min-height: 0 !important;
 }
 /* Merge borders of adjacent datetime inputs so they look like one block */
-.amis-scope .cxd-Form-group--hor .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor .cxd-DatePicker {
+.amis-scope .antd-Form-group--hor .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor .antd-DatePicker {
   border-radius: 0 !important;
   margin: 0 !important;
 }
 /* Left control: only left border + left border-radius */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item:first-child .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item:first-child .cxd-DatePicker,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item:first-child .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item:first-child .cxd-DatePicker {
+.amis-scope .antd-Form-group--hor > .antd-Form-item:first-child .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > .antd-Form-item:first-child .antd-DatePicker,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item:first-child .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item:first-child .antd-DatePicker {
   border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
   border-right: none !important;
 }
 /* Right control: only right border + right border-radius */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item:last-child .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item:last-child .cxd-DatePicker,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item:last-child .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item:last-child .cxd-DatePicker {
+.amis-scope .antd-Form-group--hor > .antd-Form-item:last-child .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > .antd-Form-item:last-child .antd-DatePicker,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item:last-child .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item:last-child .antd-DatePicker {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
   border-left: 1px solid var(--input-border) !important;
 }
 /* Focus state: expand shadow to cover both */
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item.is-focused .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item--normal.is-focused .cxd-Datetime .cxd-Datetime-control {
+.amis-scope .antd-Form-group--hor > .antd-Form-item.is-focused .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > .antd-Form-item--normal.is-focused .antd-Datetime .antd-Datetime-control {
   border-right: 1px solid var(--input-border-focus) !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item.is-focused .cxd-Datetime .cxd-Datetime-control,
-.amis-scope .cxd-Form-group--hor > div > .cxd-Form-item--normal.is-focused .cxd-Datetime .cxd-Datetime-control {
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item.is-focused .antd-Datetime .antd-Datetime-control,
+.amis-scope .antd-Form-group--hor > div > .antd-Form-item--normal.is-focused .antd-Datetime .antd-Datetime-control {
   border-right: 1px solid var(--input-border-focus) !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
 /* Validation error tpl spans full width below paired datetime */
-.amis-scope .cxd-Form-group--hor > .cxd-TplControl,
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item:has(.cxd-TplControl),
-.amis-scope .cxd-Form-group--hor > .cxd-Form-item--normal:has(.cxd-TplControl),
-.amis-scope .cxd-Form-group--hor > div:has(.cxd-TplControl) {
+.amis-scope .antd-Form-group--hor > .antd-TplControl,
+.amis-scope .antd-Form-group--hor > .antd-Form-item:has(.antd-TplControl),
+.amis-scope .antd-Form-group--hor > .antd-Form-item--normal:has(.antd-TplControl),
+.amis-scope .antd-Form-group--hor > div:has(.antd-TplControl) {
   grid-column: 1 / -1 !important;
   margin-top: 4px !important;
 }
 /* Default: controls fill full width (for non-group items) */
-.amis-scope .cxd-TextControl,
-.amis-scope .cxd-SelectControl,
-.amis-scope .cxd-DatetimeControl,
-.amis-scope .cxd-DateControl,
-.amis-scope .cxd-TextareaControl,
-.amis-scope .cxd-EditorControl {
+.amis-scope .antd-TextControl,
+.amis-scope .antd-SelectControl,
+.amis-scope .antd-DatetimeControl,
+.amis-scope .antd-DateControl,
+.amis-scope .antd-TextareaControl,
+.amis-scope .antd-EditorControl {
   width: 100% !important;
   max-width: 100% !important;
 }
-.amis-scope .cxd-Form-group > .cxd-Form-item > .amis-form-group,
-.amis-scope .cxd-Form-group > .cxd-Form-groupColumn > .amis-form-group {
+.amis-scope .antd-Form-group > .antd-Form-item > .amis-form-group,
+.amis-scope .antd-Form-group > .antd-Form-groupColumn > .amis-form-group {
   align-items: flex-start !important;
 }
-.amis-scope .cxd-Form-group > .cxd-Form-item:first-child .amis-form-group-label:empty,
-.amis-scope .cxd-Form-group > .cxd-Form-item:first-child .amis-form-group-label:only-child:empty {
+.amis-scope .antd-Form-group > .antd-Form-item:first-child .amis-form-group-label:empty,
+.amis-scope .antd-Form-group > .antd-Form-item:first-child .amis-form-group-label:only-child:empty {
   margin: 0 !important; padding: 0 !important;
 }
-.amis-scope .cxd-Form-actions { display: none !important; }
+.amis-scope .antd-Form-actions { display: none !important; }
 .amis-scope .amis-form-item-required > .amis-form-group-label::after { content: '' !important; }
 .amis-scope .amis-form-item-required .amis-form-group-label::before {
   content: '* ' !important; color: var(--danger) !important; font-weight: 600 !important;
 }
-.amis-scope .cxd-SwitchControl .cxd-Switch { margin-left: 8px; }
-.amis-scope .cxd-SwitchControl .cxd-Switch.is-checked { background: var(--primary) !important; }
+.amis-scope .antd-SwitchControl .antd-Switch { margin-left: 8px; }
+.amis-scope .antd-SwitchControl .antd-Switch.is-checked { background: var(--primary) !important; }
 
 /* ===== Amis CRUD / Table Global ===== */
-.amis-scope .cxd-CRUD { padding: 0 !important; }
-.amis-scope .cxd-Table-actions { display: none !important; }
-.amis-scope .cxd-ColumnToggler { display: none !important; }
-.amis-scope .cxd-ColumnToggler * { display: none !important; }
-.amis-scope .cxd-Table-headToolbar { display: none !important; }
-.amis-scope .cxd-Table-table > thead > tr > th {
+.amis-scope .antd-CRUD { padding: 0 !important; }
+.amis-scope .antd-Table-actions { display: none !important; }
+.amis-scope .antd-ColumnToggler { display: none !important; }
+.amis-scope .antd-ColumnToggler * { display: none !important; }
+.amis-scope .antd-Table-headToolbar { display: none !important; }
+.amis-scope .antd-Table-table > thead > tr > th {
   background: #F8F9FC !important; font-size: 12px !important;
   font-weight: 600 !important; color: #5C5F66 !important;
   padding: 8px 12px !important; border-bottom: 1px solid #E8E8E8 !important;
@@ -816,9 +868,9 @@ body {
   white-space: normal !important; height: 40px !important;
   line-height: 1.3 !important;
 }
-.amis-scope .cxd-Table-table > thead > tr > th:last-child { border-right: 1px solid #E8E8E8 !important; }
-.amis-scope .cxd-Table-table > tbody > tr { min-height: 50px !important; }
-.amis-scope .cxd-Table-table > tbody > tr > td {
+.amis-scope .antd-Table-table > thead > tr > th:last-child { border-right: 1px solid #E8E8E8 !important; }
+.amis-scope .antd-Table-table > tbody > tr { min-height: 50px !important; }
+.amis-scope .antd-Table-table > tbody > tr > td {
   padding: 8px 12px !important;
   color: #151B26 !important; border-bottom: 1px solid #E8E8E8 !important;
   border-right: 1px solid #E8E8E8 !important;
@@ -829,16 +881,16 @@ body {
   text-overflow: ellipsis !important;
   max-height: 50px !important;
 }
-.amis-scope .cxd-Table-table > tbody > tr > td:last-child { border-right: 1px solid #E8E8E8 !important; }
-.amis-scope .cxd-Table-table > tbody > tr:hover { background: #F8F9FC !important; }
-.amis-scope .cxd-Table-table > tbody > tr:last-child > td { border-bottom: none !important; }
-.amis-scope .cxd-Pagination { padding: 12px 20px !important; border-top: 1px solid #E8E8E8 !important; }
-.amis-scope .cxd-CRUD-searchForm { margin-bottom: 16px !important; }
+.amis-scope .antd-Table-table > tbody > tr > td:last-child { border-right: 1px solid #E8E8E8 !important; }
+.amis-scope .antd-Table-table > tbody > tr:hover { background: #F8F9FC !important; }
+.amis-scope .antd-Table-table > tbody > tr:last-child > td { border-bottom: none !important; }
+.amis-scope .antd-Pagination { padding: 12px 20px !important; border-top: 1px solid #E8E8E8 !important; }
+.amis-scope .antd-CRUD-searchForm { margin-bottom: 16px !important; }
 
 /* ===== Amis Cell Wrapper Overrides ===== */
-.amis-scope .cxd-Table-cell { padding: 0 !important; }
-.amis-scope .cxd-Table-cell > div { padding: 0 !important; }
-.amis-scope .cxd-Table-cell > .cxd-TplField {
+.amis-scope .antd-Table-cell { padding: 0 !important; }
+.amis-scope .antd-Table-cell > div { padding: 0 !important; }
+.amis-scope .antd-Table-cell > .antd-TplField {
   padding: 0 !important; height: auto !important; max-height: 40px !important;
   overflow: hidden !important; display: block !important;
   line-height: 1.4 !important;
@@ -847,12 +899,12 @@ body {
   -webkit-box-orient: vertical !important;
   word-break: break-all !important;
 }
-.amis-scope .cxd-Table-cell .cxd-TplField > div { padding: 0 !important; margin: 0 !important; }
+.amis-scope .antd-Table-cell .antd-TplField > div { padding: 0 !important; margin: 0 !important; }
 /* Also handle inline TplField spans inside cells */
-.amis-scope .cxd-Table-table td .cxd-TplField,
-.amis-scope .cxd-Table-table td .cxd-PlainField,
-.amis-scope .cxd-Table-table td .cxd-MappingField,
-.amis-scope .cxd-Table-table td .cxd-OperationField {
+.amis-scope .antd-Table-table td .antd-TplField,
+.amis-scope .antd-Table-table td .antd-PlainField,
+.amis-scope .antd-Table-table td .antd-MappingField,
+.amis-scope .antd-Table-table td .antd-OperationField {
   display: block !important; line-height: 1.4 !important; vertical-align: middle !important;
   white-space: normal !important; word-break: break-all !important;
 }
@@ -868,34 +920,34 @@ body {
   background: transparent !important;
 }
 /* Column 1: Order ID */
-.amis-scope .search-form > .cxd-FormItem:nth-child(1) {
+.amis-scope .search-form > .antd-FormItem:nth-child(1) {
   grid-column: span 1 !important;
 }
 /* Column 2-3: Date Range (spans 2) */
-.amis-scope .search-form > .cxd-FormItem:nth-child(2),
+.amis-scope .search-form > .antd-FormItem:nth-child(2),
 .amis-scope .search-form .search-field-date-range {
   grid-column: span 2 !important;
 }
 /* Column 4: Deal Type */
-.amis-scope .search-form > .cxd-FormItem:nth-child(3) {
+.amis-scope .search-form > .antd-FormItem:nth-child(3) {
   grid-column: span 1 !important;
 }
 /* Column 5: Business Unit */
-.amis-scope .search-form > .cxd-FormItem:nth-child(4) {
+.amis-scope .search-form > .antd-FormItem:nth-child(4) {
   grid-column: span 1 !important;
 }
 /* Form items: no extra margin/padding */
-.amis-scope .search-form .cxd-FormItem {
+.amis-scope .search-form .antd-FormItem {
   margin-bottom: 0 !important;
   margin-top: 0 !important;
   padding: 0 !important;
   min-width: 0 !important;
 }
-.amis-scope .search-form .cxd-Form-item--normal {
+.amis-scope .search-form .antd-Form-item--normal {
   padding: 0 !important;
 }
 /* Labels */
-.amis-scope .search-form .cxd-Form-label {
+.amis-scope .search-form .antd-Form-label {
   font-weight: 500 !important;
   color: #5C5F66 !important;
   margin-bottom: 6px !important;
@@ -904,8 +956,8 @@ body {
   line-height: 1.3 !important;
 }
 /* Required asterisk (red) — already handled by Amis, just ensure color */
-.amis-scope .search-form .amis-form-item-required .cxd-Form-label::before,
-.amis-scope .search-form .amis-form-item-required > .cxd-Form-label::before {
+.amis-scope .search-form .amis-form-item-required .antd-Form-label::before,
+.amis-scope .search-form .amis-form-item-required > .antd-Form-label::before {
   color: var(--danger) !important;
   font-weight: 600 !important;
 }
@@ -929,7 +981,7 @@ body {
 
 /* ===== Search Form Field Styles ===== */
 /* Text input */
-.amis-scope .search-form .cxd-TextControl-input {
+.amis-scope .search-form .antd-TextControl-input {
   background: #F1F2F7 !important;
   border: 1px solid #CDCDD5 !important;
   border-radius: 4px !important;
@@ -938,17 +990,17 @@ body {
   min-width: 0 !important;
   color: #151B26 !important;
 }
-.amis-scope .search-form .cxd-TextControl-input:focus {
+.amis-scope .search-form .antd-TextControl-input:focus {
   border-color: var(--primary) !important;
   background: #fff !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
-.amis-scope .search-form .cxd-TextControl-input::placeholder {
+.amis-scope .search-form .antd-TextControl-input::placeholder {
   color: #A8A8B0 !important;
 }
 
 /* Date range picker */
-.amis-scope .search-form .cxd-DateRangePicker {
+.amis-scope .search-form .antd-DateRangePicker {
   background: #F1F2F7 !important;
   border: 1px solid #CDCDD5 !important;
   border-radius: 4px !important;
@@ -956,20 +1008,20 @@ body {
   width: 100% !important;
   min-width: 0 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker-input {
+.amis-scope .search-form .antd-DateRangePicker-input {
   color: #151B26 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker-input::placeholder {
+.amis-scope .search-form .antd-DateRangePicker-input::placeholder {
   color: #A8A8B0 !important;
 }
-.amis-scope .search-form .cxd-DateRangePicker:focus-within {
+.amis-scope .search-form .antd-DateRangePicker:focus-within {
   border-color: var(--primary) !important;
   background: #fff !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
 }
 
 /* Select dropdown */
-.amis-scope .search-form .cxd-Select {
+.amis-scope .search-form .antd-Select {
   background: #F1F2F7 !important;
   border: 1px solid #CDCDD5 !important;
   border-radius: 4px !important;
@@ -977,13 +1029,13 @@ body {
   width: 100% !important;
   min-width: 0 !important;
 }
-.amis-scope .search-form .cxd-Select-valueWrap {
+.amis-scope .search-form .antd-Select-valueWrap {
   color: #151B26 !important;
 }
-.amis-scope .search-form .cxd-Select-placeholder {
+.amis-scope .search-form .antd-Select-placeholder {
   color: #A8A8B0 !important;
 }
-.amis-scope .search-form .cxd-Select.is-focused {
+.amis-scope .search-form .antd-Select.is-focused {
   border-color: var(--primary) !important;
   background: #fff !important;
   box-shadow: 0 0 0 2px rgba(74,92,191,0.08) !important;
@@ -1018,34 +1070,34 @@ body {
 }
 
 /* ===== CRUD Layout ===== */
-.amis-scope .cxd-Crud { padding: 0 !important; margin: 0 !important; overflow-x: auto !important; flex-shrink: 0 !important; }
-.amis-scope .cxd-Crud > .cxd-Table { min-width: 1240px !important; }
+.amis-scope .antd-Crud { padding: 0 !important; margin: 0 !important; overflow-x: auto !important; flex-shrink: 0 !important; }
+.amis-scope .antd-Crud > .antd-Table { min-width: 1240px !important; }
 
 /* ===== Operation Column ===== */
-.amis-scope .cxd-OperationField {
+.amis-scope .antd-OperationField {
   display: inline-flex !important; align-items: center !important; gap: 0 !important;
 }
-.amis-scope .cxd-OperationField .cxd-Link,
-.amis-scope .cxd-OperationField a.cxd-Link,
-.amis-scope .cxd-OperationField button.cxd-Link {
+.amis-scope .antd-OperationField .antd-Link,
+.amis-scope .antd-OperationField a.antd-Link,
+.amis-scope .antd-OperationField button.antd-Link {
   color: var(--primary) !important; font-weight: 500 !important;
   text-decoration: none !important; border: none !important; background: transparent !important;
   padding: 0 !important; margin: 0 !important; line-height: 1.4 !important;
   display: inline !important;
 }
-.amis-scope .cxd-OperationField .cxd-Link:hover { text-decoration: underline !important; }
-.amis-scope .cxd-OperationField .cxd-Link + .cxd-Link::before {
+.amis-scope .antd-OperationField .antd-Link:hover { text-decoration: underline !important; }
+.amis-scope .antd-OperationField .antd-Link + .antd-Link::before {
   content: ' | ' !important; color: #D0D5DD !important; margin: 0 6px !important
 }
 
 /* ===== Pagination (standalone wrapper) ===== */
-.amis-scope .cxd-Pagination-wrap {
+.amis-scope .antd-Pagination-wrap {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
 }
 
-.amis-scope .cxd-Pagination {
+.amis-scope .antd-Pagination {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
@@ -1053,9 +1105,9 @@ body {
   list-style: none !important;
 }
 
-.amis-scope .cxd-Pagination-prev,
-.amis-scope .cxd-Pagination-next,
-.amis-scope .cxd-Pagination-pager-item {
+.amis-scope .antd-Pagination-prev,
+.amis-scope .antd-Pagination-next,
+.amis-scope .antd-Pagination-pager-item {
   min-width: 32px !important;
   width: 32px !important;
   height: 32px !important;
@@ -1075,33 +1127,33 @@ body {
   list-style: none !important;
 }
 
-.amis-scope .cxd-Pagination-prev:hover:not(.is-disabled),
-.amis-scope .cxd-Pagination-next:hover:not(.is-disabled),
-.amis-scope .cxd-Pagination-pager-item:hover:not(.is-active) {
+.amis-scope .antd-Pagination-prev:hover:not(.is-disabled),
+.amis-scope .antd-Pagination-next:hover:not(.is-disabled),
+.amis-scope .antd-Pagination-pager-item:hover:not(.is-active) {
   border-color: #384EB4 !important;
   color: #384EB4 !important;
   background: #FFFFFF !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item.is-active {
+.amis-scope .antd-Pagination-pager-item.is-active {
   background: #384EB4 !important;
   border-color: #384EB4 !important;
   color: #FFFFFF !important;
   font-weight: 400 !important;
 }
 
-.amis-scope .cxd-Pagination-prev.is-disabled,
-.amis-scope .cxd-Pagination-next.is-disabled {
+.amis-scope .antd-Pagination-prev.is-disabled,
+.amis-scope .antd-Pagination-next.is-disabled {
   opacity: 0.3 !important;
   cursor: not-allowed !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item.is-active a {
+.amis-scope .antd-Pagination-pager-item.is-active a {
   color: #fff !important;
   background: transparent !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item a {
+.amis-scope .antd-Pagination-pager-item a {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1109,14 +1161,14 @@ body {
   height: 100% !important;
 }
 
-.amis-scope .cxd-Pagination-total,
-.amis-scope .cxd-Pagination-size {
+.amis-scope .antd-Pagination-total,
+.amis-scope .antd-Pagination-size {
   color: #3B3D49 !important;
   font-size: 18px !important;
   font-weight: 400 !important;
 }
 
-.amis-scope .cxd-Pagination-size select {
+.amis-scope .antd-Pagination-size select {
   height: 32px !important;
   min-width: 102px !important;
   padding: 0 12px !important;
@@ -1128,19 +1180,19 @@ body {
 }
 
 /* Switch per page (items per page dropdown) */
-.amis-scope .cxd-Crud-pageSwitch {
+.amis-scope .antd-Crud-pageSwitch {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
 }
 
-.amis-scope .cxd-Crud-pageSwitch span {
+.amis-scope .antd-Crud-pageSwitch span {
   font-size: 18px !important;
   color: #3B3D49 !important;
   font-weight: 400 !important;
 }
 
-.amis-scope .cxd-Crud-pageSwitch select {
+.amis-scope .antd-Crud-pageSwitch select {
   height: 32px !important;
   min-width: 102px !important;
   padding: 0 12px !important;
@@ -1154,30 +1206,30 @@ body {
   transition: all 0.15s !important;
 }
 
-.amis-scope .cxd-Crud-pageSwitch select:hover {
+.amis-scope .antd-Crud-pageSwitch select:hover {
   border-color: #384EB4 !important;
 }
 
-.amis-scope .cxd-Crud-pageSwitch select:focus {
+.amis-scope .antd-Crud-pageSwitch select:focus {
   border-color: #384EB4 !important;
   box-shadow: 0 0 0 2px rgba(56, 78, 180, 0.12) !important;
 }
 
 /* ===== Fixed Column ===== */
-.amis-scope .cxd-Table-table--affixHeader thead th:last-child { background: #F8F9FC !important; z-index: 3 !important; }
-.amis-scope .cxd-Table-fixedRight {
+.amis-scope .antd-Table-table--affixHeader thead th:last-child { background: #F8F9FC !important; z-index: 3 !important; }
+.amis-scope .antd-Table-fixedRight {
   background: #fff !important;
   box-shadow: -4px 0 12px rgba(0,0,0,0.08) !important;
 }
-.amis-scope .cxd-Table-fixedRight .cxd-Table-table > thead > tr > th { background: #F8F9FC !important; }
-.amis-scope .cxd-Table-fixedRight .cxd-Table-table > tbody > tr > td { background: #fff !important; }
-.amis-scope .cxd-Table-fixedRight .cxd-Table-table > tbody > tr:hover > td { background: #F8F9FC !important; }
+.amis-scope .antd-Table-fixedRight .antd-Table-table > thead > tr > th { background: #F8F9FC !important; }
+.amis-scope .antd-Table-fixedRight .antd-Table-table > tbody > tr > td { background: #fff !important; }
+.amis-scope .antd-Table-fixedRight .antd-Table-table > tbody > tr:hover > td { background: #F8F9FC !important; }
 
 /* ===== Cell Override: allow mission name to wrap ===== */
-.amis-scope .cxd-Table-table > tbody > tr > td .cell-name {
+.amis-scope .antd-Table-table > tbody > tr > td .cell-name {
   white-space: normal !important; max-width: 200px !important; display: inline-block !important;
 }
-.amis-scope .cxd-Table-table > tbody > tr > td .cell-code { white-space: nowrap !important; }
+.amis-scope .antd-Table-table > tbody > tr > td .cell-code { white-space: nowrap !important; }
 
 /* ===== Promotion List Mappings ===== */
 .promo-status-dot {
@@ -1886,23 +1938,23 @@ body {
 }
 
 /* ===== Project-level: Table Borders ===== */
-.amis-scope .cxd-Table {
+.amis-scope .antd-Table {
   border: 1px solid #d9d9d9 !important;
   border-radius: 0 !important;
 }
-.amis-scope .cxd-Table-table > thead > tr > th {
+.amis-scope .antd-Table-table > thead > tr > th {
   border-right: 1px solid #e8e8e8 !important;
   border-bottom: 1px solid #e8e8e8 !important;
 }
-.amis-scope .cxd-Table-table > tbody > tr > td {
+.amis-scope .antd-Table-table > tbody > tr > td {
   border-right: 1px solid #e8e8e8 !important;
   border-bottom: 1px solid #e8e8e8 !important;
 }
-.amis-scope .cxd-Table-table > tbody > tr:last-child > td {
+.amis-scope .antd-Table-table > tbody > tr:last-child > td {
   border-bottom: none !important;
 }
 /* Pagination bar at bottom */
-.amis-scope .cxd-Pagination-wrapper {
+.amis-scope .antd-Pagination-wrapper {
   padding: 14px 20px !important;
   min-height: 56px !important;
   border-top: 1px solid #E0E2E8 !important;
@@ -1911,14 +1963,14 @@ body {
 
 /* ===== Table Pagination Bar ===== */
 /* Pixel-accurate: based on reference images with annotations */
-.amis-scope .cxd-Table-footToolbar {
+.amis-scope .antd-Table-footToolbar {
   padding: 14px 20px !important;
   min-height: 56px !important;
   border-top: 1px solid #E0E2E8 !important;
   background: #FFFFFF !important;
 }
 
-.amis-scope .cxd-Crud-toolbar {
+.amis-scope .antd-Crud-toolbar {
   display: flex !important;
   justify-content: flex-end !important;
   align-items: center !important;
@@ -1926,28 +1978,28 @@ body {
   gap: 16px !important;
 }
 
-.amis-scope .cxd-Crud-toolbar-item {
+.amis-scope .antd-Crud-toolbar-item {
   display: flex !important;
   align-items: center !important;
 }
 
-.amis-scope .cxd-Crud-toolbar-item--left {
+.amis-scope .antd-Crud-toolbar-item--left {
   justify-content: flex-start !important;
 }
 
-.amis-scope .cxd-Crud-toolbar-item--center {
+.amis-scope .antd-Crud-toolbar-item--center {
   justify-content: center !important;
   flex: 0 !important;
 }
 
-.amis-scope .cxd-Crud-toolbar-item--right {
+.amis-scope .antd-Crud-toolbar-item--right {
   justify-content: flex-end !important;
 }
 
 /* ===== Expandable Table (Table2) ===== */
 
 /* Expand button — square box with +/- icon */
-.amis-scope .cxd-Table-expandBtn {
+.amis-scope .antd-Table-expandBtn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1966,35 +2018,35 @@ body {
   color: #666 !important;
 }
 /* Hide default SVG icon */
-.amis-scope .cxd-Table-expandBtn svg { display: none !important; }
+.amis-scope .antd-Table-expandBtn svg { display: none !important; }
 /* Show + symbol via pseudo-element */
-.amis-scope .cxd-Table-expandBtn::before {
+.amis-scope .antd-Table-expandBtn::before {
   content: '+' !important;
   font-weight: 400 !important;
 }
 /* Show − symbol when expanded */
-.amis-scope .cxd-Table-expanded-row .cxd-Table-expandBtn::before,
-.amis-scope .cxd-Table-row.is-expanded .cxd-Table-expandBtn::before {
+.amis-scope .antd-Table-expanded-row .antd-Table-expandBtn::before,
+.amis-scope .antd-Table-row.is-expanded .antd-Table-expandBtn::before {
   content: '−' !important;
 }
-.amis-scope .cxd-Table-expandBtn:hover {
+.amis-scope .antd-Table-expandBtn:hover {
   border-color: var(--primary) !important;
   color: var(--primary) !important;
 }
 
 /* Expand column header cell — hide content but keep column width */
-.amis-scope .cxd-Table-row-expand-icon-cell {
+.amis-scope .antd-Table-row-expand-icon-cell {
   width: 48px !important;
   min-width: 48px !important;
   max-width: 48px !important;
   padding: 0 12px !important;
   text-align: center !important;
 }
-.amis-scope .cxd-Table-row-expand-icon-cell > * {
+.amis-scope .antd-Table-row-expand-icon-cell > * {
   visibility: hidden !important;
 }
 /* Expand column body cells — center the button */
-.amis-scope .cxd-Table-cell-expand-icon-cell {
+.amis-scope .antd-Table-cell-expand-icon-cell {
   width: 48px !important;
   min-width: 48px !important;
   max-width: 48px !important;
@@ -2004,15 +2056,15 @@ body {
 }
 
 /* Expanded row background */
-.amis-scope .cxd-Table-expanded-row > td {
+.amis-scope .antd-Table-expanded-row > td {
   background: #F5F6FA !important;
 }
 
 /* Expanded row content area */
-.amis-scope .cxd-Table-expanded-row .cxd-Container-body {
+.amis-scope .antd-Table-expanded-row .antd-Container-body {
   padding: 0 !important;
 }
-.amis-scope .cxd-Table-expanded-row .cxd-TplField {
+.amis-scope .antd-Table-expanded-row .antd-TplField {
   padding: 10px 16px !important;
   max-height: none !important;
   overflow: visible !important;
@@ -2035,12 +2087,12 @@ body {
 }
 
 /* Expanded row nested table: hide header (legacy, for nested table approach) */
-.amis-scope .cxd-Table-expanded-row .cxd-Table-table > thead {
+.amis-scope .antd-Table-expanded-row .antd-Table-table > thead {
   display: none !important;
 }
 
 /* Expanded row nested table cells (legacy) */
-.amis-scope .cxd-Table-expanded-row .cxd-Table-table > tbody > tr > td {
+.amis-scope .antd-Table-expanded-row .antd-Table-table > tbody > tr > td {
   background: transparent !important;
   border-bottom: none !important;
   border-right: none !important;
@@ -2055,8 +2107,8 @@ body {
 }
 
 /* Row height: 50px, vertically centered, max 2 lines with ellipsis */
-.amis-scope .cxd-Table-table > tbody > tr { min-height: 50px !important; }
-.amis-scope .cxd-Table-table > tbody > tr > td {
+.amis-scope .antd-Table-table > tbody > tr { min-height: 50px !important; }
+.amis-scope .antd-Table-table > tbody > tr > td {
   padding: 8px 12px !important;
   color: #151B26 !important; border-bottom: 1px solid #E8E8E8 !important;
   border-right: 1px solid #E8E8E8 !important;
@@ -2069,7 +2121,7 @@ body {
 }
 
 /* Statistics text ("共 X 项") */
-.amis-scope .cxd-Crud-statistics {
+.amis-scope .antd-Crud-statistics {
   font-size: 18px !important;
   color: #3B3D49 !important;
   white-space: nowrap !important;
@@ -2077,18 +2129,18 @@ body {
 }
 
 /* Pagination container */
-.amis-scope .cxd-Crud-pager {
+.amis-scope .antd-Crud-pager {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
 }
 
-.amis-scope .cxd-Pagination-wrap {
+.amis-scope .antd-Pagination-wrap {
   display: flex !important;
   align-items: center !important;
 }
 
-.amis-scope .cxd-Pagination {
+.amis-scope .antd-Pagination {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
@@ -2097,9 +2149,9 @@ body {
 }
 
 /* Pagination buttons — 32x32px per reference */
-.amis-scope .cxd-Pagination-prev,
-.amis-scope .cxd-Pagination-next,
-.amis-scope .cxd-Pagination-pager-item {
+.amis-scope .antd-Pagination-prev,
+.amis-scope .antd-Pagination-next,
+.amis-scope .antd-Pagination-pager-item {
   min-width: 32px !important;
   width: 32px !important;
   height: 32px !important;
@@ -2119,33 +2171,33 @@ body {
   list-style: none !important;
 }
 
-.amis-scope .cxd-Pagination-prev:hover:not(.is-disabled),
-.amis-scope .cxd-Pagination-next:hover:not(.is-disabled),
-.amis-scope .cxd-Pagination-pager-item:hover:not(.is-active) {
+.amis-scope .antd-Pagination-prev:hover:not(.is-disabled),
+.amis-scope .antd-Pagination-next:hover:not(.is-disabled),
+.amis-scope .antd-Pagination-pager-item:hover:not(.is-active) {
   border-color: #384EB4 !important;
   color: #384EB4 !important;
   background: #FFFFFF !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item.is-active {
+.amis-scope .antd-Pagination-pager-item.is-active {
   background: #384EB4 !important;
   border-color: #384EB4 !important;
   color: #FFFFFF !important;
   font-weight: 400 !important;
 }
 
-.amis-scope .cxd-Pagination-prev.is-disabled,
-.amis-scope .cxd-Pagination-next.is-disabled {
+.amis-scope .antd-Pagination-prev.is-disabled,
+.amis-scope .antd-Pagination-next.is-disabled {
   opacity: 0.3 !important;
   cursor: not-allowed !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item.is-active a {
+.amis-scope .antd-Pagination-pager-item.is-active a {
   color: #fff !important;
   background: transparent !important;
 }
 
-.amis-scope .cxd-Pagination-pager-item a {
+.amis-scope .antd-Pagination-pager-item a {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2172,12 +2224,12 @@ body {
 }
 
 /* Checkbox alignment */
-.amis-scope .field-exclude-row .cxd-Checkbox {
+.amis-scope .field-exclude-row .antd-Checkbox {
   margin-left: auto !important;
   flex-shrink: 0 !important;
 }
 
-.amis-scope .field-exclude-row .cxd-Checkbox .cxd-Checkbox-label {
+.amis-scope .field-exclude-row .antd-Checkbox .antd-Checkbox-label {
   font-size: 14px !important;
   color: var(--text-secondary) !important;
 }
@@ -2188,13 +2240,13 @@ body {
 .layer1-tabs { margin-bottom: 24px !important; }
 
 /* Container: no border, no background */
-.layer1-tabs .cxd-Tabs-linksContainer,
-.layer1-tabs .cxd-Tabs-linksContainer-wrapper {
+.layer1-tabs .antd-Tabs-linksContainer,
+.layer1-tabs .antd-Tabs-linksContainer-wrapper {
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
 }
-.layer1-tabs .cxd-Tabs-links {
+.layer1-tabs .antd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2203,7 +2255,7 @@ body {
 }
 
 /* Nav items: large text, gray default, no background */
-.layer1-tabs .cxd-Tabs-link {
+.layer1-tabs .antd-Tabs-link {
   padding: 10px 24px !important;
   font-size: 16px !important;
   font-weight: 500 !important;
@@ -2219,7 +2271,7 @@ body {
   display: inline-flex !important;
   align-items: center !important;
 }
-.layer1-tabs .cxd-Tabs-link a {
+.layer1-tabs .antd-Tabs-link a {
   color: inherit !important;
   text-decoration: none !important;
   font-weight: inherit !important;
@@ -2227,15 +2279,15 @@ body {
 }
 
 /* Active: blue text + thick bottom line */
-.layer1-tabs .cxd-Tabs-link.is-active {
+.layer1-tabs .antd-Tabs-link.is-active {
   color: var(--primary) !important;
   font-weight: 600 !important;
   background: transparent !important;
 }
-.layer1-tabs .cxd-Tabs-link.is-active a {
+.layer1-tabs .antd-Tabs-link.is-active a {
   color: var(--primary) !important;
 }
-.layer1-tabs .cxd-Tabs-link.is-active::after {
+.layer1-tabs .antd-Tabs-link.is-active::after {
   content: '' !important;
   position: absolute !important;
   bottom: -2px !important;
@@ -2248,23 +2300,23 @@ body {
 }
 
 /* Hide Amis indicator */
-.layer1-tabs .cxd-Tabs__indicator { display: none !important; }
+.layer1-tabs .antd-Tabs__indicator { display: none !important; }
 /* Hide arrows */
-.layer1-tabs .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.layer1-tabs .antd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* ========== Layer 2: Sub Mission tabs (tiled mode) ========== */
 .layer2-tabs { margin-bottom: 0 !important; }
 
 /* Container: light gray background strip */
-.layer2-tabs .cxd-Tabs-linksContainer,
-.layer2-tabs .cxd-Tabs-linksContainer-wrapper {
+.layer2-tabs .antd-Tabs-linksContainer,
+.layer2-tabs .antd-Tabs-linksContainer-wrapper {
   background: #F4F5F9 !important;
   border: none !important;
   border-radius: 8px 8px 0 0 !important;
   padding: 0 12px !important;
 }
 
-.layer2-tabs .cxd-Tabs-links {
+.layer2-tabs .antd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2273,7 +2325,7 @@ body {
 }
 
 /* Nav items: smaller text */
-.layer2-tabs .cxd-Tabs-link {
+.layer2-tabs .antd-Tabs-link {
   padding: 8px 4px !important;
   font-size: 13px !important;
   font-weight: 500 !important;
@@ -2287,17 +2339,17 @@ body {
   height: auto !important;
   line-height: 1.5 !important;
 }
-.layer2-tabs .cxd-Tabs-link a {
+.layer2-tabs .antd-Tabs-link a {
   color: inherit !important;
   text-decoration: none !important;
 }
 
 /* Active: blue text + underline */
-.layer2-tabs .cxd-Tabs-link.is-active {
+.layer2-tabs .antd-Tabs-link.is-active {
   color: var(--primary) !important;
   font-weight: 600 !important;
 }
-.layer2-tabs .cxd-Tabs-link.is-active::after {
+.layer2-tabs .antd-Tabs-link.is-active::after {
   content: '' !important;
   position: absolute !important;
   bottom: 0 !important;
@@ -2306,12 +2358,12 @@ body {
   height: 2px !important;
   background: var(--primary) !important;
 }
-.layer2-tabs .cxd-Tabs-link.is-active a {
+.layer2-tabs .antd-Tabs-link.is-active a {
   color: var(--primary) !important;
 }
 
 /* Close button (×) */
-.layer2-tabs .cxd-Tabs-link-close {
+.layer2-tabs .antd-Tabs-link-close {
   margin-left: 6px !important;
   color: #9CA3AF !important;
   cursor: pointer !important;
@@ -2319,15 +2371,15 @@ body {
   display: inline-flex !important;
   align-items: center !important;
 }
-.layer2-tabs .cxd-Tabs-link-close:hover {
+.layer2-tabs .antd-Tabs-link-close:hover {
   color: #E84545 !important;
 }
-.layer2-tabs .cxd-Tabs-link-close-icon {
+.layer2-tabs .antd-Tabs-link-close-icon {
   font-size: 12px !important;
 }
 
 /* Add button: + Add */
-.layer2-tabs .cxd-Tabs-addable {
+.layer2-tabs .antd-Tabs-addable {
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
@@ -2338,27 +2390,27 @@ body {
   cursor: pointer !important;
   margin: 0 4px !important;
 }
-.layer2-tabs .cxd-Tabs-addable-icon {
+.layer2-tabs .antd-Tabs-addable-icon {
   font-size: 14px !important;
 }
 
 /* Hide indicator & arrows */
-.layer2-tabs .cxd-Tabs__indicator { display: none !important; }
-.layer2-tabs .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.layer2-tabs .antd-Tabs__indicator { display: none !important; }
+.layer2-tabs .antd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* ========== Layer 3: Rule Setup / Display (card mode) ========== */
 .layer3-tabs { margin-top: 16px !important; }
 
 /* Nav container: white bg, blue border (top + sides) */
-.layer3-tabs .cxd-Tabs-linksContainer,
-.layer3-tabs .cxd-Tabs-linksContainer-wrapper {
+.layer3-tabs .antd-Tabs-linksContainer,
+.layer3-tabs .antd-Tabs-linksContainer-wrapper {
   background: #FFFFFF !important;
   border: 1px solid var(--primary) !important;
   border-bottom: none !important;
   border-radius: 4px 4px 0 0 !important;
   padding: 0 !important;
 }
-.layer3-tabs .cxd-Tabs-links {
+.layer3-tabs .antd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2367,7 +2419,7 @@ body {
 }
 
 /* Nav items: inline, blue outline style */
-.layer3-tabs .cxd-Tabs-link {
+.layer3-tabs .antd-Tabs-link {
   padding: 6px 20px !important;
   font-size: 14px !important;
   font-weight: 500 !important;
@@ -2382,33 +2434,33 @@ body {
   height: auto !important;
   line-height: 1.4 !important;
 }
-.layer3-tabs .cxd-Tabs-link a {
+.layer3-tabs .antd-Tabs-link a {
   color: inherit !important;
   text-decoration: none !important;
 }
 
 /* Active: solid blue fill, white text */
-.layer3-tabs .cxd-Tabs-link.is-active {
+.layer3-tabs .antd-Tabs-link.is-active {
   background: var(--primary) !important;
   color: #FFFFFF !important;
   font-weight: 600 !important;
   border-color: var(--primary) !important;
 }
-.layer3-tabs .cxd-Tabs-link.is-active a {
+.layer3-tabs .antd-Tabs-link.is-active a {
   color: #FFFFFF !important;
 }
 
 /* Hover: light blue tint */
-.layer3-tabs .cxd-Tabs-link:hover:not(.is-active) {
+.layer3-tabs .antd-Tabs-link:hover:not(.is-active) {
   background: rgba(74, 92, 191, 0.06) !important;
 }
 
 /* Hide indicator & arrows */
-.layer3-tabs .cxd-Tabs__indicator { display: none !important; }
-.layer3-tabs .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.layer3-tabs .antd-Tabs__indicator { display: none !important; }
+.layer3-tabs .antd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* Layer 3 content area: white card with top blue border */
-.layer3-tabs .cxd-Tabs-content {
+.layer3-tabs .antd-Tabs-content {
   border: 1px solid var(--primary) !important;
   border-top: none !important;
   border-radius: 0 0 4px 4px !important;
@@ -2417,7 +2469,7 @@ body {
 }
 
 /* Remove default tab pane transition */
-.layer3-tabs .cxd-Tabs-pane {
+.layer3-tabs .antd-Tabs-pane {
   padding: 0 !important;
 }
 
@@ -2426,15 +2478,15 @@ body {
   background: transparent !important;
 }
 
-.custom-top-border-tabs .cxd-Tabs-linksContainer,
-.custom-top-border-tabs .cxd-Tabs-linksContainer-wrapper {
+.custom-top-border-tabs .antd-Tabs-linksContainer,
+.custom-top-border-tabs .antd-Tabs-linksContainer-wrapper {
   background: #F4F5F9 !important;
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
 }
 
-.custom-top-border-tabs .cxd-Tabs-links {
+.custom-top-border-tabs .antd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2443,12 +2495,12 @@ body {
 }
 
 /* Kill Amis line-mode default underlines on ALL tabs */
-.custom-top-border-tabs .cxd-Tabs-link::after {
+.custom-top-border-tabs .antd-Tabs-link::after {
   display: none !important;
 }
 
 /* Nav items — default (inactive) state */
-.custom-top-border-tabs .cxd-Tabs-link {
+.custom-top-border-tabs .antd-Tabs-link {
   padding: 10px 20px !important;
   font-size: 14px !important;
   font-weight: 400 !important;
@@ -2466,7 +2518,7 @@ body {
 }
 
 /* Inactive tab a tag */
-.custom-top-border-tabs .cxd-Tabs-link a {
+.custom-top-border-tabs .antd-Tabs-link a {
   color: inherit !important;
   text-decoration: none !important;
   font-weight: inherit !important;
@@ -2476,7 +2528,7 @@ body {
 }
 
 /* Active: blue text, white bg, BLUE LINE ON TOP (4px), 16px bold, 50px fixed height */
-body .custom-top-border-tabs .cxd-Tabs-link.is-active {
+body .custom-top-border-tabs .antd-Tabs-link.is-active {
   color: var(--primary) !important;
   font-weight: 700 !important;
   font-size: 16px !important;
@@ -2486,7 +2538,7 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active {
   line-height: 50px !important;
 }
 /* Active hover — no change */
-body .custom-top-border-tabs .cxd-Tabs-link.is-active:hover {
+body .custom-top-border-tabs .antd-Tabs-link.is-active:hover {
   color: var(--primary) !important;
   font-weight: 700 !important;
   font-size: 16px !important;
@@ -2496,15 +2548,15 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active:hover {
   line-height: 50px !important;
 }
 /* Active tab a tag — NO underline */
-body .custom-top-border-tabs .cxd-Tabs-link.is-active a {
+body .custom-top-border-tabs .antd-Tabs-link.is-active a {
   color: var(--primary) !important;
   border-bottom: none !important;
 }
-body .custom-top-border-tabs .cxd-Tabs-link.is-active a:hover {
+body .custom-top-border-tabs .antd-Tabs-link.is-active a:hover {
   border-bottom: none !important;
 }
 /* Blue line on TOP — 4px */
-body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
+body .custom-top-border-tabs .antd-Tabs-link.is-active::before {
   content: '' !important;
   position: absolute !important;
   top: -1px !important;
@@ -2516,18 +2568,18 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
 }
 
 /* Hide Amis indicator */
-.custom-top-border-tabs .cxd-Tabs__indicator { display: none !important; }
-.custom-top-border-tabs .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.custom-top-border-tabs .antd-Tabs__indicator { display: none !important; }
+.custom-top-border-tabs .antd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* Content area: white bg, no border, sits directly below tab bar */
-.custom-top-border-tabs .cxd-Tabs-content {
+.custom-top-border-tabs .antd-Tabs-content {
   background: #FFFFFF !important;
   border: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
 }
-.custom-top-border-tabs .cxd-Tabs-pane {
+.custom-top-border-tabs .antd-Tabs-pane {
   padding: 0 !important;
 }
 
@@ -2537,17 +2589,17 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
 }
 
 /* Kill Amis page body left padding */
-.custom-underline-tabs > .cxd-Page-body,
-.custom-underline-tabs .cxd-Page-body {
+.custom-underline-tabs > .antd-Page-body,
+.custom-underline-tabs .antd-Page-body {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
 
 /* === FULL > child selector chains to prevent style leaking into nested tabs === */
-/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+/* Amis DOM: .custom-class > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link */
 
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper,
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer {
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper,
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer {
   background: #FFFFFF !important;
   border: none !important;
   border-bottom: none !important;
@@ -2557,8 +2609,8 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   overflow: visible !important;
 }
 
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main,
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main,
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links {
   border: none !important;
   border-bottom: none !important;
   padding: 0 !important;
@@ -2570,12 +2622,12 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
 }
 
 /* Kill all default underlines — scoped to direct children only */
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after {
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::after {
   display: none !important;
 }
 
 /* Nav items — default (inactive) state */
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link {
   padding: 0 12px !important;
   font-size: 14px !important;
   font-weight: 500 !important;
@@ -2593,12 +2645,12 @@ body .custom-top-border-tabs .cxd-Tabs-link.is-active::before {
   flex-shrink: 0 !important;
 }
 /* White background for ALL tabs (inactive + active) */
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link {
   background: #FFFFFF !important;
 }
 
 /* Inactive tab a tag */
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a {
   color: inherit !important;
   text-decoration: none !important;
   font-weight: inherit !important;
@@ -2608,49 +2660,49 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* No hover effect */
-.amis-scope .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
+.amis-scope .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover {
   background: #FFFFFF !important;
 }
-.amis-scope .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
+.amis-scope .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover > a {
   border-bottom: none !important;
 }
 
 /* Active: blue text + BLUE UNDERLINE 4px at bottom + white bg */
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active {
   color: var(--primary) !important;
   font-weight: 600 !important;
   background: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: inset 0 -4px 0 0 var(--primary) !important;
 }
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover {
   color: var(--primary) !important;
   font-weight: 600 !important;
   background: #FFFFFF !important;
   border-bottom: none !important;
   box-shadow: inset 0 -4px 0 0 var(--primary) !important;
 }
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a {
   color: var(--primary) !important;
   border-bottom: none !important;
 }
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a:hover {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a:hover {
   border-bottom: none !important;
 }
 /* Kill ::before and ::after on active tab */
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::before {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active::before {
   display: none !important;
 }
-body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::after {
+body .custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active::after {
   display: none !important;
 }
 
 /* Hide Amis indicator */
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs__indicator { display: none !important; }
-.custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-arrow { display: none !important; }
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs__indicator { display: none !important; }
+.custom-underline-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-arrow { display: none !important; }
 
 /* Content area: gray bg, no border, full width */
-.custom-underline-tabs > .cxd-Tabs-content {
+.custom-underline-tabs > .antd-Tabs-content {
   background: #F5F6FA !important;
   border: none !important;
   border-radius: 0 !important;
@@ -2658,7 +2710,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   margin: 0 !important;
   width: 100% !important;
 }
-.custom-underline-tabs > .cxd-Tabs-pane {
+.custom-underline-tabs > .antd-Tabs-pane {
   padding: 20px 20px 20px 0 !important;
 }
 
@@ -2668,9 +2720,9 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* === FULL > child selector chains to prevent style leaking into nested tabs === */
-/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+/* Amis DOM: .custom-class > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link */
 
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links {
   gap: 0 !important;
   border: none !important;
   border-bottom: none !important;
@@ -2681,20 +2733,20 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Kill Amis line-mode defaults */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::after {
   content: none !important;
 }
 
 /* Kill bottom border on tab bar */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::after,
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::before {
   content: none !important;
   border: none !important;
   box-shadow: none !important;
 }
 
 /* Reset default tab button container */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link {
   padding: 0 !important;
   margin: 0 !important;
   background: transparent !important;
@@ -2702,7 +2754,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Default tab (inactive): white bg, blue text, solid border */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a {
   position: relative !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -2721,40 +2773,40 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Kill all pseudo-elements on active tab */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::before {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active::before {
   content: none !important;
 }
 
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active::after {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active::after {
   content: none !important;
 }
 
 /* Active tab: blue bg, white text */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active {
   background: transparent !important;
   padding: 0 !important;
 }
 
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a {
   background: #394DB9 !important;
   color: #fff !important;
   border: 1px solid #394DB9 !important;
 }
 
 /* No hover effect on any tab */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover > a {
   background: #fff !important;
   color: #394DB9 !important;
   border: 1px solid #394DB9 !important;
 }
 
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover > a {
   background: #394DB9 !important;
   color: #fff !important;
 }
 
 /* Content area: white bg, bottom padding 20px, kill any separator line */
-.custom-solid-fill-tabs > .cxd-Tabs-content {
+.custom-solid-fill-tabs > .antd-Tabs-content {
   background: #fff !important;
   margin-top: 0 !important;
   padding-bottom: 20px !important;
@@ -2764,7 +2816,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   box-shadow: none !important;
 }
 
-.custom-solid-fill-tabs .cxd-Tabs-pane {
+.custom-solid-fill-tabs .antd-Tabs-pane {
   padding: 20px 20px 20px 0 !important;
   background: #fff !important;
   border: none !important;
@@ -2776,25 +2828,25 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Show only active pane */
-.custom-solid-fill-tabs .cxd-Tabs-pane.is-active {
+.custom-solid-fill-tabs .antd-Tabs-pane.is-active {
   display: block !important;
 }
 
 /* Kill any form item separator line inside tab body */
-.custom-solid-fill-tabs .cxd-FormItem::before,
-.custom-solid-fill-tabs .cxd-FormItem::after,
-.custom-solid-fill-tabs .cxd-FormItem-label,
-.custom-solid-fill-tabs .cxd-Form-label {
+.custom-solid-fill-tabs .antd-FormItem::before,
+.custom-solid-fill-tabs .antd-FormItem::after,
+.custom-solid-fill-tabs .antd-FormItem-label,
+.custom-solid-fill-tabs .antd-Form-label {
   border-bottom: none !important;
 }
 
 /* Tab buttons: overlap borders so tabs connect seamlessly */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(:last-child) > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:not(:last-child) > a {
   margin-right: -1px !important;
 }
 
 /* Active tab needs higher z-index so its border covers the neighbor */
-.custom-solid-fill-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+.custom-solid-fill-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a {
   position: relative !important;
   z-index: 1 !important;
 }
@@ -2805,7 +2857,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* === FULL > child selector chains to prevent style leaking into nested tabs === */
-/* Amis DOM: .custom-class > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+/* Amis DOM: .custom-class > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link */
 
 /* Hide scrollbar for the scroll container */
 .custom-closable-tabs .closable-scroll-container::-webkit-scrollbar {
@@ -2817,7 +2869,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   -ms-overflow-style: none !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links {
   gap: 0 !important;
   border: none !important;
   border-bottom: none !important;
@@ -2828,17 +2880,17 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Kill pseudo-elements */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after,
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::before,
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::after,
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::before,
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::after,
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::before {
   content: none !important;
   border: none !important;
   display: none !important;
 }
 
 /* Tab link container (li) — this is the actual "tab button" containing both text and close button */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -2858,24 +2910,24 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Active tab: blue top bar, blue text, white bg */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active {
   background: #fff !important;
   border-top: 4px solid #394DB9 !important;
 }
 
 /* No hover effect */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover {
   background: #F9FAFA !important;
   border-top-color: transparent !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover {
   background: #fff !important;
   border-top: 4px solid #394DB9 !important;
 }
 
 /* Tab text (<a> tag) — reset to transparent, let <li> carry the visual style */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a {
   display: inline-flex !important;
   align-items: center !important;
   position: static !important;
@@ -2895,22 +2947,22 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   line-height: 1 !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a {
   color: #394DB9 !important;
   font-weight: 500 !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover > a {
   color: #555 !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover > a {
   color: #394DB9 !important;
   font-weight: 500 !important;
 }
 
 /* Content area */
-.custom-closable-tabs > .cxd-Tabs-content {
+.custom-closable-tabs > .antd-Tabs-content {
   background: #fff !important;
   margin-top: 0 !important;
   padding-bottom: 20px !important;
@@ -2918,7 +2970,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   box-shadow: none !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-pane {
+.custom-closable-tabs > .antd-Tabs-pane {
   padding: 20px !important;
   background: #fff !important;
   opacity: 1 !important;
@@ -2927,7 +2979,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Close button (×) inside tab — 10x10, vertically centered within the <li> */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > .antd-Tabs-link-close {
   width: 10px !important;
   height: 10px !important;
   margin: 0 !important;
@@ -2945,19 +2997,19 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   flex-shrink: 0 !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close:hover {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > .antd-Tabs-link-close:hover {
   color: #9CA3AF !important;
   opacity: 0.6 !important;
 }
 
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close-icon {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > .antd-Tabs-link-close-icon {
   font-size: 10px !important;
   width: 10px !important;
   height: 10px !important;
 }
 
 /* + Add button — Amis native addable */
-.custom-closable-tabs .cxd-Tabs-addable {
+.custom-closable-tabs .antd-Tabs-addable {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -3031,11 +3083,11 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Remove divider line — button should be tight against tabs */
-.custom-closable-tabs .cxd-Tabs-addable::before {
+.custom-closable-tabs .antd-Tabs-addable::before {
   display: none !important;
 }
 
-.custom-closable-tabs .cxd-Tabs-addable-icon {
+.custom-closable-tabs .antd-Tabs-addable-icon {
   font-size: 20px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
@@ -3105,17 +3157,17 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Hide tab navigation arrows */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer-arrow {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer-arrow {
   display: none !important;
 }
 
 /* Add button sits inline with tabs — no extra wrapper padding needed */
-.custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper {
+.custom-closable-tabs > .antd-Tabs-linksContainer-wrapper {
   padding-right: 0 !important;
 }
 
 /* ===== Combo styled as Tabs — pixel-identical to .custom-closable-tabs ===== */
-/* DOM chain: .custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link */
+/* DOM chain: .custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link */
 /* Using FULL > child selector chains to prevent style leaking into nested components */
 
 .custom-combo-tabs {
@@ -3133,17 +3185,17 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Combo control wrapper reset */
-.custom-combo-tabs > .cxd-ComboControl {
+.custom-combo-tabs > .antd-ComboControl {
   padding: 0 !important;
   margin: 0 !important;
 }
 
 /* === Tab bar (same structure as closable-tabs) === */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs {
   margin: 0 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links {
   gap: 0 !important;
   border: none !important;
   border-bottom: none !important;
@@ -3154,17 +3206,17 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Kill pseudo-elements on links container and tab items */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::after,
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link::before,
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::after,
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links::before {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::after,
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link::before,
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::after,
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links::before {
   content: none !important;
   border: none !important;
   display: none !important;
 }
 
 /* Tab link container (li) */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -3184,24 +3236,24 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Active tab: blue top bar, blue text, white bg */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active {
   background: #fff !important;
   border-top: 4px solid #394DB9 !important;
 }
 
 /* No hover effect */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover {
   background: #F9FAFA !important;
   border-top-color: transparent !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover {
   background: #fff !important;
   border-top: 4px solid #394DB9 !important;
 }
 
 /* Tab text (<a> tag) — inline-block layout so margin-left on delBtn creates spacing */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a {
   display: inline-block !important;
   position: static !important;
   width: auto !important;
@@ -3222,27 +3274,27 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   white-space: nowrap !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active > a {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active > a {
   color: #394DB9 !important;
   font-weight: 500 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:hover > a {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:hover > a {
   color: #555 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active:hover > a {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active:hover > a {
   color: #394DB9 !important;
   font-weight: 500 !important;
 }
 
 /* Kill flexbox pseudo-element spacing */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a::after {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a::after {
   content: none !important;
 }
 
-/* === Delete button (combo-specific: inside <a> of .cxd-Tabs-link) === */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a > .cxd-Combo-tab-delBtn {
+/* === Delete button (combo-specific: inside <a> of .antd-Tabs-link) === */
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a > .antd-Combo-tab-delBtn {
   display: inline-block !important;
   width: 10px !important;
   height: 10px !important;
@@ -3264,26 +3316,26 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   top: -1px !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a > .cxd-Combo-tab-delBtn:hover {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a > .antd-Combo-tab-delBtn:hover {
   color: #9CA3AF !important;
   opacity: 0.6 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a > .cxd-Combo-tab-delBtn > svg {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a > .antd-Combo-tab-delBtn > svg {
   width: 10px !important;
   height: 10px !important;
   vertical-align: middle !important;
 }
 
 /* Kill default Amis delBtn icon sizing */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > a > .cxd-Combo-tab-delBtn .icon-status-close {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > a > .antd-Combo-tab-delBtn .icon-status-close {
   width: 10px !important;
   height: 10px !important;
   font-size: 10px !important;
 }
 
-/* === + Add button (combo-specific: .cxd-Tabs-link.cxd-ComboTabs-addLink) === */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink {
+/* === + Add button (combo-specific: .antd-Tabs-link.antd-ComboTabs-addLink) === */
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -3315,7 +3367,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Override Amis default a inside combo add link */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink > a {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink > a {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0 !important;
@@ -3335,24 +3387,24 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Hide the SVG + icon — text already contains "+ Add Sub Mission" */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink > a svg {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink > a svg {
   display: none !important;
 }
 
 /* Kill icon-plus-fine if it exists */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink > a .icon-plus-fine {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink > a .icon-plus-fine {
   display: none !important;
   font-size: 0 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink > a > span {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink > a > span {
   flex-shrink: 0 !important;
   white-space: nowrap !important;
   overflow: visible !important;
 }
 
 /* Divider line between last tab and Add button */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.cxd-ComboTabs-addLink::before {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.antd-ComboTabs-addLink::before {
   content: '' !important;
   position: absolute !important;
   left: 0 !important;
@@ -3365,17 +3417,17 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Hide tab navigation arrows */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer-arrow {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer-arrow {
   display: none !important;
 }
 
 /* Add right padding to wrapper so tabs don't overlap the Add button text */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-linksContainer-wrapper {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-linksContainer-wrapper {
   padding-right: 170px !important;
 }
 
 /* === Content area === */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-content {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-content {
   background: #fff !important;
   margin-top: 0 !important;
   padding-bottom: 20px !important;
@@ -3383,7 +3435,7 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
   box-shadow: none !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-content > .cxd-Tabs-pane {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-content > .antd-Tabs-pane {
   padding: 20px !important;
   background: #fff !important;
   opacity: 1 !important;
@@ -3392,19 +3444,19 @@ body .custom-underline-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-links
 }
 
 /* Combo form inside tab pane — reset form styling so it doesn't clash with nested tabs */
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-content > .cxd-Tabs-pane > .cxd-Combo-itemInner > .cxd-Form {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-content > .antd-Tabs-pane > .antd-Combo-itemInner > .antd-Form {
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-content > .cxd-Tabs-pane > .cxd-Combo-itemInner > .cxd-Form > .cxd-FormItem {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-content > .antd-Tabs-pane > .antd-Combo-itemInner > .antd-Form > .antd-FormItem {
   padding: 12px 0 !important;
   margin: 0 !important;
   border: none !important;
   background: transparent !important;
 }
 
-.custom-combo-tabs > .cxd-ComboControl > .cxd-Tabs.cxd-ComboTabs > .cxd-Tabs-content > .cxd-Tabs-pane > .cxd-Combo-itemInner > .cxd-Form > .cxd-FormItem > .cxd-Form-label {
+.custom-combo-tabs > .antd-ComboControl > .antd-Tabs.antd-ComboTabs > .antd-Tabs-content > .antd-Tabs-pane > .antd-Combo-itemInner > .antd-Form > .antd-FormItem > .antd-Form-label {
   padding: 0 0 8px 0 !important;
   margin: 0 !important;
 }
