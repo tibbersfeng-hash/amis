@@ -433,6 +433,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   previewLanguage,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scopedRef = useRef<any>(null);
   const [currentLang, setCurrentLang] = useState<Language>(previewLanguage || 'zh');
   const langRef = useRef(currentLang);
   langRef.current = currentLang;
@@ -516,7 +517,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
     detachedDiv.className = 'amis-scope-inner';
 
     const amisElement = renderAmis(
-      schema,
+      injectFormName(schema),
       {
         data: {
           ...displayData,
@@ -524,6 +525,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
         },
         locale,
         theme: 'antd',
+        scopeRef: (ref: any) => { scopedRef.current = ref; },
       },
       {
         session: 'mission-cms',
