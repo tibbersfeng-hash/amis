@@ -61,41 +61,6 @@ function collectMultiLangFields(schema: unknown): string[] {
   return fields;
 }
 
-/** Extract label→value option mappings from schema for select/radio/checkbox fields */
-function collectFieldOptions(
-  schema: unknown,
-): Record<string, Array<{ label: string; value: string }>> {
-  const options: Record<string, Array<{ label: string; value: string }>> = {};
-  function walk(node: unknown) {
-    if (!node || typeof node !== 'object') return;
-    const obj = node as Record<string, unknown>;
-    if (
-      typeof obj.name === 'string' &&
-      Array.isArray(obj.options) &&
-      obj.options.length > 0
-    ) {
-      const mapped = obj.options.map((o: Record<string, unknown>) => ({
-        label: String(o.label ?? ''),
-        value: String(o.value ?? ''),
-      }));
-      options[obj.name] = mapped;
-      // For field-with-exclude-v2, also register sub-fields with same options
-      if (
-        obj.type === 'field-with-exclude-v2' &&
-        typeof obj.excludeName === 'string'
-      ) {
-        options[obj.excludeName] = mapped;
-      }
-    }
-    for (const val of Object.values(obj)) {
-      if (Array.isArray(val)) val.forEach(walk);
-      else walk(val);
-    }
-  }
-  walk(schema);
-  return options;
-}
-
 /** Build a lookup of original {zh, en} values for the given fields */
 function buildLookup(data: Record<string, unknown>, fields: string[]): Record<string, Record<string, unknown>> {
   const lookup: Record<string, Record<string, unknown>> = {};
@@ -125,228 +90,71 @@ function flattenData(
   return result;
 }
 
-/**
- * Read current DOM value for a field.
- * Returns string for text fields, or raw array/object for FieldWithExclude.
- */
-function readDomValue(
-  field: string,
-  fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
-  isRichText?: boolean,
-): string | unknown[] | unknown | undefined {
-  // Special fields where input[name] doesn't represent the actual value
-  if (field === 'tag') return undefined;             // input is for new tags, not the values
-
-  // ① Image/file upload: find ImageControl whose parent has data-amis-name matching the field
-  let imgControl: Element | null = document.querySelector(
-    `[data-amis-name="${field}"] .antd-ImageControl`
-  );
-
-  if (imgControl) {
-    const img = imgControl.querySelector('img') as HTMLImageElement | null;
-    if (img?.src && img.src !== window.location.href) return img.src;
-    const hiddenInput = imgControl.querySelector('input[type="hidden"]') as HTMLInputElement | null;
-    if (hiddenInput?.value) return hiddenInput.value;
-    // Image was cleared — return empty string so lookup gets updated with ""
-    return '';
-  }
-
-  // ③ TinyMCE rich text editor — only read if this field is a rich text field
-  if (isRichText) {
-    const tinymceEditor = (window as any).tinymce?.activeEditor;
-    if (tinymceEditor && tinymceEditor.getContent) {
-      const content = tinymceEditor.getContent();
-      if (content) return content;
-    }
-  }
-
-  // ④ Native input/textarea with name attribute
-  const input = document.querySelector(
-    `input[name="${field}"], textarea[name="${field}"]`,
-  ) as HTMLInputElement | HTMLTextAreaElement | null;
-  if (input) return input.value;
-
-  // ⑤ Label→value mapping for select/radio/checkbox
-  const opts = fieldOptions?.[field];
-  if (opts?.length) {
-    // Radio: find checked label → match label text → return value
-    const radioChecked = document.querySelector('.antd-Checkbox--radio--default.checked');
-    if (radioChecked) {
-      const label = radioChecked.textContent?.trim() ?? '';
-      const match = opts.find((o) => o.label === label);
-      if (match) return match.value;
-    }
-
-    // Checkbox: only return when match found (avoid returning '' for other fields)
-    const cbChecked = document.querySelectorAll('.antd-Checkbox--checkbox--default.checked');
-    if (cbChecked.length > 0) {
-      const values: string[] = [];
-      cbChecked.forEach((el) => {
-        const label = el.textContent?.trim() ?? '';
-        const match = opts.find((o) => o.label === label);
-        if (match) values.push(match.value);
-      });
-      if (values.length > 0) return values.join(',');
-    }
-
-    // Select: read display text from value span(s) — excludes V2 component's selects
-    const selValues = Array.from(document.querySelectorAll('.antd-Select-value'))
-        .filter(el => !el.closest('.field-with-exclude-v2'));
-    if (selValues.length > 0) {
-      const matched: string[] = [];
-      selValues.forEach((el) => {
-        const label = el.textContent?.trim() ?? '';
-        const match = opts.find((o) => o.label === label);
-        if (match) matched.push(match.value);
-      });
-      if (matched.length > 0) return matched.join(',');
-    }
-
-    // Select exists but no value visible (cleared or placeholder only) — return empty string
-    // so lookup gets updated with "" instead of skipping persistence
-    const hasSelectControl = document.querySelector('.antd-SelectControl');
-    if (hasSelectControl) return '';
-  }
-
-  // ⑥ Date / time / month / datetime pickers: match by placeholder
-  const pickers = document.querySelectorAll('.antd-DatePicker-input');
-  for (const p of pickers) {
-    const inp = p as HTMLInputElement;
-    if (!inp.value) continue;
-    if (field === 'date' && inp.placeholder?.includes('日期') && !inp.placeholder?.includes('时间')) return inp.value;
-    if (field === 'month' && inp.placeholder?.includes('月份')) return inp.value;
-    if (field === 'time' && inp.placeholder?.includes('时间')) return inp.value;
-    if (field === 'datetime' && inp.placeholder?.includes('日期以及时间')) return inp.value;
-  }
-
-  // ⑦ Date range picker: read start,end combo
-  if (field === 'dateRange') {
-    const rangeInputs = document.querySelectorAll('.antd-DateRangePicker-input');
-    if (rangeInputs.length >= 2) {
-      const start = (rangeInputs[0] as HTMLInputElement).value;
-      const end = (rangeInputs[1] as HTMLInputElement).value;
-      if (start && end) return start + ',' + end;
-    }
-  }
-
-  // ⑧ Color picker
-  if (field === 'color') {
-    const colorInput = document.querySelector('.antd-ColorPicker-input') as HTMLInputElement | null
-      ?? document.querySelector('.antd-ColorPicker input') as HTMLInputElement | null;
-    if (colorInput?.value) return colorInput.value;
-  }
-
-  // ⑨ Field-with-exclude: read from hidden data div — preserve raw type for multiLang
+/** 从隐藏的 data-field-name div 中读取 FieldWithExclude 值 */
+function readExcludeFieldData(field: string): unknown | undefined {
   const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
   if (excludeData) {
     try {
       const parsed = JSON.parse(excludeData.textContent || '{}');
       if (parsed && typeof parsed === 'object' && field in parsed) {
-        const val = parsed[field];
-        if (val !== null && val !== undefined) return val; // return raw (array/object/string)
+        return parsed[field];
       }
-    } catch { /* ignore parse errors */ }
+    } catch { /* ignore */ }
   }
-
-  // ⑩ Switch
-  if (field === 'switch') {
-    return document.querySelector('.antd-Switch.is-checked') ? true : false;
-  }
-
   return undefined;
 }
 
-/** Write a value into the DOM for a field */
-function writeDomValue(field: string, value: string | unknown): void {
-  // Try native input/textarea first
-  const input = document.querySelector(
-    `input[name="${field}"], textarea[name="${field}"]`
-  ) as HTMLInputElement | HTMLTextAreaElement | null;
-  if (input) {
-    const proto = input instanceof HTMLTextAreaElement
-      ? window.HTMLTextAreaElement.prototype
-      : window.HTMLInputElement.prototype;
-    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
-    if (nativeSetter) {
-      nativeSetter.call(input, value);
-    } else {
-      input.value = value as string;
-    }
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    return;
-  }
-
-  // Image/file upload component: update via Amis store (no native input[name] to write to)
-  const imgControl = document.querySelector(`.antd-ImageControl input[name="${field}"]`);
-  if (imgControl) {
-    const store = (window as any).amisStore;
-    if (store?.changeValue) {
-      store.changeValue(field, value);
-    }
-    return;
-  }
-
-  // Field-with-exclude: write to hidden data div
-  const excludeData = document.querySelector(`div[data-field-name="${field}"]`);
-  if (excludeData && excludeData.textContent) {
-    try {
-      const parsed = JSON.parse(excludeData.textContent || '{}');
-      if (parsed && typeof parsed === 'object') {
-        // Update the value for this field (keep checkbox state intact)
-        parsed[field] = value;
-        excludeData.textContent = JSON.stringify(parsed);
-        return;
-      }
-    } catch { /* ignore parse errors */ }
-    // Fallback: replace entire content
-    excludeData.textContent = JSON.stringify({ [field]: value });
-    return;
-  }
-
-  const store = (window as any).amisStore;
-  if (store?.changeValue) {
-    store.changeValue(field, value);
-  }
-}
-
-/** Persist current DOM values into the lookup, returning the updated lookup */
+/** 持久化当前语言的值到 lookup — 优先从 amis store 读取，fallback 保留特殊处理 */
 function persistToLookup(
+  scoped: any,
   lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   lang: string,
-  fieldOptions?: Record<string, Array<{ label: string; value: string }>>,
   richTextFields?: string[]
 ): Record<string, Record<string, unknown>> {
+  const form = scoped?.getComponentByName(FORM_NAME);
+  const storeValues = form?.getValues() || {};
   const updated = { ...lookup };
+
   for (const field of fields) {
-    const currentVal = readDomValue(field, fieldOptions, richTextFields?.includes(field) || false);
-    if (currentVal !== undefined) {
-      const prev = updated[field] || { zh: '', en: '' };
-      // Detect if original value was array → convert comma string back to array
-      const anyPrev = Object.values(prev).find(v => v !== null && v !== undefined);
-      if (Array.isArray(anyPrev) && typeof currentVal === 'string') {
-        updated[field] = { ...prev, [lang]: currentVal ? currentVal.split(',') : [] };
-      } else {
-        updated[field] = { ...prev, [lang]: currentVal };
+    // tag 字段跳过（input-tag 的 store 值可能包含未确认的新标签）
+    if (field === 'tag') continue;
+
+    // ① 优先从 amis store 读取
+    let currentVal: unknown | undefined;
+    if (field in storeValues) {
+      currentVal = storeValues[field];
+    }
+
+    // ② fallback: 自定义组件的隐藏数据 div（FieldWithExcludeV2 excludeName）
+    if (currentVal === undefined) {
+      currentVal = readExcludeFieldData(field);
+    }
+
+    // ③ fallback: TinyMCE 富文本
+    if (currentVal === undefined && richTextFields?.includes(field)) {
+      currentVal = (window as any).tinymce?.activeEditor?.getContent();
+    }
+
+    // ④ fallback: Image 组件（从 DOM 读）
+    if (currentVal === undefined) {
+      const imgControl = document.querySelector(
+        `[data-amis-name="${field}"] .antd-ImageControl`
+      );
+      if (imgControl) {
+        const img = imgControl.querySelector('img') as HTMLImageElement | null;
+        if (img?.src && img.src !== window.location.href) currentVal = img.src;
       }
     }
+
+    // 只有成功获取到值才更新 lookup
+    if (currentVal !== undefined) {
+      const prev = updated[field] || { zh: '', en: '' };
+      updated[field] = { ...prev, [lang]: currentVal };
+    }
+    // 如果所有方式都没获取到值，保持 lookup 中旧值不变
   }
   return updated;
-}
-
-/** Apply a language's values from the lookup into the DOM */
-function applyFromLookup(
-  lookup: Record<string, Record<string, unknown>>,
-  fields: string[],
-  lang: string
-): void {
-  for (const field of fields) {
-    const vals = lookup[field];
-    if (!vals) continue;
-    // Use ?? instead of || so empty string '' is NOT treated as missing
-    const value = vals[lang] ?? vals['zh'];
-    if (value !== undefined) writeDomValue(field, value);
-  }
 }
 
 /** Merge current values into {zh, en} for all multiLang fields */
@@ -355,36 +163,38 @@ function mergeI18nData(
   lookup: Record<string, Record<string, unknown>>,
   fields: string[],
   currentLang: string,
-  fieldOptions?: Record<string, Array<{ label: string; value: string }>>
 ): Record<string, unknown> {
   const merged = { ...rawData };
   for (const field of fields) {
-    const rawVal = rawData[field];
-    let domVal: unknown;
-    // If rawVal is already a {zh, en} object, keep it as-is (V2 component data)
-    if (rawVal !== null && typeof rawVal === 'object' && !Array.isArray(rawVal)) {
-      if ('zh' in rawVal || 'en' in rawVal) continue;
-    }
-    if (Array.isArray(rawVal)) {
-      domVal = rawVal;
-    } else {
-      domVal = readDomValue(field, fieldOptions);
-      if (domVal === undefined) {
-        if (rawVal === undefined || rawVal === null) continue;
-        domVal = typeof rawVal === 'boolean' ? rawVal : String(rawVal);
-      }
+    let rawVal = rawData[field];
+
+    // 已经是 {zh, en} 结构，跳过
+    if (rawVal && typeof rawVal === 'object' && !Array.isArray(rawVal)) {
+      if ('zh' in (rawVal as object) || 'en' in (rawVal as object)) continue;
     }
 
-    const existing = lookup[field];
-    if (existing && isI18nValue(existing)) {
-      // For boolean/array values (component state, not language-specific)
-      if (typeof domVal === 'boolean' || Array.isArray(domVal)) {
-        merged[field] = { zh: domVal, en: domVal };
-      } else {
-        merged[field] = { ...existing, [currentLang]: domVal };
-      }
+    let storeVal: unknown;
+    if (Array.isArray(rawVal)) {
+      // 数组值直接使用
+      storeVal = rawVal;
+    } else if (rawVal === undefined || rawVal === null) {
+      // 未设置值，fallback 到 api.data 中的原始值（可能是 boolean）
+      storeVal = typeof rawVal === 'boolean' ? rawVal : undefined;
     } else {
-      merged[field] = { zh: domVal, en: domVal };
+      storeVal = rawVal;
+    }
+
+    if (storeVal === undefined) continue;
+
+    const existing = lookup[field];
+    // boolean/array 值不随语言变化，双写
+    if (typeof storeVal === 'boolean' || Array.isArray(storeVal)) {
+      merged[field] = { zh: storeVal, en: storeVal };
+    } else if (existing) {
+      // 用当前语言的值覆盖，保留另一语言
+      merged[field] = { ...existing, [currentLang]: storeVal };
+    } else {
+      merged[field] = { zh: storeVal, en: storeVal };
     }
   }
   return merged;
@@ -438,9 +248,8 @@ export const AmisPage: React.FC<AmisPageProps> = ({
   const langRef = useRef(currentLang);
   langRef.current = currentLang;
 
-  // Extract multiLang fields and option mappings from schema
+  // Extract multiLang fields from schema
   const i18nFields = useMemo(() => collectMultiLangFields(schema), [schema]);
-  const fieldOptions = useMemo(() => collectFieldOptions(schema), [schema]);
   const hasI18n = i18nFields.length > 0;
 
   // Extract rich text field names from schema
@@ -484,25 +293,24 @@ export const AmisPage: React.FC<AmisPageProps> = ({
           lookupRef.current,
           i18nFields,
           langRef.current,
-          fieldOptions,
         );
         api = { ...api, data: merged };
       }
       return defaultFetcher(api, props);
     },
-    [i18nFields, fieldOptions]
+    [i18nFields]
   );
 
   // Language switch handler
   const handleLanguageChange = useCallback(
     (newLang: Language) => {
       if (newLang === langRef.current) return;
-      const updated = persistToLookup(lookupRef.current, i18nFields, langRef.current, fieldOptions, richTextFields);
+      const updated = persistToLookup(scopedRef.current, lookupRef.current, i18nFields, langRef.current, richTextFields);
       setLookup(updated);
       langRef.current = newLang;
       setCurrentLang(newLang);
     },
-    [i18nFields, fieldOptions, richTextFields]
+    [i18nFields, richTextFields]
   );
 
   // Render Amis into a detached DOM node to keep it as a separate React root.
