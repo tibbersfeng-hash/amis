@@ -27,4 +27,53 @@ describe('LanguageSwitcher', () => {
     }
     expect(handleChange).toHaveBeenCalledWith('en');
   });
+
+  it('renders button variant when variant="button"', () => {
+    const { container } = render(
+      <LanguageSwitcher language="zh" onLanguageChange={() => {}} variant="button" />
+    );
+    const buttons = container.querySelectorAll('button');
+    expect(buttons.length).toBe(3); // zh, en, jp
+    expect(buttons[0].classList.contains('is-active')).toBe(true);
+  });
+
+  it('renders tab variant when variant="tab"', () => {
+    const { container } = render(
+      <LanguageSwitcher language="en" onLanguageChange={() => {}} variant="tab" />
+    );
+    const tabs = container.querySelectorAll('.language-tab');
+    expect(tabs.length).toBe(3);
+    expect(tabs[1].classList.contains('is-active')).toBe(true);
+  });
+
+  it('hides label when showLabel={false}', () => {
+    const { container } = render(
+      <LanguageSwitcher language="zh" onLanguageChange={() => {}} showLabel={false} />
+    );
+    const label = container.querySelector('.language-label');
+    expect(label).toBeNull();
+  });
+
+  it('calls onLanguageChange on button click', () => {
+    const handleChange = vi.fn();
+    const { container } = render(
+      <LanguageSwitcher language="zh" onLanguageChange={handleChange} variant="button" />
+    );
+    const buttons = container.querySelectorAll('button');
+    buttons[1].click(); // click "English"
+    expect(handleChange).toHaveBeenCalledWith('en');
+  });
+
+  it('uses custom languages when provided', () => {
+    const { container } = render(
+      <LanguageSwitcher
+        language="zh"
+        onLanguageChange={() => {}}
+        languages={[{ value: 'zh' as const, label: '中文' }]}
+      />
+    );
+    const options = container.querySelectorAll('option');
+    expect(options.length).toBe(1);
+    expect(options[0].value).toBe('zh');
+  });
 });
