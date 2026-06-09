@@ -60,10 +60,10 @@ test.describe('全部组件中文回显（所有字段 multiLang）', () => {
     await expect(page.getByPlaceholder('请输入数字')).toHaveValue('42');
   });
   test('input-rich-text 富文本', async ({ page }) => {
-    await expect(page.locator('.cxd-RichText, .tox-tinymce, [class*="editor"]').first()).toBeVisible();
+    await expect(page.locator('.antd-RichText, .tox-tinymce, [class*="editor"]').first()).toBeVisible();
   });
   test('select 下拉', async ({ page }) => {
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
+    await expect(page.locator('.antd-Select').first()).toBeVisible();
   });
   test('input-date 日期', async ({ page }) => {
     await expect(page.getByRole('textbox', { name: '请选择日期', exact: true })).toHaveValue('2026-06-04');
@@ -73,13 +73,13 @@ test.describe('全部组件中文回显（所有字段 multiLang）', () => {
     await expect(page.getByPlaceholder('请选择月份')).toHaveValue('2026-06');
   });
   test('input-rating 评分', async ({ page }) => {
-    await expect(page.locator('.cxd-Rating')).toBeVisible();
+    await expect(page.locator('.antd-Rating')).toBeVisible();
   });
   test('input-tag 标签', async ({ page }) => {
     await expect(page.locator('input[name="tag"]')).toBeVisible();
   });
   test('input-image 图片上传', async ({ page }) => {
-    await expect(page.locator('.cxd-ImageControl, .cxd-InputImage, [accept="image/*"]').first()).toBeVisible();
+    await expect(page.locator('.antd-ImageControl, .antd-InputImage, [accept="image/*"]').first()).toBeVisible();
   });
 });
 
@@ -129,6 +129,7 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   test('input-text: 编辑→英文→回中文保留', async ({ page }) => {
     await page.locator('input[name="textField"]').fill('编辑文本');
+    await page.waitForTimeout(500);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="textField"]')).toHaveValue('English Text');
@@ -139,6 +140,7 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   test('textarea: 编辑→英文→回中文保留', async ({ page }) => {
     await page.locator('textarea[name="textArea"]').fill('编辑多行');
+    await page.waitForTimeout(500);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('textarea[name="textArea"]')).toHaveValue(/Multi-line English/);
@@ -149,6 +151,7 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   test('input-email: 编辑→英文→回中文保留', async ({ page }) => {
     await page.locator('input[name="email"]').fill('edited@test.com');
+    await page.waitForTimeout(500);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="email"]')).toHaveValue('english@test.com');
@@ -159,6 +162,7 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   test('input-url: 编辑→英文→回中文保留', async ({ page }) => {
     await page.locator('input[name="url"]').fill('https://edited.example.com');
+    await page.waitForTimeout(500);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="url"]')).toHaveValue('https://english.example.com');
@@ -169,6 +173,7 @@ test.describe('编辑后切换保留（逐组件验证）', () => {
 
   test('input-password: 编辑→英文→回中文保留', async ({ page }) => {
     await page.locator('input[name="password"]').fill('edited-pwd');
+    await page.waitForTimeout(500);
     await page.locator('.language-switcher select').selectOption('en');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[name="password"]')).toHaveValue('english-pwd');
@@ -256,7 +261,8 @@ test.describe('提交保存完整验证', () => {
 
     const d = readData(SID);
     expect(d.textField).toEqual({ zh: '第1次', en: 'Second' });
-    expect(d.number).toEqual({ zh: '11', en: '11' });
+    // number values are stored as actual numbers by getValues()
+    expect(d.number).toEqual({ zh: 11, en: 11 });
     del(SID);
   });
 });

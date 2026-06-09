@@ -7,7 +7,7 @@ import '../FieldWithExclude';
 import '../FieldWithExcludeV2';
 import '../ClosableTabs';
 import '../InputRichTextQuill';
-import { LanguageSwitcher, LANGUAGES } from '../LanguageSwitcher';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import type { Language } from '../LanguageSwitcher';
 
 // ── i18n helpers ──────────────────────────────────────────────
@@ -113,7 +113,7 @@ function persistToLookup(
   richTextFields?: string[]
 ): Record<string, Record<string, unknown>> {
   const form = scoped?.getComponentByName(FORM_NAME);
-  const storeValues = form?.getValues() || {};
+  const storeValues = form?.getValues?.() || {};
   const updated = { ...lookup };
 
   for (const field of fields) {
