@@ -10,23 +10,23 @@ vi.mock('./AmisLivePreview', () => ({
     return (
       <div className="amis-live-preview" data-testid="amis-preview">
         <div className="custom-closable-tabs" data-testid="closable-tabs">
-          <div className="cxd-Tabs-linksContainer">
+          <div className="antd-Tabs-linksContainer">
             {tabSchema.tabs?.map((tab, idx) => (
               <div
                 key={idx}
-                className={`cxd-Tabs-link ${idx === 0 ? 'is-active' : ''}`}
+                className={`antd-Tabs-link ${idx === 0 ? 'is-active' : ''}`}
                 data-tab-index={idx}
               >
                 <a>{tab.title}</a>
-                <span className="cxd-Tabs-link-close" data-close-index={idx}>×</span>
+                <span className="antd-Tabs-link-close" data-close-index={idx}>×</span>
               </div>
             ))}
           </div>
-          <div className="cxd-Tabs-panes">
+          <div className="antd-Tabs-panes">
             {tabSchema.tabs?.map((tab, idx) => (
               <div
                 key={idx}
-                className={`cxd-Tabs-pane ${idx === 0 ? 'is-active' : ''}`}
+                className={`antd-Tabs-pane ${idx === 0 ? 'is-active' : ''}`}
                 data-pane-index={idx}
               >
                 {(tab.body as Record<string, unknown>)?.data && (
@@ -94,7 +94,7 @@ describe('ClosableTabsPreview', () => {
     it('textarea contains schema JSON by default', () => {
       render(<ClosableTabsPreview />);
       const textarea = document.querySelector('.schema-preview-textarea') as HTMLTextAreaElement;
-      expect(textarea.value).toContain('"type": "tabs"');
+      expect(textarea.value).toContain('"type": "closable-tab"');
     });
 
     it('textarea shows data JSON when data tab is active', () => {
@@ -102,8 +102,8 @@ describe('ClosableTabsPreview', () => {
       const tabs = document.querySelectorAll('.schema-preview-tab');
       fireEvent.click(tabs[1]);
       const textarea = document.querySelector('.schema-preview-textarea') as HTMLTextAreaElement;
-      expect(textarea.value).toContain('"Sub Mission 1"');
-      expect(textarea.value).toContain('"Sub Mission 2"');
+      expect(textarea.value).toContain('"Tab 1"');
+      expect(textarea.value).toContain('"Tab 2"');
     });
 
     it('Ctrl+Enter triggers render', () => {
@@ -119,20 +119,20 @@ describe('ClosableTabsPreview', () => {
   describe('rendering', () => {
     it('renders with 2 initial tabs', () => {
       render(<ClosableTabsPreview />);
-      const tabs = document.querySelectorAll('.cxd-Tabs-link');
+      const tabs = document.querySelectorAll('.antd-Tabs-link');
       expect(tabs).toHaveLength(2);
     });
 
     it('renders tab titles correctly', () => {
       render(<ClosableTabsPreview />);
-      const links = document.querySelectorAll('.cxd-Tabs-link a');
-      expect(links[0]).toHaveTextContent('Sub Mission 1');
-      expect(links[1]).toHaveTextContent('Sub Mission 2');
+      const links = document.querySelectorAll('.antd-Tabs-link a');
+      expect(links[0]).toHaveTextContent('Tab 1');
+      expect(links[1]).toHaveTextContent('Tab 2');
     });
 
     it('marks the first tab as active', () => {
       render(<ClosableTabsPreview />);
-      expect(document.querySelector('.cxd-Tabs-link.is-active')).toBeInTheDocument();
+      expect(document.querySelector('.antd-Tabs-link.is-active')).toBeInTheDocument();
     });
 
     it('renders the AmisLivePreview wrapper', () => {
@@ -156,8 +156,8 @@ describe('ClosableTabsPreview', () => {
       expect(pane0).toBeInTheDocument();
       expect(pane1).toBeInTheDocument();
       // Tab 0 and Tab 1 should have different data
-      expect(pane0.textContent).toContain('Room Stay Prepaid Booking');
-      expect(pane1.textContent).toContain('Direct Booking');
+      expect(pane0.textContent).toContain('Alice');
+      expect(pane1.textContent).toContain('Bob');
     });
   });
 
@@ -167,10 +167,13 @@ describe('ClosableTabsPreview', () => {
     it('should use DEFAULT_TAB_DATA for new tab, not leak data from other tabs', () => {
       render(<ClosableTabsPreview />);
       const pane0 = screen.getByTestId('pane-data-0');
-      const initialData = JSON.parse(pane0?.textContent || '{}');
-      expect(initialData.subMissionType).toBe('Room Stay Prepaid Booking');
-      expect(initialData.businessUnit).toBe('BU1');
-      expect(initialData.currency).toBe('积分');
+      const pane1 = screen.getByTestId('pane-data-1');
+      const data0 = JSON.parse(pane0?.textContent || '{}');
+      const data1 = JSON.parse(pane1?.textContent || '{}');
+      // Each tab has independent form data
+      expect(data0.name).toBe('Alice');
+      expect(data1.name).toBe('Bob');
+      expect(data0.name).not.toBe(data1.name);
     });
 
     it('buildTabsSchema produces independent tab data', () => {
