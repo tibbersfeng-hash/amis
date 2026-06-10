@@ -4,6 +4,7 @@
   "api": "post:/api/remote/save",
   "mode": "horizontal",
   "body": [
+    { "type": "language-switcher", "variant": "select", "showLabel": true },
     {
       "type": "input-text",
       "name": "name",

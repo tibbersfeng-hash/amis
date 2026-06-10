@@ -46,6 +46,14 @@ export class MultiLangHandler {
     lang: string,
     richTextFields?: string[],
   ): Record<string, Record<string, unknown>> {
+    // 切换语言前，强制触发所有字段的 blur + 验证，确保 store 值已同步
+    // 这解决了 input-number/textarea/email 等 blur-sync 组件在用户快速操作时值丢失的问题
+    const form = scoped?.getComponentByName(FORM_NAME);
+    try {
+      form?.validate?.();
+    } catch {
+      // validate 可能返回 Promise 或在验证失败时抛错，忽略
+    }
     this.lookup = persistToLookup(scoped, this.lookup, this.i18nFields, lang, richTextFields);
     return this.lookup;
   }
@@ -163,6 +171,49 @@ function readExcludeFieldData(field: string): unknown | undefined {
   return undefined;
 }
 
+/**
+ * Read current value from DOM for a form field.
+ * 用于处理 Amis 受控组件在用户快速操作时 store 未同步的情况。
+ * DOM 是用户实际看到的状态，比 store 更可靠。
+ */
+function readDomValue(field: string): unknown | undefined {
+  // input / textarea
+  const input = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+    `input[name="${field}"], textarea[name="${field}"]`
+  );
+  if (input) {
+    if (input instanceof HTMLInputElement && input.type === 'number') {
+      const numVal = input.valueAsNumber;
+      return isNaN(numVal) ? (input.value || undefined) : numVal;
+    }
+    return input.value || undefined;
+  }
+
+  // select
+  const select = document.querySelector<HTMLSelectElement>(`select[name="${field}"]`);
+  if (select) {
+    return select.value || undefined;
+  }
+
+  // radio (checked)
+  const checkedRadio = document.querySelector<HTMLInputElement>(
+    `input[type="radio"][name="${field}"]:checked`
+  );
+  if (checkedRadio) {
+    return checkedRadio.value;
+  }
+
+  // checkboxes (all checked → array)
+  const checkboxes = document.querySelectorAll<HTMLInputElement>(
+    `input[type="checkbox"][name="${field}"]:checked`
+  );
+  if (checkboxes.length > 0) {
+    return Array.from(checkboxes).map((cb) => cb.value);
+  }
+
+  return undefined;
+}
+
 /** 持久化当前语言的值到 lookup — 优先从 amis store 读取，fallback 保留特殊处理 */
 function persistToLookup(
   scoped: any,
@@ -183,6 +234,13 @@ function persistToLookup(
     let currentVal: unknown | undefined;
     if (field in storeValues) {
       currentVal = storeValues[field];
+    }
+
+    // ①.5 DOM fallback: Amis 受控组件在 blur-sync 场景下 store 可能滞后，
+    // DOM 是用户实际看到的状态，更可靠
+    const domVal = readDomValue(field);
+    if (domVal !== undefined && domVal !== currentVal) {
+      currentVal = domVal;
     }
 
     // ② fallback: 自定义组件的隐藏数据 div（FieldWithExcludeV2 excludeName）

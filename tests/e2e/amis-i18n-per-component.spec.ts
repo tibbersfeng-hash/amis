@@ -206,6 +206,8 @@ test.describe('input-number', () => {
     setup(d);
     await go(page, d);
     await page.getByPlaceholder('请输入数字').fill('777');
+    await page.waitForTimeout(500);
+    await expect(page.getByPlaceholder('请输入数字')).toHaveValue('777', { timeout: 5000 });
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     await sw(page, 'zh');

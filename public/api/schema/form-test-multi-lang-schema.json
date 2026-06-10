@@ -5,6 +5,7 @@
   "mode": "horizontal",
   "horizontal": { "left": 4, "right": 8 },
   "body": [
+    { "type": "language-switcher", "variant": "select", "showLabel": true },
     { "type": "input-text", "name": "textField", "label": "单行文本", "placeholder": "请输入文本", "multiLang": true, "clearable": true },
     { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "multiLang": true, "minRows": 3 },
     { "type": "input-email", "name": "email", "label": "邮箱", "placeholder": "请输入邮箱", "multiLang": true, "clearable": true },
