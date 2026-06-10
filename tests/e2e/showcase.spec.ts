@@ -316,9 +316,9 @@ test.describe('Showcase', () => {
     await page.waitForTimeout(500);
 
     // Should have 3 property options
-    await expect(page.locator('.cxd-Select-option')).toHaveCount(3);
+    await expect(page.locator('.antd-Select-option')).toHaveCount(3);
     // Click the first option (CNHSN001)
-    await page.locator('.cxd-Select-option').nth(0).click();
+    await page.locator('.antd-Select-option').nth(0).click();
     await page.waitForTimeout(500);
 
     // Sub Unit should now appear with its own dropdown
@@ -333,7 +333,7 @@ test.describe('Showcase', () => {
     await page.waitForTimeout(500);
 
     // Should have 3 sub unit options for CNHSN001
-    await expect(page.locator('.cxd-Select-option')).toHaveCount(3);
+    await expect(page.locator('.antd-Select-option')).toHaveCount(3);
     // Verify content (select displays name, not code)
     await expect(page.locator('text=朝阳18号')).toBeVisible();
     await expect(page.locator('text=海淀分部')).toBeVisible();
@@ -657,9 +657,9 @@ test.describe('Showcase', () => {
     const i18nPreview = content.locator('.showcase-section').filter({ hasText: 'Live Preview — 支持 i18n' }).locator('.amis-live-preview');
     await expect(i18nPreview).toBeVisible();
 
-    // Date range inputs use class cxd-DateRangePicker-input (no name attr)
+    // Date range inputs use class antd-DateRangePicker-input (no name attr)
     // First two inputs are YYYY-MM-DD range (period field)
-    const dateInputs = i18nPreview.locator('.cxd-DateRangePicker-input');
+    const dateInputs = i18nPreview.locator('.antd-DateRangePicker-input');
     await expect(dateInputs.nth(0)).toBeVisible();
 
     const startVal = await dateInputs.nth(0).inputValue();
@@ -675,7 +675,7 @@ test.describe('Showcase', () => {
     await expect(i18nPreview).toBeVisible();
 
     // Last two inputs are datetime range (with time component)
-    const dateInputs = i18nPreview.locator('.cxd-DateRangePicker-input');
+    const dateInputs = i18nPreview.locator('.antd-DateRangePicker-input');
     await expect(dateInputs).toHaveCount(4);
 
     const startVal = await dateInputs.nth(2).inputValue();
@@ -702,8 +702,8 @@ test.describe('Showcase', () => {
     await i18nPreview.locator('[role="combobox"]').nth(1).click();
 
     // Wait for dropdown options to appear
-    await expect(page.locator('.cxd-Select-option')).toHaveCount(6);
-    await expect(page.locator('.cxd-Select-option').first()).toContainText('北京');
+    await expect(page.locator('.antd-Select-option')).toHaveCount(6);
+    await expect(page.locator('.antd-Select-option').first()).toContainText('北京');
   });
 
   test('Select — API mock with keyword search filters users', async ({ page }) => {
@@ -723,12 +723,12 @@ test.describe('Showcase', () => {
     await i18nPreview.locator('[role="combobox"]').nth(2).click();
 
     // Wait for the searchable select menu with input
-    const searchInput = page.locator('.cxd-Select-menu input').first();
+    const searchInput = page.locator('.antd-Select-menu input').first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('张');
 
     // Wait for filtered results
-    await expect(page.locator('.cxd-Select-option').first()).toContainText('张三');
+    await expect(page.locator('.antd-Select-option').first()).toContainText('张三');
   });
 
   test('TreeSelect — API mock loads department tree', async ({ page }) => {
@@ -739,13 +739,13 @@ test.describe('Showcase', () => {
     const i18nPreview = content.locator('.showcase-section').filter({ hasText: 'Live Preview — 支持 i18n' }).locator('.amis-live-preview');
     await expect(i18nPreview).toBeVisible();
 
-    // TreeSelect uses .cxd-TreeSelect class
-    const treeSelects = i18nPreview.locator('.cxd-TreeSelect');
+    // TreeSelect uses .antd-TreeSelect class
+    const treeSelects = i18nPreview.locator('.antd-TreeSelect');
     // 0=static region, 1=API dept
     await treeSelects.nth(1).click();
 
-    // Tree items use .cxd-Tree-item class
-    await expect(page.locator('.cxd-Tree-item').first()).toBeVisible();
+    // Tree items use .antd-Tree-item class
+    await expect(page.locator('.antd-Tree-item').first()).toBeVisible();
     await expect(page.locator('text=技术部')).toBeVisible();
     await expect(page.locator('text=产品部')).toBeVisible();
   });
@@ -770,35 +770,35 @@ test.describe('Showcase', () => {
     await expect(content.locator('.showcase-page-title', { hasText: 'Table' })).toBeVisible();
 
     // Wait for table data to load
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Footer toolbar container
-    const footToolbar = content.locator('.cxd-Table-footToolbar');
+    const footToolbar = content.locator('.antd-Table-footToolbar');
     await expect(footToolbar).toBeVisible();
 
     // Statistics text: "共 89 项" (total count only, no page range)
-    const stats = content.locator('.cxd-Crud-statistics');
+    const stats = content.locator('.antd-Crud-statistics');
     await expect(stats).toBeVisible();
     const statsText = await stats.textContent();
     expect(statsText).toMatch(/共\s*\d+\s*项/);
 
     // Pagination buttons present (9 page buttons visible)
-    await expect(content.locator('.cxd-Pagination-pager-item')).toHaveCount(9);
+    await expect(content.locator('.antd-Pagination-pager-item')).toHaveCount(9);
 
     // Page-switch (per-page dropdown) present
-    const pageSwitch = content.locator('.cxd-Crud-pageSwitch');
+    const pageSwitch = content.locator('.antd-Crud-pageSwitch');
     await expect(pageSwitch).toBeVisible();
     // The select may be nested inside a wrapper
-    await expect(pageSwitch.locator('select, .cxd-Select')).toBeVisible();
+    await expect(pageSwitch.locator('select, .antd-Select')).toBeVisible();
   });
 
   test('Table — footerToolbar all items right-aligned', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Verify toolbar is flex with justify-content: flex-end
-    const toolbar = content.locator('.cxd-Crud-toolbar');
+    const toolbar = content.locator('.antd-Crud-toolbar');
     const justifyContent = await toolbar.evaluate(el => getComputedStyle(el).justifyContent);
     expect(justifyContent).toBe('flex-end');
   });
@@ -806,34 +806,34 @@ test.describe('Showcase', () => {
   test('Table — pagination click changes page data', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Get first row's order ID on page 1
-    const firstOrderId = await content.locator('.cxd-Table-table tbody tr').nth(0).locator('td').nth(1).textContent();
+    const firstOrderId = await content.locator('.antd-Table-table tbody tr').nth(0).locator('td').nth(1).textContent();
 
     // Click page 2
-    await content.locator('.cxd-Pagination-pager-item').filter({ hasText: '2' }).click();
+    await content.locator('.antd-Pagination-pager-item').filter({ hasText: '2' }).click();
     await page.waitForTimeout(500);
 
     // Verify we still have 10 rows
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Get first row's order ID on page 2 — should be different
-    const page2OrderId = await content.locator('.cxd-Table-table tbody tr').nth(0).locator('td').nth(1).textContent();
+    const page2OrderId = await content.locator('.antd-Table-table tbody tr').nth(0).locator('td').nth(1).textContent();
     expect(page2OrderId).not.toBe(firstOrderId);
 
     // Page 2 button should now be active
-    const activePage = content.locator('.cxd-Pagination-pager-item.is-active a');
+    const activePage = content.locator('.antd-Pagination-pager-item.is-active a');
     await expect(activePage).toHaveText('2');
   });
 
   test('Table — per-page dropdown changes page size', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Find the page switch area
-    const pageSwitch = content.locator('.cxd-Crud-pageSwitch .cxd-Select');
+    const pageSwitch = content.locator('.antd-Crud-pageSwitch .antd-Select');
     await expect(pageSwitch).toBeVisible();
 
     // Click to open dropdown
@@ -841,23 +841,23 @@ test.describe('Showcase', () => {
     await page.waitForTimeout(300);
 
     // Dropdown options should include 20
-    await expect(page.locator('.cxd-Select-option').filter({ hasText: '20' })).toBeVisible();
+    await expect(page.locator('.antd-Select-option').filter({ hasText: '20' })).toBeVisible();
 
     // Select 20 per page
-    await page.locator('.cxd-Select-option').filter({ hasText: '20' }).click();
+    await page.locator('.antd-Select-option').filter({ hasText: '20' }).click();
     await page.waitForTimeout(1000);
 
     // Should now show 20 rows
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(20);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(20);
   });
 
   test('Table — active page button has correct styling', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Page 1 should be active by default
-    const activeBtn = content.locator('.cxd-Pagination-pager-item.is-active');
+    const activeBtn = content.locator('.antd-Pagination-pager-item.is-active');
     await expect(activeBtn).toBeVisible();
 
     // Verify active button has blue background
@@ -872,10 +872,10 @@ test.describe('Showcase', () => {
   test('Table — disabled prev button on first page', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Prev button should be disabled on page 1
-    const prevBtn = content.locator('.cxd-Pagination-prev');
+    const prevBtn = content.locator('.antd-Pagination-prev');
     await expect(prevBtn).toHaveClass(/is-disabled/);
   });
 
@@ -886,17 +886,17 @@ test.describe('Showcase', () => {
     await expect(content.locator('.showcase-page-title', { hasText: 'Table+Search' })).toBeVisible();
 
     // Wait for table data to load
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Footer toolbar present
-    const footToolbar = content.locator('.cxd-Table-footToolbar');
+    const footToolbar = content.locator('.antd-Table-footToolbar');
     await expect(footToolbar).toBeVisible();
 
     // Statistics visible
-    await expect(content.locator('.cxd-Crud-statistics')).toBeVisible();
+    await expect(content.locator('.antd-Crud-statistics')).toBeVisible();
 
     // Right-aligned
-    const toolbar = content.locator('.cxd-Crud-toolbar');
+    const toolbar = content.locator('.antd-Crud-toolbar');
     const justifyContent = await toolbar.evaluate(el => getComputedStyle(el).justifyContent);
     expect(justifyContent).toBe('flex-end');
   });
@@ -904,7 +904,7 @@ test.describe('Showcase', () => {
   test('Table+Search — search filter works with pagination', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table-search');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Find and fill the Order ID search field
     const searchForm = content.locator('.search-form');
@@ -920,18 +920,18 @@ test.describe('Showcase', () => {
     await page.waitForTimeout(1500);
 
     // Should still show results (filtered)
-    const rowCount = await content.locator('.cxd-Table-table tbody tr').count();
+    const rowCount = await content.locator('.antd-Table-table tbody tr').count();
     expect(rowCount).toBeGreaterThan(0);
 
     // Statistics should update - check with evaluate to get the rewritten text
-    const statsText = await content.locator('.cxd-Crud-statistics').evaluate(el => el.textContent);
+    const statsText = await content.locator('.antd-Crud-statistics').evaluate(el => el.textContent);
     expect(statsText).toMatch(/共\s*\d+\s*项/);
   });
 
   test('Table+Search — reset button clears filters', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table-search');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     const searchForm = content.locator('.search-form');
 
@@ -955,10 +955,10 @@ test.describe('Showcase', () => {
   test('Table+Search — expandable rows work', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table-search');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Rows with children have expand buttons (in tbody, not thead)
-    const expandBtns = content.locator('.cxd-Table-table tbody .cxd-Table-expandBtn2');
+    const expandBtns = content.locator('.antd-Table-table tbody .antd-Table-expandBtn2');
     const btnCount = await expandBtns.count();
     expect(btnCount).toBeGreaterThan(0);
 
@@ -967,39 +967,39 @@ test.describe('Showcase', () => {
     await page.waitForTimeout(500);
 
     // Row count should increase (1 row adds 2 children)
-    const rowCount = await content.locator('.cxd-Table-table tbody tr').count();
+    const rowCount = await content.locator('.antd-Table-table tbody tr').count();
     expect(rowCount).toBe(12);
 
     // Expanded row should have is-expanded class
-    const expandedRows = content.locator('.cxd-Table-table-tr.is-expanded');
+    const expandedRows = content.locator('.antd-Table-table-tr.is-expanded');
     await expect(expandedRows.first()).toBeVisible();
   });
 
   test('Table+Search — expand/collapse toggles correctly', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table-search');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
-    const expandBtns = content.locator('.cxd-Table-table tbody .cxd-Table-expandBtn2');
+    const expandBtns = content.locator('.antd-Table-table tbody .antd-Table-expandBtn2');
 
     // Expand first row (10 → 12)
     await expandBtns.first().click();
     await page.waitForTimeout(500);
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(12);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(12);
 
     // Collapse - row count returns to 10
     await expandBtns.first().click();
     await page.waitForTimeout(500);
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
   });
 
   test('Table — statistics shows only total count (no page range)', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#amis-table');
     const content = page.locator('.showcase-content');
-    await expect(content.locator('.cxd-Table-table tbody tr')).toHaveCount(10);
+    await expect(content.locator('.antd-Table-table tbody tr')).toHaveCount(10);
 
     // Statistics should show total count format: "共 89 项" (no page range)
-    const stats = content.locator('.cxd-Crud-statistics');
+    const stats = content.locator('.antd-Crud-statistics');
     const statsText = await stats.evaluate(el => el.innerText);
     expect(statsText).toMatch(/共\s*\d+\s*项/);
     expect(statsText).not.toMatch(/^\d+\/\d+/); // No leading page range
@@ -1157,11 +1157,11 @@ test.describe('Top-Border Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-top-border-tab');
     await page.waitForTimeout(800);
 
-    const tabsContainer = page.locator('.custom-top-border-tabs .cxd-Tabs-linksContainer').first();
+    const tabsContainer = page.locator('.custom-top-border-tabs .antd-Tabs-linksContainer').first();
     await expect(tabsContainer).toBeVisible();
 
     // Active tab: white bg, 16px, bold, 50px
-    const activeTab = page.locator('.custom-top-border-tabs .cxd-Tabs-link.is-active').first();
+    const activeTab = page.locator('.custom-top-border-tabs .antd-Tabs-link.is-active').first();
     await expect(activeTab).toBeVisible();
     expect(await activeTab.evaluate(el => window.getComputedStyle(el).backgroundColor)).toContain('255, 255, 255');
     expect(await activeTab.evaluate(el => window.getComputedStyle(el).fontSize)).toBe('16px');
@@ -1207,8 +1207,8 @@ test.describe('Top-Border Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-top-border-tab');
     await page.waitForTimeout(800);
 
-    const propertyTab = page.locator('.custom-top-border-tabs .cxd-Tabs-link').nth(1);
-    const globalTab = page.locator('.custom-top-border-tabs .cxd-Tabs-link').first();
+    const propertyTab = page.locator('.custom-top-border-tabs .antd-Tabs-link').nth(1);
+    const globalTab = page.locator('.custom-top-border-tabs .antd-Tabs-link').first();
 
     // Inactive tab hover: should stay transparent
     expect(await propertyTab.evaluate(el => el.classList.contains('is-active'))).toBe(false);
@@ -1234,8 +1234,8 @@ test.describe('Top-Border Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-top-border-tab');
     await page.waitForTimeout(800);
 
-    const propertyTab = page.locator('.custom-top-border-tabs .cxd-Tabs-link').nth(1);
-    const globalTab = page.locator('.custom-top-border-tabs .cxd-Tabs-link').first();
+    const propertyTab = page.locator('.custom-top-border-tabs .antd-Tabs-link').nth(1);
+    const globalTab = page.locator('.custom-top-border-tabs .antd-Tabs-link').first();
 
     // Phase 1: Global is active
     expect(await globalTab.evaluate(el => el.classList.contains('is-active'))).toBe(true);
@@ -1243,7 +1243,7 @@ test.describe('Top-Border Tab', () => {
     // Phase 2: Click Property
     await propertyTab.click();
     await page.waitForFunction(() => {
-      const tabs = document.querySelectorAll('.custom-top-border-tabs .cxd-Tabs-link');
+      const tabs = document.querySelectorAll('.custom-top-border-tabs .antd-Tabs-link');
       return tabs.length >= 2 && tabs[1]?.classList.contains('is-active') && !tabs[0]?.classList.contains('is-active');
     });
 
@@ -1256,7 +1256,7 @@ test.describe('Top-Border Tab', () => {
       const rules = Array.from(document.styleSheets)
         .map(s => { try { return Array.from(s.cssRules || []); } catch { return []; } })
         .flat();
-      const rule = rules.find((r: any) => r.selectorText === 'body .custom-top-border-tabs .cxd-Tabs-link.is-active');
+      const rule = rules.find((r: any) => r.selectorText === 'body .custom-top-border-tabs .antd-Tabs-link.is-active');
       return rule ? {
         bg: rule.style.backgroundColor,
         fontSize: rule.style.fontSize,
@@ -1283,7 +1283,7 @@ test.describe('Top-Border Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-top-border-tab');
     await page.waitForTimeout(800);
 
-    const container = page.locator('.custom-top-border-tabs .cxd-Tabs-linksContainer').first();
+    const container = page.locator('.custom-top-border-tabs .antd-Tabs-linksContainer').first();
     expect(await container.evaluate(el => window.getComputedStyle(el).borderBottomWidth)).toBe('0px');
   });
 });
@@ -1294,14 +1294,14 @@ test.describe('Bottom-Underline Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-bottom-underline-tab');
     await page.waitForTimeout(800);
 
-    const tabsContainer = page.locator('.custom-underline-tabs .cxd-Tabs-linksContainer').first();
+    const tabsContainer = page.locator('.custom-underline-tabs .antd-Tabs-linksContainer').first();
     await expect(tabsContainer).toBeVisible();
 
     // Container background: white
     expect(await tabsContainer.evaluate(el => window.getComputedStyle(el).backgroundColor)).toContain('255, 255, 255');
 
     // Active tab
-    const activeTab = page.locator('.custom-underline-tabs .cxd-Tabs-link.is-active').first();
+    const activeTab = page.locator('.custom-underline-tabs .antd-Tabs-link.is-active').first();
     await expect(activeTab).toBeVisible();
 
     // Active tab: white bg
@@ -1329,7 +1329,7 @@ test.describe('Bottom-Underline Tab', () => {
     expect(parseInt(tabWidth)).toBeLessThan(parseInt(containerWidth));
 
     // Content area: gray bg
-    const content = page.locator('.custom-underline-tabs .cxd-Tabs-content').first();
+    const content = page.locator('.custom-underline-tabs .antd-Tabs-content').first();
     expect(await content.evaluate(el => window.getComputedStyle(el).backgroundColor)).toContain('245, 246, 250'); // #F5F6FA
 
     await page.screenshot({
@@ -1342,8 +1342,8 @@ test.describe('Bottom-Underline Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-bottom-underline-tab');
     await page.waitForTimeout(800);
 
-    const inactiveTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').nth(1); // Registration Rule
-    const activeTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').first(); // Mission Rule
+    const inactiveTab = page.locator('.custom-underline-tabs .antd-Tabs-link').nth(1); // Registration Rule
+    const activeTab = page.locator('.custom-underline-tabs .antd-Tabs-link').first(); // Mission Rule
 
     // Inactive tab: already has white bg, hover should NOT change
     const inactiveBgBefore = await inactiveTab.evaluate(el => window.getComputedStyle(el).backgroundColor);
@@ -1371,8 +1371,8 @@ test.describe('Bottom-Underline Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-bottom-underline-tab');
     await page.waitForTimeout(800);
 
-    const registrationTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').nth(1);
-    const missionTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').first();
+    const registrationTab = page.locator('.custom-underline-tabs .antd-Tabs-link').nth(1);
+    const missionTab = page.locator('.custom-underline-tabs .antd-Tabs-link').first();
 
     // Phase 1: Mission Rule is active
     expect(await missionTab.evaluate(el => el.classList.contains('is-active'))).toBe(true);
@@ -1380,7 +1380,7 @@ test.describe('Bottom-Underline Tab', () => {
     // Phase 2: Click Registration Rule
     await registrationTab.click();
     await page.waitForFunction(() => {
-      const tabs = document.querySelectorAll('.custom-underline-tabs .cxd-Tabs-link');
+      const tabs = document.querySelectorAll('.custom-underline-tabs .antd-Tabs-link');
       return tabs.length >= 2 && tabs[1]?.classList.contains('is-active');
     });
 
@@ -1397,13 +1397,13 @@ test.describe('Bottom-Underline Tab', () => {
       const rules = Array.from(document.styleSheets)
         .map(s => { try { return Array.from(s.cssRules || []); } catch { return []; } })
         .flat();
-      const rule = rules.find((r: any) => r.selectorText === 'body .custom-underline-tabs .cxd-Tabs-link.is-active');
+      const rule = rules.find((r: any) => r.selectorText === 'body .custom-underline-tabs .antd-Tabs-link.is-active');
       return rule ? rule.style.boxShadow : '';
     });
     expect(activeRuleBoxShadow).toContain('4px');
 
     // Phase 6: Verify no border on container
-    const container = page.locator('.custom-underline-tabs .cxd-Tabs-linksContainer').first();
+    const container = page.locator('.custom-underline-tabs .antd-Tabs-linksContainer').first();
     expect(await container.evaluate(el => window.getComputedStyle(el).borderBottomWidth)).toBe('0px');
 
     await page.screenshot({
@@ -1416,8 +1416,8 @@ test.describe('Bottom-Underline Tab', () => {
     await page.goto('http://localhost:5173/showcase#amis-bottom-underline-tab');
     await page.waitForTimeout(800);
 
-    const activeTab = page.locator('.custom-underline-tabs .cxd-Tabs-link').first();
-    const linksContainer = page.locator('.custom-underline-tabs .cxd-Tabs-links').first();
+    const activeTab = page.locator('.custom-underline-tabs .antd-Tabs-link').first();
+    const linksContainer = page.locator('.custom-underline-tabs .antd-Tabs-links').first();
 
     // Tab width should be less than container width
     const tabWidth = await activeTab.evaluate(el => window.getComputedStyle(el).width);
@@ -1565,34 +1565,34 @@ test.describe.parallel('Showcase Smoke Test — All Pages', () => {
   const allPages = [...customPages, ...amisPages];
 
   // Only "表单输入" category components — expect Amis form control in preview
-  // Components with specific known DOM class use that; others fall back to generic .cxd-Form.
+  // Components with specific known DOM class use that; others fall back to generic .antd-Form.
   const formControlMap: Record<string, string> = {
-    'amis-input-text': '.cxd-TextControl',
-    'amis-textarea': '.cxd-TextareaControl',
-    'amis-input-password': '.cxd-TextControl',
-    'amis-input-number': '.cxd-NumberControl',
-    'amis-select': '.cxd-SelectControl',
-    'amis-radios': '.cxd-RadiosControl',
-    'amis-checkboxes': '.cxd-CheckboxesControl',
-    'amis-switch': '.cxd-SwitchControl',
-    'amis-input-rich-text': '.cxd-RichTextControl',
-    'amis-transfer': '.cxd-TransferControl',
-    'amis-chained-select-api': '.cxd-SelectControl',
-    'amis-input-date': '.cxd-DateControl',
-    'amis-input-date-range': '.cxd-DateRangeControl',
-    'amis-input-color': '.cxd-ColorControl',
-    'amis-input-image': '.cxd-ImageControl',
-    'amis-input-file': '.cxd-FileControl',
-    'amis-input-rating': '.cxd-RatingControl',
-    'amis-editor': '.cxd-CodeEditor',
-    'amis-button-toolbar': '.cxd-ButtonToolbar',
-    'amis-hidden': '.cxd-Form',
-    'amis-icon-picker': '.cxd-Form',
-    'amis-input-tree': '.cxd-Form',
-    'amis-tree-select': '.cxd-Form',
-    'amis-cascader': '.cxd-Form',
-    'amis-input-tag': '.cxd-Form',
-    'amis-input-range': '.cxd-Form',
+    'amis-input-text': '.antd-TextControl',
+    'amis-textarea': '.antd-TextareaControl',
+    'amis-input-password': '.antd-TextControl',
+    'amis-input-number': '.antd-NumberControl',
+    'amis-select': '.antd-SelectControl',
+    'amis-radios': '.antd-RadiosControl',
+    'amis-checkboxes': '.antd-CheckboxesControl',
+    'amis-switch': '.antd-SwitchControl',
+    'amis-input-rich-text': '.antd-RichTextControl',
+    'amis-transfer': '.antd-TransferControl',
+    'amis-chained-select-api': '.antd-SelectControl',
+    'amis-input-date': '.antd-DateControl',
+    'amis-input-date-range': '.antd-DateRangeControl',
+    'amis-input-color': '.antd-ColorControl',
+    'amis-input-image': '.antd-ImageControl',
+    'amis-input-file': '.antd-FileControl',
+    'amis-input-rating': '.antd-RatingControl',
+    'amis-editor': '.antd-CodeEditor',
+    'amis-button-toolbar': '.antd-ButtonToolbar',
+    'amis-hidden': '.antd-Form',
+    'amis-icon-picker': '.antd-Form',
+    'amis-input-tree': '.antd-Form',
+    'amis-tree-select': '.antd-Form',
+    'amis-cascader': '.antd-Form',
+    'amis-input-tag': '.antd-Form',
+    'amis-input-range': '.antd-Form',
   };
 
   for (const pageInfo of allPages) {

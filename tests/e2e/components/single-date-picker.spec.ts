@@ -84,26 +84,26 @@ test.describe('Mission CMS - Date Inputs', () => {
   test.describe('input-date', () => {
     test('【日期】Countdown Day 输入框存在', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').nth(3).click({ force: true });
+      await page.locator('.antd-Tabs-link').nth(3).click({ force: true });
       await page.waitForTimeout(300);
-      const dateItem = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Countdown Day' });
+      const dateItem = page.locator('.antd-Form-item--normal').filter({ hasText: 'Countdown Day' });
       await expect(dateItem).toBeVisible();
-      await expect(dateItem.locator('.cxd-DateControl').first()).toBeVisible();
+      await expect(dateItem.locator('.antd-DateControl').first()).toBeVisible();
     });
 
     test('【日期】Countdown Day 默认值正确', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').nth(3).click({ force: true });
+      await page.locator('.antd-Tabs-link').nth(3).click({ force: true });
       await page.waitForTimeout(300);
-      const dateControl = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Countdown Day' }).locator('.cxd-DateControl').first();
+      const dateControl = page.locator('.antd-Form-item--normal').filter({ hasText: 'Countdown Day' }).locator('.antd-DateControl').first();
       await expect(dateControl).toBeVisible();
     });
 
     test('【日期】点击输入框打开日期选择器', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').nth(3).click({ force: true });
+      await page.locator('.antd-Tabs-link').nth(3).click({ force: true });
       await page.waitForTimeout(300);
-      const input = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Countdown Day' }).locator('.cxd-DatePicker-input').first();
+      const input = page.locator('.antd-Form-item--normal').filter({ hasText: 'Countdown Day' }).locator('.antd-DatePicker-input').first();
       await expect(input).toBeVisible();
       await input.click();
       await page.waitForTimeout(500);
@@ -111,9 +111,9 @@ test.describe('Mission CMS - Date Inputs', () => {
 
     test('【日期】Countdown Day 必填标记存在', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').nth(3).click({ force: true });
+      await page.locator('.antd-Tabs-link').nth(3).click({ force: true });
       await page.waitForTimeout(300);
-      const item = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Countdown Day' }).first();
+      const item = page.locator('.antd-Form-item--normal').filter({ hasText: 'Countdown Day' }).first();
       await expect(item).toBeVisible();
     });
   });
@@ -124,15 +124,15 @@ test.describe('Mission CMS - Date Inputs', () => {
   test.describe('input-date-range', () => {
     test('【日期范围】搜索区域有两个日期范围选择器', async ({ page }) => {
       await page.goto('/?page=list');
-      await page.waitForSelector('.cxd-Table-table tbody tr', { timeout: 10000 });
-      const dateRangeCount = await page.locator('.cxd-DateRangeControl').count();
+      await page.waitForSelector('.antd-Table-table tbody tr', { timeout: 10000 });
+      const dateRangeCount = await page.locator('.antd-DateRangeControl').count();
       expect(dateRangeCount).toBeGreaterThanOrEqual(2);
     });
 
     test('【日期范围】占位符为英文 (Start/End)', async ({ page }) => {
       await page.goto('/?page=list');
-      await page.waitForSelector('.cxd-Table-table tbody tr', { timeout: 10000 });
-      const input = page.locator('.cxd-DateRangeControl').first().locator('.cxd-DateRangePicker-input').first();
+      await page.waitForSelector('.antd-Table-table tbody tr', { timeout: 10000 });
+      const input = page.locator('.antd-DateRangeControl').first().locator('.antd-DateRangePicker-input').first();
       await expect(input).toBeVisible();
       const placeholder = await input.getAttribute('placeholder');
       expect(placeholder).toBeTruthy();
@@ -140,8 +140,8 @@ test.describe('Mission CMS - Date Inputs', () => {
 
     test('【日期范围】点击打开日期弹窗', async ({ page }) => {
       await page.goto('/?page=list');
-      await page.waitForSelector('.cxd-Table-table tbody tr', { timeout: 10000 });
-      const input = page.locator('.cxd-DateRangeControl').first().locator('.cxd-DateRangePicker-input').first();
+      await page.waitForSelector('.antd-Table-table tbody tr', { timeout: 10000 });
+      const input = page.locator('.antd-DateRangeControl').first().locator('.antd-DateRangePicker-input').first();
       await expect(input).toBeVisible();
       await input.click();
       await page.waitForTimeout(500);
@@ -149,14 +149,14 @@ test.describe('Mission CMS - Date Inputs', () => {
 
     test('【日期范围】两个输入之间有分隔符', async ({ page }) => {
       await page.goto('/?page=list');
-      await page.waitForSelector('.cxd-Table-table tbody tr', { timeout: 10000 });
-      await expect(page.locator('.cxd-DateRangeControl').first().locator('.cxd-DateRangePicker-input-separator').first()).toBeVisible();
+      await page.waitForSelector('.antd-Table-table tbody tr', { timeout: 10000 });
+      await expect(page.locator('.antd-DateRangeControl').first().locator('.antd-DateRangePicker-input-separator').first()).toBeVisible();
     });
 
     test('【日期范围】输入框有日历图标', async ({ page }) => {
       await page.goto('/?page=list');
-      await page.waitForSelector('.cxd-Table-table tbody tr', { timeout: 10000 });
-      await expect(page.locator('.cxd-DateRangeControl').first().locator('.cxd-DateRangePicker-toggler').first()).toBeVisible();
+      await page.waitForSelector('.antd-Table-table tbody tr', { timeout: 10000 });
+      await expect(page.locator('.antd-DateRangeControl').first().locator('.antd-DateRangePicker-toggler').first()).toBeVisible();
     });
   });
 });

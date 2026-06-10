@@ -37,7 +37,7 @@ test.describe('input-color', () => {
     const d = did();
     await go(page, d);
     const val = await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('.cxd-ColorPicker-input, .cxd-ColorPicker input');
+      const el = document.querySelector<HTMLInputElement>('.antd-ColorPicker-input, .antd-ColorPicker input');
       return el?.value;
     });
     expect(val).toBe('#4A5CBF');
@@ -50,7 +50,7 @@ test.describe('input-color', () => {
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     const val = await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('.cxd-ColorPicker-input, .cxd-ColorPicker input');
+      const el = document.querySelector<HTMLInputElement>('.antd-ColorPicker-input, .antd-ColorPicker input');
       return el?.value;
     });
     expect(val).toBe('#4A5CBF');
@@ -63,7 +63,7 @@ test.describe('input-color', () => {
     await go(page, d);
     // 改色
     await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('.cxd-ColorPicker-input, .cxd-ColorPicker input');
+      const el = document.querySelector<HTMLInputElement>('.antd-ColorPicker-input, .antd-ColorPicker input');
       if (!el) return;
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
       if (setter) setter.call(el, '#FF0000');
@@ -76,7 +76,7 @@ test.describe('input-color', () => {
     await sw(page, 'zh');
     await page.waitForTimeout(1000);
     const val = await page.evaluate(() => {
-      const el = document.querySelector<HTMLInputElement>('.cxd-ColorPicker-input, .cxd-ColorPicker input');
+      const el = document.querySelector<HTMLInputElement>('.antd-ColorPicker-input, .antd-ColorPicker input');
       return el?.value;
     });
     expect(val).toBe('#FF0000');
@@ -105,7 +105,7 @@ test.describe('input-time', () => {
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     // 英文下 placeholder 可能变化，只要组件可见即可
-    await expect(page.locator('.cxd-DatePicker').first()).toBeVisible();
+    await expect(page.locator('.antd-DatePicker').first()).toBeVisible();
     await sw(page, 'zh');
     await page.waitForTimeout(1000);
     await expect(page.locator('input[placeholder="请选择时间"]')).toBeVisible();
@@ -122,7 +122,7 @@ test.describe('input-date-range', () => {
     const d = did();
     await go(page, d);
     const vals = await page.evaluate(() => {
-      const inputs = document.querySelectorAll<HTMLInputElement>('.cxd-DateRangePicker-input');
+      const inputs = document.querySelectorAll<HTMLInputElement>('.antd-DateRangePicker-input');
       if (inputs.length < 2) return null;
       return [inputs[0].value, inputs[1].value];
     });
@@ -136,7 +136,7 @@ test.describe('input-date-range', () => {
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     const vals = await page.evaluate(() => {
-      const inputs = document.querySelectorAll<HTMLInputElement>('.cxd-DateRangePicker-input');
+      const inputs = document.querySelectorAll<HTMLInputElement>('.antd-DateRangePicker-input');
       if (inputs.length < 2) return null;
       return [inputs[0].value, inputs[1].value];
     });
@@ -148,13 +148,13 @@ test.describe('input-date-range', () => {
     const d = did();
     setup(d);
     await go(page, d);
-    await expect(page.locator('.cxd-DateRangePicker')).toBeVisible();
+    await expect(page.locator('.antd-DateRangePicker')).toBeVisible();
     await sw(page, 'en');
     await page.waitForTimeout(800);
-    await expect(page.locator('.cxd-DateRangePicker')).toBeVisible();
+    await expect(page.locator('.antd-DateRangePicker')).toBeVisible();
     await sw(page, 'zh');
     await page.waitForTimeout(800);
-    await expect(page.locator('.cxd-DateRangePicker')).toBeVisible();
+    await expect(page.locator('.antd-DateRangePicker')).toBeVisible();
     del(d);
   });
 });
@@ -168,20 +168,20 @@ test.describe('input-tag', () => {
     const d = did();
     await go(page, d);
     // zh 为空字符串，组件应正常渲染
-    await expect(page.locator('.cxd-TagControl').first()).toBeVisible();
+    await expect(page.locator('.antd-TagControl').first()).toBeVisible();
     del(d);
   });
 
   test('S3 切换语言后标签不崩溃', async ({ page }) => {
     const d = did();
     await go(page, d);
-    await expect(page.locator('.cxd-TagControl').first()).toBeVisible();
+    await expect(page.locator('.antd-TagControl').first()).toBeVisible();
     await sw(page, 'en');
     await page.waitForTimeout(1000);
-    await expect(page.locator('.cxd-TagControl').first()).toBeVisible();
+    await expect(page.locator('.antd-TagControl').first()).toBeVisible();
     await sw(page, 'zh');
     await page.waitForTimeout(1000);
-    await expect(page.locator('.cxd-TagControl').first()).toBeVisible();
+    await expect(page.locator('.antd-TagControl').first()).toBeVisible();
     del(d);
   });
 });
@@ -223,7 +223,7 @@ test.describe('checkboxes', () => {
   test('S2 中文选中项正确', async ({ page }) => {
     const d = did();
     await go(page, d);
-    const checked = await page.locator('.cxd-Checkbox--checkbox--default.checked').count();
+    const checked = await page.locator('.antd-Checkbox--checkbox--default.checked').count();
     // zh 初始值 "a" → 选项A 被选中
     expect(checked).toBeGreaterThanOrEqual(1);
     del(d);
@@ -252,12 +252,12 @@ test.describe('radios', () => {
     const d = did();
     await go(page, d);
     const zhLabel = await page.evaluate(() =>
-      document.querySelector('.cxd-Checkbox--radio--default.checked')?.textContent?.trim() ?? '');
+      document.querySelector('.antd-Checkbox--radio--default.checked')?.textContent?.trim() ?? '');
     expect(zhLabel).toBe('是');
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     const enLabel = await page.evaluate(() =>
-      document.querySelector('.cxd-Checkbox--radio--default.checked')?.textContent?.trim() ?? '');
+      document.querySelector('.antd-Checkbox--radio--default.checked')?.textContent?.trim() ?? '');
     expect(enLabel).toBe('是');
     del(d);
   });
@@ -272,12 +272,12 @@ test.describe('select', () => {
     const d = did();
     await go(page, d);
     const zh = await page.evaluate(() =>
-      document.querySelector('.cxd-Select-value')?.textContent?.trim() ?? '');
+      document.querySelector('.antd-Select-value')?.textContent?.trim() ?? '');
     expect(zh).toBe('选项一');
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     const en = await page.evaluate(() =>
-      document.querySelector('.cxd-Select-value')?.textContent?.trim() ?? '');
+      document.querySelector('.antd-Select-value')?.textContent?.trim() ?? '');
     expect(en).toBe('选项一');
     del(d);
   });
@@ -291,13 +291,13 @@ test.describe('switch', () => {
   test('S3 切换语言后开关状态不变(zh=en)', async ({ page }) => {
     const d = did();
     await go(page, d);
-    await expect(page.locator('.cxd-Switch.is-checked')).toBeVisible();
+    await expect(page.locator('.antd-Switch.is-checked')).toBeVisible();
     await sw(page, 'en');
     await page.waitForTimeout(1000);
-    await expect(page.locator('.cxd-Switch.is-checked')).toBeVisible();
+    await expect(page.locator('.antd-Switch.is-checked')).toBeVisible();
     await sw(page, 'zh');
     await page.waitForTimeout(1000);
-    await expect(page.locator('.cxd-Switch.is-checked')).toBeVisible();
+    await expect(page.locator('.antd-Switch.is-checked')).toBeVisible();
     del(d);
   });
 });
@@ -310,7 +310,7 @@ test.describe('rating', () => {
   test('S2 中文评分 2 颗星', async ({ page }) => {
     const d = did();
     await go(page, d);
-    const active = await page.locator('.cxd-Rating-star.is-active').count();
+    const active = await page.locator('.antd-Rating-star.is-active').count();
     expect(active).toBe(2);
     del(d);
   });
@@ -320,11 +320,11 @@ test.describe('rating', () => {
     await go(page, d);
     await sw(page, 'en');
     await page.waitForTimeout(1000);
-    const en = await page.locator('.cxd-Rating-star.is-active').count();
+    const en = await page.locator('.antd-Rating-star.is-active').count();
     expect(en).toBe(2);
     await sw(page, 'zh');
     await page.waitForTimeout(1000);
-    const zh = await page.locator('.cxd-Rating-star.is-active').count();
+    const zh = await page.locator('.antd-Rating-star.is-active').count();
     expect(zh).toBe(2);
     del(d);
   });

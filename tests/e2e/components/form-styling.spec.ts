@@ -84,7 +84,7 @@ test.describe('Mission - Style Verification', () => {
 
   test.describe('Tab Styling', () => {
     test('active tab has primary text color and bottom line indicator', async ({ page }) => {
-      const activeTab = page.locator('.cxd-Tabs-link.is-active').first();
+      const activeTab = page.locator('.antd-Tabs-link.is-active').first();
       const bg = await activeTab.evaluate(el => getComputedStyle(el).backgroundColor);
       const color = await activeTab.evaluate(el => getComputedStyle(el).color);
       const fontWeight = await activeTab.evaluate(el => getComputedStyle(el).fontWeight);
@@ -103,7 +103,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('inactive tabs have transparent background and gray text', async ({ page }) => {
-      const inactiveTab = page.locator('.cxd-Tabs-link:not(.is-active)').first();
+      const inactiveTab = page.locator('.antd-Tabs-link:not(.is-active)').first();
       const bg = await inactiveTab.evaluate(el => getComputedStyle(el).backgroundColor);
       const color = await inactiveTab.evaluate(el => getComputedStyle(el).color);
 
@@ -114,7 +114,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('all tabs in the same row are vertically aligned', async ({ page }) => {
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       const count = await tabs.count();
       expect(count).toBeGreaterThanOrEqual(2);
 
@@ -130,7 +130,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('all tabs in the same row have consistent height', async ({ page }) => {
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       const count = await tabs.count();
       let firstHeight: number | null = null;
       for (let i = 0; i < count; i++) {
@@ -144,7 +144,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('active tab does not have negative margin offset', async ({ page }) => {
-      const activeTab = page.locator('.cxd-Tabs-link.is-active').first();
+      const activeTab = page.locator('.antd-Tabs-link.is-active').first();
       const marginTop = await activeTab.evaluate(el => getComputedStyle(el).marginTop);
       const marginLeft = await activeTab.evaluate(el => getComputedStyle(el).marginLeft);
       // Should not have large negative margins that would misalign it
@@ -152,13 +152,13 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('tab content area has left padding', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active').first();
+      const activePane = page.locator('.antd-Tabs-pane.is-active').first();
       const paddingLeft = await activePane.evaluate(el => getComputedStyle(el).paddingLeft);
       expect(parseInt(paddingLeft)).toBeGreaterThanOrEqual(0);
     });
 
     test('all section titles within active tab have consistent left alignment', async ({ page }) => {
-      const titles = page.locator('.cxd-Tabs-pane.is-active .section-title-sm');
+      const titles = page.locator('.antd-Tabs-pane.is-active .section-title-sm');
       const count = await titles.count();
       if (count < 2) {
         test.skip(true, 'not enough section titles to compare');
@@ -176,10 +176,10 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('form items within active tab form area have consistent left alignment', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active');
+      const activePane = page.locator('.antd-Tabs-pane.is-active');
       // Check top-level form items (not inside flex groups) have consistent left alignment.
-      // Items inside .cxd-Form-group--hor are side-by-side by design, so we exclude them.
-      const formItems = activePane.locator('.form-card .cxd-Form-item');
+      // Items inside .antd-Form-group--hor are side-by-side by design, so we exclude them.
+      const formItems = activePane.locator('.form-card .antd-Form-item');
       const count = await formItems.count();
       if (count < 2) {
         test.skip(true, 'not enough form items to compare');
@@ -189,7 +189,7 @@ test.describe('Mission - Style Verification', () => {
       const xPositions: number[] = [];
       for (let i = 0; i < count; i++) {
         const item = formItems.nth(i);
-        const isInGroup = await item.evaluate(el => !!el.closest('.cxd-Form-group--hor'));
+        const isInGroup = await item.evaluate(el => !!el.closest('.antd-Form-group--hor'));
         if (!isInGroup) {
           const box = await item.boundingBox();
           if (box) xPositions.push(box.x);
@@ -206,8 +206,8 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('text inputs within same type have consistent width', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active');
-      const textInputs = activePane.locator('.cxd-TextControl-input');
+      const activePane = page.locator('.antd-Tabs-pane.is-active');
+      const textInputs = activePane.locator('.antd-TextControl-input');
       const textWidths: number[] = [];
 
       const count = await textInputs.count();
@@ -224,8 +224,8 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('select controls have consistent width', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active');
-      const selectControls = activePane.locator('.cxd-SelectControl .cxd-Select');
+      const activePane = page.locator('.antd-Tabs-pane.is-active');
+      const selectControls = activePane.locator('.antd-SelectControl .antd-Select');
       const selectWidths: number[] = [];
 
       const count = await selectControls.count();
@@ -241,7 +241,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('datetime controls have consistent width', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active');
+      const activePane = page.locator('.antd-Tabs-pane.is-active');
       const datetimeControls = activePane.locator('.date-range-picker-input-wrap');
       const dtWidths: number[] = [];
 
@@ -258,22 +258,22 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('all form control types have the same width', async ({ page }) => {
-      const activePane = page.locator('.cxd-Tabs-pane.is-active');
+      const activePane = page.locator('.antd-Tabs-pane.is-active');
 
       // Get full-width controls (not inside a group = not half-width)
       const fullTextWidths: number[] = [];
       const fullSelectWidths: number[] = [];
       const fullDatetimeWidths: number[] = [];
 
-      const textInputs = activePane.locator('.cxd-TextControl-input');
+      const textInputs = activePane.locator('.antd-TextControl-input');
       const textCount = await textInputs.count();
       for (let i = 0; i < textCount; i++) {
         const isInGroup = await textInputs.nth(i).evaluate(el => {
           // Check if the control's parent FormItem is inside a Group
-          const formItem = el.closest('.cxd-Form-item');
+          const formItem = el.closest('.antd-Form-item');
           if (!formItem) return false;
           // Check if the formItem is directly under a group (half-width) or the group's parent (full-width)
-          const groupWrapper = formItem.closest('.cxd-Form-group');
+          const groupWrapper = formItem.closest('.antd-Form-group');
           return groupWrapper !== null;
         });
         if (!isInGroup) {
@@ -282,13 +282,13 @@ test.describe('Mission - Style Verification', () => {
         }
       }
 
-      const selectControls = activePane.locator('.cxd-SelectControl .cxd-Select');
+      const selectControls = activePane.locator('.antd-SelectControl .antd-Select');
       const selectCount = await selectControls.count();
       for (let i = 0; i < selectCount; i++) {
         const isInGroup = await selectControls.nth(i).evaluate(el => {
-          const formItem = el.closest('.cxd-Form-item');
+          const formItem = el.closest('.antd-Form-item');
           if (!formItem) return false;
-          const groupWrapper = formItem.closest('.cxd-Form-group');
+          const groupWrapper = formItem.closest('.antd-Form-group');
           return groupWrapper !== null;
         });
         if (!isInGroup) {
@@ -297,13 +297,13 @@ test.describe('Mission - Style Verification', () => {
         }
       }
 
-      const datetimeInputs = activePane.locator('.cxd-DateControl input[type="text"]');
+      const datetimeInputs = activePane.locator('.antd-DateControl input[type="text"]');
       const dtCount = await datetimeInputs.count();
       for (let i = 0; i < dtCount; i++) {
         const isInGroup = await datetimeInputs.nth(i).evaluate(el => {
-          const formItem = el.closest('.cxd-Form-item');
+          const formItem = el.closest('.antd-Form-item');
           if (!formItem) return false;
-          const groupWrapper = formItem.closest('.cxd-Form-group');
+          const groupWrapper = formItem.closest('.antd-Form-group');
           return groupWrapper !== null;
         });
         if (!isInGroup) {
@@ -323,13 +323,13 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('tabs have no bottom border on container', async ({ page }) => {
-      const tabsContainer = page.locator('.cxd-Tabs--line').first();
+      const tabsContainer = page.locator('.antd-Tabs--line').first();
       const borderBottom = await tabsContainer.evaluate(el => getComputedStyle(el).borderBottomWidth);
       expect(borderBottom).toBe('0px');
     });
 
     test('tab content has top margin', async ({ page }) => {
-      const content = page.locator('.cxd-Tabs-content').first();
+      const content = page.locator('.antd-Tabs-content').first();
       const marginTop = await content.evaluate(el => getComputedStyle(el).marginTop);
       expect(marginTop).toBe('20px');
     });
@@ -339,10 +339,10 @@ test.describe('Mission - Style Verification', () => {
       let globalFirstX: number | null = null;
 
       for (const tabName of tabNames) {
-        await page.locator('.cxd-Tabs-link').filter({ hasText: tabName }).first().click({ force: true });
+        await page.locator('.antd-Tabs-link').filter({ hasText: tabName }).first().click({ force: true });
         await page.waitForTimeout(500);
 
-        const titles = page.locator('.cxd-Tabs-pane.is-active .section-title-sm');
+        const titles = page.locator('.antd-Tabs-pane.is-active .section-title-sm');
         const count = await titles.count();
         if (count === 0) continue;
 
@@ -362,14 +362,14 @@ test.describe('Mission - Style Verification', () => {
 
   test.describe('Card Styling', () => {
     test('form-card has white background', async ({ page }) => {
-      const card = page.locator('.cxd-Tabs-pane.is-active .form-card').first();
+      const card = page.locator('.antd-Tabs-pane.is-active .form-card').first();
       await expect(card).toBeVisible();
       const bg = await card.evaluate(el => getComputedStyle(el).backgroundColor);
       expect(bg).toMatch(/255.*255.*255|white/);
     });
 
     test('form-card has border-radius and shadow', async ({ page }) => {
-      const card = page.locator('.cxd-Tabs-pane.is-active .form-card').first();
+      const card = page.locator('.antd-Tabs-pane.is-active .form-card').first();
       const borderRadius = await card.evaluate(el => getComputedStyle(el).borderRadius);
       const boxShadow = await card.evaluate(el => getComputedStyle(el).boxShadow);
 
@@ -379,7 +379,7 @@ test.describe('Mission - Style Verification', () => {
     });
 
     test('form-card has padding', async ({ page }) => {
-      const card = page.locator('.cxd-Tabs-pane.is-active .form-card').first();
+      const card = page.locator('.antd-Tabs-pane.is-active .form-card').first();
       const padding = await card.evaluate(el => getComputedStyle(el).padding);
       expect(padding).toBeTruthy();
     });
@@ -410,10 +410,10 @@ test.describe('Mission - Style Verification', () => {
 
     test('award-panel has form-bg background', async ({ page }) => {
       // Award panel is on the Registration Rule tab
-      await page.locator('.cxd-Tabs-link').filter({ hasText: 'Registration Rule' }).first().click({ force: true });
+      await page.locator('.antd-Tabs-link').filter({ hasText: 'Registration Rule' }).first().click({ force: true });
       await page.waitForTimeout(800);
 
-      const panel = page.locator('.cxd-Tabs-pane.is-active .award-panel').first();
+      const panel = page.locator('.antd-Tabs-pane.is-active .award-panel').first();
       await expect(panel).toBeVisible();
       const bg = await panel.evaluate(el => getComputedStyle(el).backgroundColor);
       // --form-bg = #F8F9FC = rgb(248, 249, 252)
@@ -572,26 +572,26 @@ test.describe('Mission - Style Verification', () => {
 
   test.describe('Input Controls', () => {
     test('text input wrapper has correct height', async ({ page }) => {
-      const wrapper = page.locator('.cxd-TextControl-input').first();
+      const wrapper = page.locator('.antd-TextControl-input').first();
       const height = await wrapper.evaluate(el => getComputedStyle(el).height);
       // Wrapper should be 36px (--input-height)
       expect(parseInt(height)).toBeGreaterThanOrEqual(30);
     });
 
     test('text input has correct border color', async ({ page }) => {
-      const input = page.locator('.cxd-TextControl-input').first();
+      const input = page.locator('.antd-TextControl-input').first();
       const border = await input.evaluate(el => getComputedStyle(el).borderColor);
       expect(border).toBeTruthy();
     });
 
     test('text input has rounded corners', async ({ page }) => {
-      const input = page.locator('.cxd-TextControl-input').first();
+      const input = page.locator('.antd-TextControl-input').first();
       const radius = await input.evaluate(el => getComputedStyle(el).borderRadius);
       expect(radius).toBeTruthy();
     });
 
     test('select control has correct height', async ({ page }) => {
-      const select = page.locator('.cxd-SelectControl .cxd-Select').first();
+      const select = page.locator('.antd-SelectControl .antd-Select').first();
       await expect(select).toBeVisible();
       const height = await select.evaluate(el => getComputedStyle(el).height);
       expect(parseInt(height)).toBeGreaterThanOrEqual(30);
@@ -601,7 +601,7 @@ test.describe('Mission - Style Verification', () => {
       const numInput = page.locator('input[name="minPurchaseAmount"], input[name="budget"]').first();
       if (!await numInput.isVisible().catch(() => false)) {
         // Fallback: find any number-like input
-        const allInputs = page.locator('.cxd-TextControl-input input');
+        const allInputs = page.locator('.antd-TextControl-input input');
         const count = await allInputs.count();
         if (count < 2) {
           test.skip(true, 'no number inputs found');

@@ -95,7 +95,7 @@ test.describe('JSON + Preview + Render Regression', () => {
       await page.waitForTimeout(300);
 
       // Get initial tab titles
-      const initialTitles = await page.locator('.custom-closable-tabs .cxd-Tabs-link a').allTextContents();
+      const initialTitles = await page.locator('.custom-closable-tabs .antd-Tabs-link a').allTextContents();
       expect(initialTitles).toEqual(['Tab 1', 'Tab 2']);
 
       // Edit Schema JSON — change tab title
@@ -114,7 +114,7 @@ test.describe('JSON + Preview + Render Regression', () => {
       // Verify the rendered state has been updated by checking the preview re-rendered
       // The preview should show the new title after a re-render cycle
       await page.waitForTimeout(1000);
-      const titles = await page.locator('.custom-closable-tabs .cxd-Tabs-link a').allTextContents();
+      const titles = await page.locator('.custom-closable-tabs .antd-Tabs-link a').allTextContents();
       expect(titles.length).toBeGreaterThanOrEqual(2);
     });
 
@@ -249,7 +249,7 @@ test.describe('JSON + Preview + Render Regression', () => {
       await expect(amisPreview.first()).toBeVisible({ timeout: 15000 });
 
       // Verify tab titles are rendered
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       await expect(tabs.first()).toBeVisible({ timeout: 10000 });
       const tabCount = await tabs.count();
       expect(tabCount).toBe(2);
@@ -275,7 +275,7 @@ test.describe('JSON + Preview + Render Regression', () => {
       await page.waitForTimeout(1000);
 
       // After render: the preview should have been updated
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       await expect(tabs.first()).toBeVisible();
     });
   });
@@ -355,7 +355,7 @@ test.describe('JSON + Preview + Render Regression', () => {
       await page.waitForTimeout(1000);
 
       // Verify the preview still renders
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       await expect(tabs.first()).toBeVisible();
     });
   });
@@ -451,7 +451,7 @@ test.describe('JSON + Preview + Render Regression', () => {
 
       // Verify the preview updated — the control class should change from TextControl to TextareaControl
       const preview = page.locator('.showcase-section').filter({ hasText: 'Live Preview — 支持 i18n' }).locator('.amis-live-preview');
-      const textareaControl = preview.locator('.cxd-TextareaControl');
+      const textareaControl = preview.locator('.antd-TextareaControl');
       await expect(textareaControl.first()).toBeVisible({ timeout: 10000 });
     });
   });

@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 // Scoped selectors — find the first closable-tab wrapper, then find its add button via data attribute
 const CLOSABLE_WRAPPER = '.closable-tab-wrapper';
 const ADD_BTN = '[data-closable-tab-add]';
-const TAB_LINK = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
-const CLOSE_BTN = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
+const TAB_LINK = '> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:not(.closable-custom-add)';
+const CLOSE_BTN = '> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > .antd-Tabs-link-close';
 
 // Helper to get the first closable-tab scope
 function firstClosable(page: ReturnType<typeof test>['page']) {
@@ -55,7 +55,7 @@ test.describe('Closable Tabs Component', () => {
     await expect(addBtn).toBeVisible();
     await expect(addBtn).toContainText('Add Tab');
 
-    const wrapperEl = firstClosable(page).locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper').first();
+    const wrapperEl = firstClosable(page).locator('> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper').first();
     const wrapperPadding = await wrapperEl.evaluate(el => window.getComputedStyle(el).paddingRight);
     expect(parseInt(wrapperPadding, 10)).toBeLessThan(50);
 
@@ -153,8 +153,8 @@ test.describe('Closable Tabs Component', () => {
     const wrapper = firstClosable(page);
     const firstTab = wrapper.locator(TAB_LINK).first();
     const tabStyle = await firstTab.getAttribute('class');
-    expect(tabStyle).toContain('cxd-Tabs-link');
-    const activeTab = wrapper.locator('> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link.is-active');
+    expect(tabStyle).toContain('antd-Tabs-link');
+    const activeTab = wrapper.locator('> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link.is-active');
     await expect(activeTab).toBeVisible();
     await page.screenshot({ path: 'tests/e2e/screenshots/closable-tabs-css-styles.png', fullPage: true });
   });
@@ -205,7 +205,7 @@ test.describe('Closable Tabs Component', () => {
     const tabLinks = wrapper.locator(TAB_LINK);
     await expect(tabLinks).toHaveCount(2);
 
-    const activeInput = page.locator('.cxd-Tabs-pane.is-active input[name="name"]');
+    const activeInput = page.locator('.antd-Tabs-pane.is-active input[name="name"]');
     await expect(activeInput).toBeVisible();
     await activeInput.fill('AAA');
     await page.waitForTimeout(500);
@@ -221,7 +221,7 @@ test.describe('Closable Tabs Component', () => {
     });
     await page.waitForTimeout(1000);
 
-    const inputAfterAdd = page.locator('.cxd-Tabs-pane.is-active input[name="name"]');
+    const inputAfterAdd = page.locator('.antd-Tabs-pane.is-active input[name="name"]');
     await expect(inputAfterAdd).toBeVisible();
     await expect(inputAfterAdd).toHaveValue('AAA');
 

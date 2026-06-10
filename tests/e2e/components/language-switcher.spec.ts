@@ -250,7 +250,7 @@ test.describe('Language Switcher & Preview', () => {
     await expect(editor).toBeVisible();
 
     await page.evaluate(() => {
-      const select = document.querySelector('.cxd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
+      const select = document.querySelector('.antd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
       if (select) {
         select.value = 'en';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -267,7 +267,7 @@ test.describe('Language Switcher & Preview', () => {
     await expect(editor).toBeVisible();
 
     await page.evaluate(() => {
-      const select = document.querySelector('.cxd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
+      const select = document.querySelector('.antd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
       if (select) {
         select.value = 'en';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -290,7 +290,7 @@ test.describe('Language Switcher & Preview', () => {
     expect(valueBefore).toBe('MISSION_20260430_001');
 
     await page.evaluate(() => {
-      const select = document.querySelector('.cxd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
+      const select = document.querySelector('.antd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
       if (select) {
         select.value = 'en';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -308,7 +308,7 @@ test.describe('Language Switcher & Preview', () => {
     expect(valueBefore).toBe('Summer Spending Mission');
 
     await page.evaluate(() => {
-      const select = document.querySelector('.cxd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
+      const select = document.querySelector('.antd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
       if (select) {
         select.value = 'en';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -326,7 +326,7 @@ test.describe('Language Switcher & Preview', () => {
   });
 
   test('非i18n: thresholdValue 值不受语言切换影响', async ({ page }) => {
-    const input = page.locator('.cxd-NumberControl input').first();
+    const input = page.locator('.antd-NumberControl input').first();
     await expect(input).toBeVisible();
   });
 
@@ -335,7 +335,7 @@ test.describe('Language Switcher & Preview', () => {
     await expect(noRadio).toBeChecked();
 
     await page.evaluate(() => {
-      const select = document.querySelector('.cxd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
+      const select = document.querySelector('.antd-Tabs-pane.is-active .language-select') as HTMLSelectElement;
       if (select) {
         select.value = 'en';
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -402,17 +402,17 @@ test.describe('Language Switcher & Preview', () => {
     await expect(previewPanel).toBeVisible();
 
     // Switch to Registration Rule tab - preview should stay visible
-    await page.locator('.cxd-Tabs-link').nth(4).click({ force: true });
+    await page.locator('.antd-Tabs-link').nth(4).click({ force: true });
     await page.waitForTimeout(500);
     await expect(previewPanel).toBeVisible();
 
     // Switch to Sub-Mission Rules tab
-    await page.locator('.cxd-Tabs-link').nth(1).click({ force: true });
+    await page.locator('.antd-Tabs-link').nth(1).click({ force: true });
     await page.waitForTimeout(500);
     await expect(previewPanel).toBeVisible();
 
     // Switch back to Mission Setup
-    await page.locator('.cxd-Tabs-link').nth(0).click({ force: true });
+    await page.locator('.antd-Tabs-link').nth(0).click({ force: true });
     await page.waitForTimeout(500);
     await expect(previewPanel).toBeVisible();
   });
@@ -425,7 +425,7 @@ test.describe('Language Switcher & Preview', () => {
     // Switch tabs - should still be visible
     for (let i = 0; i < 5; i++) {
       if (i > 0) {
-        await page.locator('.cxd-Tabs-link').nth(i).click({ force: true });
+        await page.locator('.antd-Tabs-link').nth(i).click({ force: true });
         await page.waitForTimeout(300);
       }
       await expect(langSwitcher).toBeVisible();

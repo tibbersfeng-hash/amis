@@ -13,7 +13,7 @@ const sw = (page: Page, lang: string) =>
 
 const getImgSrc = (page: Page) =>
   page.evaluate(() => {
-    const img = document.querySelector('.cxd-ImageControl img') as HTMLImageElement | null;
+    const img = document.querySelector('.antd-ImageControl img') as HTMLImageElement | null;
     return img?.src || null;
   });
 
@@ -55,7 +55,7 @@ test.describe('图片 multiLang — S2 状态回显', () => {
     const id = uniq('s2');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
     expect(await getImgSrc(page)).toContain('/uploads/test-zh.svg');
     del(id);
   });
@@ -64,7 +64,7 @@ test.describe('图片 multiLang — S2 状态回显', () => {
     const id = uniq('s2');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
     await sw(page, 'en');
     await page.waitForTimeout(1000);
     expect(await getImgSrc(page)).toContain('/uploads/test-en.svg');
@@ -75,7 +75,7 @@ test.describe('图片 multiLang — S2 状态回显', () => {
     const id = uniq('s2');
     setupWithImage(id, { zh: '', en: '' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible();
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible();
     del(id);
   });
 });
@@ -86,7 +86,7 @@ test.describe('图片 multiLang — S3 语言切换', () => {
     const id = uniq('s3');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     expect(await getImgSrc(page)).toContain('test-zh.svg');
     await sw(page, 'en');
@@ -101,7 +101,7 @@ test.describe('图片 multiLang — S3 语言切换', () => {
     const id = uniq('s3');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     for (let i = 0; i < 3; i++) {
       await sw(page, 'en');
@@ -121,7 +121,7 @@ test.describe('图片 multiLang — S4 编辑后切换保留', () => {
     const id = uniq('s4');
     setupWithImage(id, { zh: '/uploads/zh-uploaded.png', en: '/uploads/test-en.svg' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     expect(await getImgSrc(page)).toContain('zh-uploaded.png');
     await sw(page, 'en');
@@ -137,7 +137,7 @@ test.describe('图片 multiLang — S4 编辑后切换保留', () => {
     const id = uniq('s4');
     setupWithImage(id, { zh: '/uploads/test-zh.svg', en: '/uploads/en-uploaded.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await sw(page, 'en');
     await page.waitForTimeout(1000);
@@ -158,7 +158,7 @@ test.describe('图片 multiLang — S5a 提交保存', () => {
     const id = uniq('s5a');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await page.locator('button[type="submit"]').click();
     await page.waitForTimeout(1000);
@@ -172,7 +172,7 @@ test.describe('图片 multiLang — S5a 提交保存', () => {
     const id = uniq('s5a');
     setupWithImage(id, { zh: '/uploads/zh-custom.png', en: '/uploads/test-en.svg' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await page.locator('button[type="submit"]').click();
     await page.waitForTimeout(1000);
@@ -187,7 +187,7 @@ test.describe('图片 multiLang — S5a 提交保存', () => {
     const id = uniq('s5a');
     setupWithImage(id, { zh: '/uploads/zh-only.png', en: '/uploads/en-only.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await page.locator('button[type="submit"]').click();
     await page.waitForTimeout(1000);
@@ -219,7 +219,7 @@ test.describe('图片 multiLang — S5b 清空后切换', () => {
     const id = uniq('s5b');
     setupWithImage(id, { zh: '', en: '/uploads/test-en.svg' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await sw(page, 'en');
     await page.waitForTimeout(1500);
@@ -231,7 +231,7 @@ test.describe('图片 multiLang — S5b 清空后切换', () => {
     const id = uniq('s5b');
     setupWithImage(id, { zh: '/uploads/test-zh.svg', en: '' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await sw(page, 'en');
     await page.waitForTimeout(1000);
@@ -245,7 +245,7 @@ test.describe('图片 multiLang — S5b 清空后切换', () => {
     const id = uniq('s5b');
     setupWithImage(id, { zh: '', en: '' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
     del(id);
   });
 
@@ -253,14 +253,14 @@ test.describe('图片 multiLang — S5b 清空后切换', () => {
     const id = uniq('s5b');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await sw(page, 'en');
     await page.waitForTimeout(800);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible();
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible();
     await sw(page, 'zh');
     await page.waitForTimeout(800);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible();
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible();
     del(id);
   });
 
@@ -268,7 +268,7 @@ test.describe('图片 multiLang — S5b 清空后切换', () => {
     const id = uniq('s5b');
     setupWithImage(id, { zh: '', en: '/uploads/test-en.svg' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await page.locator('button[type="submit"]').click();
     await page.waitForTimeout(1000);
@@ -285,7 +285,7 @@ test.describe('图片 multiLang — B 基线保护', () => {
     const id = uniq('b');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
     await expect(page.locator('input[name="textField"]')).toBeVisible();
     del(id);
   });
@@ -294,7 +294,7 @@ test.describe('图片 multiLang — B 基线保护', () => {
     const id = uniq('b');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     await page.locator('input[name="textField"]').fill('临时编辑');
     await sw(page, 'en');
@@ -317,7 +317,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A: 修改
     await page.locator('input[name="textField"]').fill('修改值A');
@@ -340,7 +340,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A: 清空
     await page.locator('input[name="textField"]').fill('');
@@ -362,7 +362,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     // A: 数据预设 zh=值A, en=值B
     setupWithImage(id, { zh: '/uploads/aba-zh.png', en: '/uploads/aba-en.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A验证: zh显示值A
     expect(await getImgSrc(page)).toContain('aba-zh.png');
@@ -387,7 +387,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setupWithImage(id, { zh: '/uploads/aba-zh.png', en: '/uploads/aba-en.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A: zh下编辑文本 + 确认图片
     await page.locator('input[name="textField"]').fill('zh文本A');
@@ -420,7 +420,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setupWithImage(id, { zh: '/uploads/aba-zh.png', en: '/uploads/aba-en.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A: zh是aba-zh.png
     expect(await getImgSrc(page)).toContain('aba-zh.png');
@@ -449,7 +449,7 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setupWithImage(id, { zh: '/uploads/aba-zh.png', en: '/uploads/aba-en.png' });
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // A: zh设值 → 提交
     await page.locator('input[name="textField"]').fill('zh文本A');
@@ -480,21 +480,21 @@ test.describe('图片 multiLang — ABA 操作验证', () => {
     const id = uniq('aba');
     setup(id);
     await go(page, id);
-    await expect(page.locator('.cxd-ImageControl').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.antd-ImageControl').first()).toBeVisible({ timeout: 8000 });
 
     // 检查清单: 表单标题、字段label、占位提示、语言切换器、提交按钮、组件wrapper
     const checks = async (label: string) => {
-      await expect(page.locator('.cxd-Panel-title')).toBeVisible();
-      await expect(page.locator('.cxd-ImageControl')).toBeVisible();
+      await expect(page.locator('.antd-Panel-title')).toBeVisible();
+      await expect(page.locator('.antd-ImageControl')).toBeVisible();
       await expect(page.locator('.language-switcher')).toBeVisible();
       await expect(page.locator('button[type="submit"]')).toBeVisible();
       await expect(page.locator('input[name="textField"]')).toBeVisible();
       await expect(page.locator('textarea[name="textArea"]')).toBeVisible();
-      await expect(page.locator('.cxd-Select').first()).toBeVisible();
-      await expect(page.locator('.cxd-Switch').first()).toBeVisible();
-      await expect(page.locator('.cxd-DatePicker').first()).toBeVisible();
+      await expect(page.locator('.antd-Select').first()).toBeVisible();
+      await expect(page.locator('.antd-Switch').first()).toBeVisible();
+      await expect(page.locator('.antd-DatePicker').first()).toBeVisible();
       // 控件内容完整
-      await expect(page.locator('.cxd-Panel-title')).toContainText('多语言测试');
+      await expect(page.locator('.antd-Panel-title')).toContainText('多语言测试');
       await expect(page.locator('button[type="submit"]')).toContainText('提交');
     };
 

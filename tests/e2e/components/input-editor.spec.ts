@@ -37,7 +37,7 @@ test.describe('Mission CMS - Editor & Image Upload', () => {
 
     test('【图片上传】上传按钮/区域存在', async ({ page }) => {
       await goToMission(page);
-      await expect(page.locator('.cxd-Upload, .cxd-Image').first()).toBeVisible();
+      await expect(page.locator('.antd-Upload, .antd-Image').first()).toBeVisible();
     });
 
     test('【图片上传】有推荐尺寸提示', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Mission CMS - Editor & Image Upload', () => {
 
     test('【图片上传】file input 存在', async ({ page }) => {
       await goToMission(page);
-      const uploadArea = page.locator('.cxd-Upload, .cxd-Image, .upload-area, [class*="Upload"]').first();
+      const uploadArea = page.locator('.antd-Upload, .antd-Image, .upload-area, [class*="Upload"]').first();
       await expect(uploadArea).toBeVisible();
     });
   });

@@ -170,28 +170,28 @@ test.describe('清空数据后切换语言 — 特殊字段类型', () => {
 
   test('switch 关闭后切换语言不崩溃', async ({ page }) => {
     // 初始为打开状态
-    await expect(page.locator('.cxd-Switch.is-checked')).toBeVisible();
+    await expect(page.locator('.antd-Switch.is-checked')).toBeVisible();
     // 关闭 switch
-    await page.locator('.cxd-Switch').click({ force: true });
+    await page.locator('.antd-Switch').click({ force: true });
     await page.waitForTimeout(500);
-    await expect(page.locator('.cxd-Switch.is-checked')).not.toBeVisible();
+    await expect(page.locator('.antd-Switch.is-checked')).not.toBeVisible();
     // 切英文 → 组件正常渲染，不崩溃
     // 注意: switch 无 input[name]，writeDomValue 无法写入，切换后以 Amis 原始数据为准
     await sw(page, 'en');
-    await expect(page.locator('.cxd-Switch')).toBeVisible();
+    await expect(page.locator('.antd-Switch')).toBeVisible();
     await sw(page, 'zh');
-    await expect(page.locator('.cxd-Switch')).toBeVisible();
+    await expect(page.locator('.antd-Switch')).toBeVisible();
   });
 
   test('checkboxes 取消全部勾选后切换语言不崩溃', async ({ page }) => {
     // 初始有勾选
-    const initChecked = await page.locator('.cxd-Checkbox--checkbox--default.checked').count();
+    const initChecked = await page.locator('.antd-Checkbox--checkbox--default.checked').count();
     expect(initChecked).toBeGreaterThan(0);
     // 取消所有勾选
-    const boxes = await page.locator('.cxd-Checkbox--checkbox--default.checked').all();
+    const boxes = await page.locator('.antd-Checkbox--checkbox--default.checked').all();
     for (const box of boxes) await box.click({ force: true });
     await page.waitForTimeout(500);
-    await expect(page.locator('.cxd-Checkbox--checkbox--default.checked')).toHaveCount(0);
+    await expect(page.locator('.antd-Checkbox--checkbox--default.checked')).toHaveCount(0);
     // 切英文 → 组件正常渲染，不崩溃
     // 注意: checkboxes 无 input[name]，persist 无法写入，切换后以 Amis 原始数据为准
     await sw(page, 'en');
@@ -213,19 +213,19 @@ test.describe('清空数据后切换语言 — 无 DOM 字段', () => {
   test.afterEach(() => delData());
 
   test('select 切换语言不崩溃', async ({ page }) => {
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
+    await expect(page.locator('.antd-Select').first()).toBeVisible();
     await sw(page, 'en');
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
+    await expect(page.locator('.antd-Select').first()).toBeVisible();
     await sw(page, 'zh');
-    await expect(page.locator('.cxd-Select').first()).toBeVisible();
+    await expect(page.locator('.antd-Select').first()).toBeVisible();
   });
 
   test('radios 切换语言不崩溃', async ({ page }) => {
-    await expect(page.locator('.cxd-Checkbox--radio--default').first()).toBeVisible();
+    await expect(page.locator('.antd-Checkbox--radio--default').first()).toBeVisible();
     await sw(page, 'en');
-    await expect(page.locator('.cxd-Checkbox--radio--default').first()).toBeVisible();
+    await expect(page.locator('.antd-Checkbox--radio--default').first()).toBeVisible();
     await sw(page, 'zh');
-    await expect(page.locator('.cxd-Checkbox--radio--default').first()).toBeVisible();
+    await expect(page.locator('.antd-Checkbox--radio--default').first()).toBeVisible();
   });
 
   test('input-date 切换语言不崩溃', async ({ page }) => {

@@ -7,8 +7,8 @@ test.describe('List Page — Amis CRUD rendering', () => {
     await page.waitForTimeout(3000);
 
     // 验证 Amis 组件已渲染
-    const cxdElements = await page.locator('[class*="cxd-"]').count();
-    expect(cxdElements).toBeGreaterThan(10);
+    const antdElements = await page.locator('[class*="antd-"]').count();
+    expect(antdElements).toBeGreaterThan(10);
 
     // 表头列
     const headers = page.locator('th');
@@ -36,8 +36,8 @@ test.describe('List Page — Amis CRUD rendering', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    const cxdElements = await page.locator('[class*="cxd-"]').count();
-    expect(cxdElements).toBeGreaterThan(10);
+    const antdElements = await page.locator('[class*="antd-"]').count();
+    expect(antdElements).toBeGreaterThan(10);
 
     await expect(page.getByText('香宫')).toBeVisible();
     await expect(page.getByText('咖啡苑')).toBeVisible();
@@ -94,7 +94,7 @@ test.describe('List Page — Amis CRUD rendering', () => {
     await page.waitForTimeout(3000);
 
     // 操作列应包含按钮
-    const buttons = page.locator('.cxd-Button');
+    const buttons = page.locator('.antd-Button');
     await expect(buttons.first()).toBeVisible();
   });
 

@@ -3,6 +3,11 @@ import react from '@vitejs/plugin-react';
 import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module compatibility: define __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Load the components guide document.
@@ -127,6 +132,13 @@ const FIELD_TEMPLATES = {
       language: '${language}', size: '${size}',
     },
     description: '代码编辑器',
+  },
+  'input-rich-text-quill': {
+    template: {
+      type: 'input-rich-text-quill', name: '${name}', label: '${label}',
+      maxLength: 5000,
+    },
+    description: 'Quill 富文本编辑器',
   },
   'tpl': {
     template: {
@@ -978,6 +990,11 @@ function parseMultipart(buffer, boundary) {
 // ─ Vite Config ───────────────────────────────────────────────────
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   plugins: [
     react(),
     {

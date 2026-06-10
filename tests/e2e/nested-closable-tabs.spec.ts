@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 // Scoped selectors — first closable-tab wrapper, then find elements inside via data attribute
 const CLOSABLE_WRAPPER = '.closable-tab-wrapper';
 const ADD_BTN = '[data-closable-tab-add]';
-const TAB_LINK = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link:not(.closable-custom-add)';
-const CLOSE_BTN = '> .custom-closable-tabs > .cxd-Tabs-linksContainer-wrapper > .cxd-Tabs-linksContainer > .cxd-Tabs-linksContainer-main > .cxd-Tabs-links > .cxd-Tabs-link > .cxd-Tabs-link-close';
+const TAB_LINK = '> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link:not(.closable-custom-add)';
+const CLOSE_BTN = '> .custom-closable-tabs > .antd-Tabs-linksContainer-wrapper > .antd-Tabs-linksContainer > .antd-Tabs-linksContainer-main > .antd-Tabs-links > .antd-Tabs-link > .antd-Tabs-link-close';
 
 function firstClosable(page: ReturnType<typeof test>['page']) {
   return page.locator(CLOSABLE_WRAPPER).first();

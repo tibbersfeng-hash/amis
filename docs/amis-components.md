@@ -104,6 +104,21 @@
 
 **常用属性：** `name`, `label`, `language` (`"html"` | `"json"` | `"css"` | `"javascript"`), `size`
 
+### input-rich-text-quill — Quill 富文本编辑器
+
+```json
+{
+  "type": "input-rich-text-quill",
+  "name": "description",
+  "label": "描述",
+  "maxLength": 5000
+}
+```
+
+基于 Quill Editor 的富文本编辑器，底部带 富文本 / HTML 源码双 Tab 切换。支持加粗、斜体、下划线、删除线、有序/无序列表、链接、对齐、字号、文字颜色、背景色。配置 `receiver` 可启用图片上传。
+
+**常用属性：** `name`, `label`, `maxLength` (默认 5000), `receiver` (图片上传 API 地址), `disabled`
+
 ## 选择类组件
 
 ### select — 下拉选择框

@@ -1,13 +1,15 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { registerRenderer } from 'amis';
-import type { FormControlProps } from 'amis';
+import { FormItem } from 'amis';
+import type { FormControlProps } from 'amis-core';
 
 /**
  * FieldWithExcludeV2 — Amis custom form control with select + Exclude checkbox.
  *
- * Renders a custom label row with Exclude checkbox, then uses Amis native select
- * for the dropdown. When Exclude is toggled, selected values are transferred
- * between the base name field and the excludeName field.
+ * Renders Amis native select with an Exclude checkbox below. When Exclude is
+ * toggled, selected values are transferred between the base name field and
+ * the excludeName field.
+ *
+ * Registered via FormItem for proper form integration (label, validation, layout modes).
  *
  * Schema usage:
  * {
@@ -27,7 +29,6 @@ interface FieldWithExcludeV2Schema {
   excludeName?: string;
   excludeLabel?: string;
   excludeCheckboxName?: string;
-  label?: string;
   name?: string;
   options?: Array<{ label: string; value: string }>;
   source?: unknown;
@@ -44,7 +45,6 @@ interface FieldWithExcludeV2Props extends FormControlProps, FieldWithExcludeV2Sc
 
 const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
   const {
-    label = '',
     name = '',
     excludeName,
     excludeLabel = 'Exclude',
@@ -125,45 +125,8 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
   }
 
   return (
-    <div className="field-with-exclude-v2" style={{ marginBottom: 16 }}>
-      {/* Label row: label + Exclude checkbox */}
-      <div className="field-with-exclude-v2-label-row" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 4,
-      }}>
-        <label className="field-with-exclude-v2-label" style={{
-          fontSize: 14,
-          fontWeight: 500,
-          color: '#2D3348',
-        }}>
-          {label}
-        </label>
-        <label
-          className="field-with-exclude-v2-checkbox-wrap"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            cursor: 'pointer',
-            fontSize: 14,
-            color: '#666',
-            userSelect: 'none',
-          }}
-          onClick={handleCheckboxToggle}
-        >
-          <input
-            type="checkbox"
-            checked={isExcluded}
-            readOnly
-            style={{ margin: 0, cursor: 'pointer' }}
-          />
-          {excludeLabel}
-        </label>
-      </div>
-
-      {/* Amis native select */}
+    <div className="field-with-exclude-v2">
+      {/* Amis native select (label handled by FormItem wrapper) */}
       <div className="field-with-exclude-v2-select-wrap">
         {render('select', {
           type: 'select',
@@ -178,6 +141,37 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
         }, {
           data: data as Record<string, unknown>,
         })}
+      </div>
+
+      {/* Exclude checkbox row */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: 6,
+        marginTop: 4,
+      }}>
+        <label
+          className="field-with-exclude-v2-checkbox-wrap"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            cursor: 'pointer',
+            fontSize: 13,
+            color: '#666',
+            userSelect: 'none',
+          }}
+          onClick={handleCheckboxToggle}
+        >
+          <input
+            type="checkbox"
+            checked={isExcluded}
+            readOnly
+            style={{ margin: 0, cursor: 'pointer' }}
+          />
+          {excludeLabel}
+        </label>
       </div>
 
       {/* Exclude indicator */}
@@ -202,14 +196,12 @@ const FieldWithExcludeV2Inner: React.FC<FieldWithExcludeV2Props> = (props) => {
   );
 };
 
-// Register the renderer
-console.log('[FieldWithExcludeV2] Registering field-with-exclude-v2 renderer...');
-registerRenderer({
+// Register as FormItem (proper form integration: label, validation, layout modes)
+FormItem({
   type: 'field-with-exclude-v2',
   name: 'field-with-exclude-v2',
-  component: FieldWithExcludeV2Inner,
-});
-console.log('[FieldWithExcludeV2] Renderer registered successfully');
+  strictMode: false,  // close strict mode for better re-rendering
+})(FieldWithExcludeV2Inner);
 
 export { FieldWithExcludeV2Inner as FieldWithExcludeV2 };
 export default FieldWithExcludeV2Inner;

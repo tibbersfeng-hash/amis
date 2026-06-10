@@ -59,7 +59,7 @@ test.describe('Mission CMS - Date Range Picker Layout', () => {
   test.describe('Date Range Picker - Other Tabs', () => {
     test('【范围日期】Skin Setting tab 有范围选择器', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
+      await page.locator('.antd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
       await page.waitForTimeout(500);
       const picker = page.locator('.date-range-picker');
       expect(await picker.count()).toBeGreaterThanOrEqual(1);
@@ -67,7 +67,7 @@ test.describe('Mission CMS - Date Range Picker Layout', () => {
 
     test('【范围日期】Skin Setting 范围选择器显示默认值', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
+      await page.locator('.antd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
       await page.waitForTimeout(500);
       const picker = page.locator('.date-range-picker').first();
       const input = picker.locator('.date-range-picker-input');
@@ -77,7 +77,7 @@ test.describe('Mission CMS - Date Range Picker Layout', () => {
 
     test('【范围日期】Sub-Mission Rules tab 有范围选择器', async ({ page }) => {
       await goToMission(page);
-      await page.locator('.cxd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
+      await page.locator('.antd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
       await page.waitForTimeout(500);
       const picker = page.locator('.date-range-picker');
       expect(await picker.count()).toBeGreaterThanOrEqual(1);
@@ -90,11 +90,11 @@ test.describe('Mission CMS - Date Range Picker Layout', () => {
   test.describe('Color Controls Layout', () => {
     test('【颜色控件】Background Color / Font Color 在一行', async ({ page }) => {
       await goToMission(page);
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       await tabs.nth(2).click({ force: true });
       await page.waitForTimeout(500);
-      const bgColorItem = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Background Color' });
-      const fontColorItem = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Font Color' });
+      const bgColorItem = page.locator('.antd-Form-item--normal').filter({ hasText: 'Background Color' });
+      const fontColorItem = page.locator('.antd-Form-item--normal').filter({ hasText: 'Font Color' });
       await expect(bgColorItem).toBeVisible();
       await expect(fontColorItem).toBeVisible();
       const box1 = await bgColorItem.boundingBox();
@@ -112,17 +112,17 @@ test.describe('Mission CMS - Date Range Picker Layout', () => {
   test.describe('Single Date - Countdown Day Layout', () => {
     test('【单日】Countdown Day 不在 group 中（独立一行）', async ({ page }) => {
       await goToMission(page);
-      const tabs = page.locator('.cxd-Tabs-link');
+      const tabs = page.locator('.antd-Tabs-link');
       const tabCount = await tabs.count();
       if (tabCount > 3) {
         await tabs.nth(3).click({ force: true });
         await page.waitForTimeout(300);
       }
-      const countdownItem = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Countdown Day' });
+      const countdownItem = page.locator('.antd-Form-item--normal').filter({ hasText: 'Countdown Day' });
       await expect(countdownItem).toBeVisible();
-      const dateControl = countdownItem.locator('.cxd-DateControl');
+      const dateControl = countdownItem.locator('.antd-DateControl');
       await expect(dateControl.first()).toBeVisible();
-      const datetimeControls = countdownItem.locator('.cxd-DateControl.is-datetime');
+      const datetimeControls = countdownItem.locator('.antd-DateControl.is-datetime');
       const count = await datetimeControls.count();
       expect(count).toBe(0);
     });

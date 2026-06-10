@@ -11,7 +11,7 @@
     { "type": "input-url", "name": "url", "label": "网址", "placeholder": "https://", "multiLang": true, "clearable": true },
     { "type": "input-password", "name": "password", "label": "密码", "multiLang": true },
     { "type": "input-number", "name": "number", "label": "数字", "placeholder": "请输入数字", "multiLang": true, "min": 0 },
-    { "type": "input-rich-text", "name": "richText", "label": "富文本", "multiLang": true, "language": "zh" },
+    { "type": "input-rich-text-quill", "name": "richText", "label": "富文本quill", "multiLang": true},
     { "type": "select", "name": "select", "label": "下拉选择", "multiLang": true, "options": [
       { "label": "选项一", "value": "opt1" },
       { "label": "选项二", "value": "opt2" }

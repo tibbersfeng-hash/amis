@@ -11,7 +11,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForTimeout(2000);
 
     // 表单渲染
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     // 标题包含"酒店基础信息"
@@ -41,7 +41,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     // 存在的字段有值
@@ -60,7 +60,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     // 所有字段均为空
@@ -75,7 +75,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     await expect(page.getByText('餐厅基础信息')).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     await expect(page.locator('input[name="restaurantName"]')).toHaveValue('咖啡苑');
@@ -115,7 +115,7 @@ test.describe('Remote Page — 酒店/餐厅业务数据渲染', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     await expect(page.locator('input[name="hotelName"]')).toHaveValue('深圳福田香格里拉');
@@ -149,9 +149,9 @@ test.describe('Remote Page — POST /api/page/save 提交保存', () => {
     await page.locator('input[name="hotelCode"]').fill('E2ECRT001');
     await page.locator('input[name="city"]').fill('南京');
     // 品牌为必填项 — 不选则 Amis 校验不通过无法提交
-    await page.locator('.cxd-Select').first().click();
+    await page.locator('.antd-Select').first().click();
     await page.waitForTimeout(300);
-    await page.locator('.cxd-Select-option').filter({ hasText: '香格里拉' }).click();
+    await page.locator('.antd-Select-option').filter({ hasText: '香格里拉' }).click();
     await page.waitForTimeout(300);
 
     // 监听 POST 响应

@@ -158,7 +158,7 @@ test.describe('Mission - Date Range Picker Controls', () => {
   test('date-range-picker echoes store.setValues changes with full date+time', async ({ page }) => {
     // Set new values via Form Store with full date and time
     await page.evaluate(() => {
-      const formEl = document.querySelector('.cxd-Form');
+      const formEl = document.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -203,14 +203,14 @@ test.describe('Mission - Date Range Picker Controls', () => {
 
   // ===== Date Range Picker on Different Tabs =====
   test('Skin Setting tab has date-range-picker', async ({ page }) => {
-    await page.locator('.cxd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
+    await page.locator('.antd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
     await page.waitForTimeout(300);
     const picker = page.locator('.date-range-picker');
     expect(await picker.count()).toBeGreaterThanOrEqual(1);
   });
 
   test('Sub-Mission Rules tab has date-range-picker', async ({ page }) => {
-    await page.locator('.cxd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
+    await page.locator('.antd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
     await page.waitForTimeout(300);
     const picker = page.locator('.date-range-picker');
     expect(await picker.count()).toBeGreaterThanOrEqual(1);
@@ -228,7 +228,7 @@ test.describe('Mission - Date Range Picker Controls', () => {
   // ===== Validation via DateRangePicker built-in validation =====
   test('Registration Period: end before start shows error', async ({ page }) => {
     await page.evaluate(() => {
-      const formEl = document.querySelector('.cxd-Form');
+      const formEl = document.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -246,12 +246,12 @@ test.describe('Mission - Date Range Picker Controls', () => {
     await page.waitForTimeout(500);
     // DateRangePicker renders validation internally
     const picker = page.locator('.date-range-picker').first();
-    await expect(picker.locator('.cxd-Form-validation.is-error').first()).toBeVisible();
+    await expect(picker.locator('.antd-Form-validation.is-error').first()).toBeVisible();
   });
 
   test('Registration Period: end equals start shows error', async ({ page }) => {
     await page.evaluate(() => {
-      const formEl = document.querySelector('.cxd-Form');
+      const formEl = document.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -268,12 +268,12 @@ test.describe('Mission - Date Range Picker Controls', () => {
     });
     await page.waitForTimeout(500);
     const picker = page.locator('.date-range-picker').first();
-    await expect(picker.locator('.cxd-Form-validation.is-error').first()).toBeVisible();
+    await expect(picker.locator('.antd-Form-validation.is-error').first()).toBeVisible();
   });
 
   test('Mission Period: end before start shows error', async ({ page }) => {
     await page.evaluate(() => {
-      const formEl = document.querySelector('.cxd-Form');
+      const formEl = document.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -290,18 +290,18 @@ test.describe('Mission - Date Range Picker Controls', () => {
     });
     await page.waitForTimeout(500);
     const pickers = page.locator('.date-range-picker');
-    await expect(pickers.nth(1).locator('.cxd-Form-validation.is-error').first()).toBeVisible();
+    await expect(pickers.nth(1).locator('.antd-Form-validation.is-error').first()).toBeVisible();
   });
 
   test('Skin Setting: end before start shows error', async ({ page }) => {
-    await page.locator('.cxd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
+    await page.locator('.antd-Tabs-link').filter({ hasText: 'Skin Setting' }).first().click({ force: true });
     await page.waitForTimeout(500);
 
     await page.evaluate(() => {
       // Find form inside the active tab pane
-      const activeTab = document.querySelector('.cxd-Tabs-pane.is-active');
+      const activeTab = document.querySelector('.antd-Tabs-pane.is-active');
       if (!activeTab) return;
-      const formEl = activeTab.querySelector('.cxd-Form');
+      const formEl = activeTab.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -318,20 +318,20 @@ test.describe('Mission - Date Range Picker Controls', () => {
     });
     await page.waitForTimeout(500);
     // Find picker inside the active tab
-    const activePane = page.locator('.cxd-Tabs-pane.is-active').first();
+    const activePane = page.locator('.antd-Tabs-pane.is-active').first();
     const picker = activePane.locator('.date-range-picker').first();
-    await expect(picker.locator('.cxd-Form-validation.is-error').first()).toBeVisible();
+    await expect(picker.locator('.antd-Form-validation.is-error').first()).toBeVisible();
   });
 
   test('Sub-Mission Rules: end before start shows error', async ({ page }) => {
-    await page.locator('.cxd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
+    await page.locator('.antd-Tabs-link').filter({ hasText: 'Sub-Mission Rules' }).first().click({ force: true });
     await page.waitForTimeout(500);
 
     await page.evaluate(() => {
       // Find form inside the active tab pane
-      const activeTab = document.querySelector('.cxd-Tabs-pane.is-active');
+      const activeTab = document.querySelector('.antd-Tabs-pane.is-active');
       if (!activeTab) return;
-      const formEl = activeTab.querySelector('.cxd-Form');
+      const formEl = activeTab.querySelector('.antd-Form');
       if (!formEl) return;
       const fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
       if (!fiberKey) return;
@@ -348,8 +348,8 @@ test.describe('Mission - Date Range Picker Controls', () => {
     });
     await page.waitForTimeout(500);
     // Find picker inside the active tab
-    const activePane = page.locator('.cxd-Tabs-pane.is-active').first();
+    const activePane = page.locator('.antd-Tabs-pane.is-active').first();
     const picker = activePane.locator('.date-range-picker').first();
-    await expect(picker.locator('.cxd-Form-validation.is-error').first()).toBeVisible();
+    await expect(picker.locator('.antd-Form-validation.is-error').first()).toBeVisible();
   });
 });

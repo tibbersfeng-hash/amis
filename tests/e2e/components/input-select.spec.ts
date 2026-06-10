@@ -7,12 +7,12 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
   }
 
   async function clickSubMissionRule(page) {
-    await page.locator('.cxd-Tabs-link').nth(1).click({ force: true });
+    await page.locator('.antd-Tabs-link').nth(1).click({ force: true });
     await page.waitForTimeout(500);
   }
 
   function getSelectByLabel(page, labelText) {
-    return page.locator('.cxd-Form-item--normal').filter({ hasText: labelText }).locator('.cxd-Select-valueWrap').first();
+    return page.locator('.antd-Form-item--normal').filter({ hasText: labelText }).locator('.antd-Select-valueWrap').first();
   }
 
   // ==========================================
@@ -31,7 +31,7 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
       const selectWrap = getSelectByLabel(page, 'Sub Mission Type');
       await selectWrap.click();
       await page.waitForTimeout(500);
-      const optionCount = await page.locator('.cxd-Select-dropdown .cxd-Select-option, .cxd-Select-menu .cxd-Select-option').count();
+      const optionCount = await page.locator('.antd-Select-dropdown .antd-Select-option, .antd-Select-menu .antd-Select-option').count();
       expect(optionCount).toBeGreaterThanOrEqual(3);
       await page.keyboard.press('Escape');
       await page.waitForTimeout(200);
@@ -44,7 +44,7 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
       const initialText = await selectWrap.textContent();
       await selectWrap.click();
       await page.waitForTimeout(500);
-      const secondOption = page.locator('.cxd-Select-dropdown .cxd-Select-option').nth(1);
+      const secondOption = page.locator('.antd-Select-dropdown .antd-Select-option').nth(1);
       if (await secondOption.isVisible()) {
         await secondOption.click();
         await page.waitForTimeout(300);
@@ -63,8 +63,8 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
     test('【下拉选择】有下拉箭头图标', async ({ page }) => {
       await goToMission(page);
       await clickSubMissionRule(page);
-      const selectControl = page.locator('.cxd-Form-item--normal').filter({ hasText: 'Sub Mission Type' }).locator('.cxd-Select').first();
-      await expect(selectControl.locator('.cxd-Select-arrow').first()).toBeVisible();
+      const selectControl = page.locator('.antd-Form-item--normal').filter({ hasText: 'Sub Mission Type' }).locator('.antd-Select').first();
+      await expect(selectControl.locator('.antd-Select-arrow').first()).toBeVisible();
     });
 
     test('【下拉选择】点击展开下拉菜单', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
       const selectWrap = getSelectByLabel(page, 'Sub Mission Type');
       await selectWrap.click();
       await page.waitForTimeout(500);
-      await expect(page.locator('.cxd-Select-dropdown, .cxd-Select-menu').first()).toBeVisible();
+      await expect(page.locator('.antd-Select-dropdown, .antd-Select-menu').first()).toBeVisible();
       await page.keyboard.press('Escape');
       await page.waitForTimeout(200);
     });
@@ -127,7 +127,7 @@ test.describe('Mission CMS - Select, Radio & Switch', () => {
   test.describe('switch', () => {
     test('【开关】开关组件存在', async ({ page }) => {
       await goToMission(page);
-      const count = await page.locator('.cxd-Switch').count();
+      const count = await page.locator('.antd-Switch').count();
       expect(count).toBeGreaterThanOrEqual(0);
     });
   });

@@ -148,23 +148,23 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
 
   test('1. 上传图片后组件显示缩略图', async ({ page }) => {
     // 文件 input 是隐藏的 (display:none), 直接用 setInputFiles
-    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    const fileInput = page.locator('.antd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
 
     // 验证图片已上传（缩略图出现）
-    const img = page.locator('.cxd-ImageControl img');
+    const img = page.locator('.antd-ImageControl img');
     await expect(img).toBeVisible({ timeout: 5000 });
     const src = await img.getAttribute('src');
     expect(src).toBeTruthy();
   });
 
   test('2. 上传后切换语言 → 图片保留', async ({ page }) => {
-    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    const fileInput = page.locator('.antd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
 
-    const img = page.locator('.cxd-ImageControl img');
+    const img = page.locator('.antd-ImageControl img');
     await expect(img).toBeVisible({ timeout: 5000 });
     const srcBefore = await img.getAttribute('src');
 
@@ -183,7 +183,7 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
   });
 
   test('3. 上传后提交 → URL 保存到文件', async ({ page }) => {
-    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    const fileInput = page.locator('.antd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
 
@@ -200,11 +200,11 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
 
   test('4. 上传 → 切英文编辑文本 → 回中文 → 图片和文本都保留', async ({ page }) => {
     // 中文下上传图片
-    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    const fileInput = page.locator('.antd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
 
-    const img = page.locator('.cxd-ImageControl img');
+    const img = page.locator('.antd-ImageControl img');
     await expect(img).toBeVisible({ timeout: 5000 });
     const srcBefore = await img.getAttribute('src');
 
@@ -229,7 +229,7 @@ test.describe('input-image 上传 → 切换 → 保留', () => {
   });
 
   test('5. 上传 + 编辑字段 → 提交 → 数据一致', async ({ page }) => {
-    const fileInput = page.locator('.cxd-ImageControl input[type="file"]');
+    const fileInput = page.locator('.antd-ImageControl input[type="file"]');
     await fileInput.setInputFiles(TEST_PNG);
     await page.waitForTimeout(1000);
     await page.locator('input[name="textField"]').fill('图片+文本提交');

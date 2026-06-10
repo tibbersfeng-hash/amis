@@ -7,7 +7,7 @@ test.describe('Remote Page — API-driven schema rendering', () => {
     await page.waitForTimeout(2000);
 
     // Verify the form is rendered
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     // Verify form fields are present with data values
@@ -43,7 +43,7 @@ test.describe('Remote Page — API-driven schema rendering', () => {
     await page.waitForTimeout(2000);
 
     // Form should render but with empty fields
-    const form = page.locator('.cxd-Form');
+    const form = page.locator('.antd-Form');
     await expect(form).toBeVisible();
 
     // Name field should be empty (no data file)

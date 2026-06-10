@@ -85,9 +85,13 @@ test.describe('全部组件：编辑→切英→回中→ persist 保留', () =>
   });
 
   test('select', async ({ page }) => {
-    const getValue = () => page.evaluate(() => document.querySelector('.antd-Select-value')?.textContent?.trim() ?? '');
+    const selectEl = () => page.locator('.antd-Select').first();
+    const getValue = () => page.evaluate(() => {
+      const els = document.querySelectorAll('.antd-Select-value');
+      return els.length > 0 ? els[0].textContent?.trim() ?? '' : '';
+    });
     const init = await getValue();
-    await page.locator('.antd-Select').click();
+    await selectEl().click();
     await page.waitForTimeout(300);
     await page.locator('.antd-Select-option').filter({ hasText: '选项二' }).click();
     await page.waitForTimeout(300);

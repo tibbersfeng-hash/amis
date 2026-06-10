@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-// Amis 3.6 combo with tabsMode renders tabs as .cxd-Tabs-link elements.
-// Content lives inside .cxd-Combo-itemInner. No .cxd-Combo-item class exists.
+// Amis 3.6 combo with tabsMode renders tabs as .antd-Tabs-link elements.
+// Content lives inside .antd-Combo-itemInner. No .antd-Combo-item class exists.
 
 // Selector for actual combo tabs (excludes the add button)
-const TAB_SELECTOR = '.cxd-Tabs-link:not(.cxd-ComboTabs-addLink)';
+const TAB_SELECTOR = '.antd-Tabs-link:not(.antd-ComboTabs-addLink)';
 
 // Click events are dispatched via page.evaluate because Amis <li> elements
 // intercept pointer events, preventing normal Playwright clicks.
@@ -71,18 +71,18 @@ async function deleteLastTabViaJsonEditor(page) {
 /** Read all form values from the currently active tab pane. */
 async function getActiveTabFormValues(page) {
   return page.evaluate(function() {
-    var pane = document.querySelector('.cxd-Tabs-pane.is-active');
+    var pane = document.querySelector('.antd-Tabs-pane.is-active');
     if (!pane) return { selects: {}, inputs: {}, radios: {} };
     var selects = {};
     var inputs = {};
     var radios = {};
-    // Amis selects: .cxd-Select-value when selected, .cxd-Select-placeholder when empty
-    pane.querySelectorAll('.cxd-Select').forEach(function(el) {
-      var parent = el.closest('.cxd-Form-item');
-      var label = parent ? parent.querySelector('.cxd-Form-label') : null;
+    // Amis selects: .antd-Select-value when selected, .antd-Select-placeholder when empty
+    pane.querySelectorAll('.antd-Select').forEach(function(el) {
+      var parent = el.closest('.antd-Form-item');
+      var label = parent ? parent.querySelector('.antd-Form-label') : null;
       var key = label ? label.textContent.trim() : 'select';
-      var valueEl = el.querySelector('.cxd-Select-value');
-      var placeholderEl = el.querySelector('.cxd-Select-placeholder');
+      var valueEl = el.querySelector('.antd-Select-value');
+      var placeholderEl = el.querySelector('.antd-Select-placeholder');
       selects[key] = valueEl ? valueEl.textContent.trim() : (placeholderEl ? placeholderEl.textContent.trim() : '');
     });
     pane.querySelectorAll('input[name], textarea[name]').forEach(function(el) {
@@ -107,7 +107,7 @@ async function getActiveTabFormValues(page) {
 /** Get tab labels (titles) from the tab bar. */
 async function getTabLabels(page) {
   return page.evaluate(function() {
-    var tabs = document.querySelectorAll('.cxd-Tabs-link:not(.cxd-ComboTabs-addLink)');
+    var tabs = document.querySelectorAll('.antd-Tabs-link:not(.antd-ComboTabs-addLink)');
     var result = [];
     tabs.forEach(function(t) {
       var link = t.querySelector('a');
@@ -118,15 +118,15 @@ async function getTabLabels(page) {
 }
 
 async function getTabCount(page) {
-  var allLinks = await page.locator('.cxd-Tabs-link').count();
-  var addLinks = await page.locator('.cxd-ComboTabs-addLink').count();
+  var allLinks = await page.locator('.antd-Tabs-link').count();
+  var addLinks = await page.locator('.antd-ComboTabs-addLink').count();
   return allLinks - addLinks;
 }
 
 /** Switch to tab by index (0-based). */
 async function switchToTab(page, index) {
   await page.evaluate(function(idx) {
-    var tabs = document.querySelectorAll('.cxd-Tabs-link:not(.cxd-ComboTabs-addLink)');
+    var tabs = document.querySelectorAll('.antd-Tabs-link:not(.antd-ComboTabs-addLink)');
     if (tabs[idx]) tabs[idx].click();
   }, index);
   await page.waitForTimeout(1000);
@@ -160,12 +160,12 @@ test.describe('Combo Tab Showcase', () => {
     await expect(secondTabLink).toBeVisible();
 
     // Data validation: active tab should have form fields
-    var activePane = page.locator('.cxd-Tabs-pane.is-active');
+    var activePane = page.locator('.antd-Tabs-pane.is-active');
     await expect(activePane).toBeVisible();
-    var selects = activePane.locator('.cxd-Select');
+    var selects = activePane.locator('.antd-Select');
     expect(await selects.count()).toBeGreaterThan(0);
 
-    var addBtn = page.locator('.cxd-ComboTabs-addLink');
+    var addBtn = page.locator('.antd-ComboTabs-addLink');
     await expect(addBtn.first()).toBeVisible();
   });
 
@@ -204,9 +204,9 @@ test.describe('Combo Tab Showcase', () => {
     expect(labels[2]).toBe('Sub Mission 3');
 
     // Data validation: new tab should have form fields
-    var activePane = page.locator('.cxd-Tabs-pane.is-active');
+    var activePane = page.locator('.antd-Tabs-pane.is-active');
     await expect(activePane).toBeVisible();
-    await expect(activePane.locator('.cxd-Select').first()).toBeVisible();
+    await expect(activePane.locator('.antd-Select').first()).toBeVisible();
   });
 
   test('can add many tabs without hitting max limit', async ({ page }) => {
@@ -265,7 +265,7 @@ test.describe('Combo Tab Showcase', () => {
 
   test('can add many tabs via JSON editor', async ({ page }) => {
     expect(await getTabCount(page)).toBe(2);
-    var addLink = page.locator('.cxd-ComboTabs-addLink');
+    var addLink = page.locator('.antd-ComboTabs-addLink');
     await expect(addLink).toBeVisible();
 
     // Add 5 tabs via JSON editor
@@ -392,9 +392,9 @@ test.describe('Combo Tab Showcase', () => {
     expect(labels[2]).toBe('Sub Mission 3');
 
     // Each tab should have its own form pane
-    var activePane = page.locator('.cxd-Tabs-pane.is-active');
+    var activePane = page.locator('.antd-Tabs-pane.is-active');
     await expect(activePane).toBeVisible();
-    await expect(activePane.locator('.cxd-Select').first()).toBeVisible();
+    await expect(activePane.locator('.antd-Select').first()).toBeVisible();
   });
 
   // ===== Core: Add/Delete Does NOT Affect Existing Tab Data =====
@@ -572,7 +572,7 @@ test.describe('Combo Tab Showcase', () => {
     var customComboTabs = page.locator('.custom-combo-tabs');
     await expect(customComboTabs.first()).toBeVisible();
 
-    var tabBar = page.locator('.cxd-ComboTabs');
+    var tabBar = page.locator('.antd-ComboTabs');
     await expect(tabBar.first()).toBeVisible();
   });
 
