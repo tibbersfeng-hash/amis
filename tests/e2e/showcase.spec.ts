@@ -31,16 +31,6 @@ test.describe('Showcase', () => {
     await expect(content.locator('.showcase-preview-container').first()).toBeVisible();
   });
 
-  test('custom component: StickyFooter renders', async ({ page }) => {
-    await page.goto('http://localhost:5173/showcase#sticky-footer');
-    const content = page.locator('.showcase-content');
-    await expect(content.locator('.showcase-page-title', { hasText: 'StickyFooter' }).first()).toBeVisible();
-    // StickyFooter uses position:fixed so it's at viewport level, not inside .showcase-content
-    await expect(page.locator('.sticky-footer').first()).toBeVisible();
-    // First StickyFooter instance has 3 buttons
-    await expect(page.locator('.sticky-footer').first().locator('.footer-btn')).toHaveCount(3);
-  });
-
   test('custom component: Loading renders', async ({ page }) => {
     await page.goto('http://localhost:5173/showcase#loading');
     const content = page.locator('.showcase-content');
@@ -491,11 +481,6 @@ test.describe('Showcase', () => {
     await page.goto('http://localhost:5173/showcase');
     await expect(page.locator('.showcase-page-title', { hasText: 'i18n-config' })).toBeVisible();
 
-    // Click StickyFooter in sidebar
-    await page.locator('button.showcase-nav-item', { hasText: 'StickyFooter' }).click();
-    await page.waitForURL('**/showcase#sticky-footer');
-    await expect(page.locator('.showcase-page-title', { hasText: 'StickyFooter' })).toBeVisible();
-
     // Click Loading
     await page.locator('button.showcase-nav-item', { hasText: 'Loading' }).click();
     await page.waitForURL('**/showcase#loading');
@@ -503,7 +488,7 @@ test.describe('Showcase', () => {
 
     // Go back via browser back
     await page.goBack();
-    await expect(page.locator('.showcase-page-title', { hasText: 'StickyFooter' })).toBeVisible();
+    await expect(page.locator('.showcase-page-title', { hasText: 'i18n-config' })).toBeVisible();
   });
 
   // ============ Submit Button & Data Display ============
@@ -514,7 +499,7 @@ test.describe('Showcase', () => {
   });
 
   test('submit button hidden on custom component pages', async ({ page }) => {
-    await page.goto('http://localhost:5173/showcase#sticky-footer');
+    await page.goto('http://localhost:5173/showcase#loading');
     const content = page.locator('.showcase-content');
     await expect(content.locator('.showcase-submit-btn')).toHaveCount(0);
   });
@@ -628,19 +613,6 @@ test.describe('Showcase', () => {
     const parsed = JSON.parse(submittedText);
     expect(typeof parsed['支持 i18n']).toBe('object');
     expect(typeof parsed['不支持 i18n']).toBe('object');
-  });
-
-  // ============ Drawer Showcase (custom component) ============
-  test('Drawer custom component renders', async ({ page }) => {
-    await page.goto('http://localhost:5173/showcase#amis-drawer');
-    const content = page.locator('.showcase-content');
-    await expect(content.locator('.showcase-page-title', { hasText: 'Drawer' }).first()).toBeVisible();
-
-    // Custom component uses .drawer-showcase class
-    const drawerShowcase = content.locator('.drawer-showcase');
-    await expect(drawerShowcase).toBeVisible();
-    await expect(drawerShowcase.locator('.drawer-showcase-title')).toBeVisible();
-    await expect(drawerShowcase.locator('.drawer-showcase-schema')).toBeVisible();
   });
 
   // ============ InputDateRange (date format + datetime format) ============
@@ -1437,14 +1409,10 @@ test.describe.parallel('Showcase Smoke Test — All Pages', () => {
   // Custom components (defined in data.tsx)
   const customPages = [
     { id: 'i18n-config', title: 'i18n-config' },
-    { id: 'sticky-footer', title: 'StickyFooter' },
     { id: 'loading', title: 'Loading' },
     { id: 'language-switcher', title: 'LanguageSwitcher' },
-    { id: 'i18n-config-panel', title: 'I18nConfigPanel' },
     { id: 'phone-mockup', title: 'PhoneMockup' },
     { id: 'date-range-picker', title: 'DateRangePicker' },
-    { id: 'preview-panel', title: 'PreviewPanel' },
-    { id: 'amis-drawer', title: 'Drawer' },
     { id: 'solid-fill-tabs', title: 'Solid Fill Tabs' },
     { id: 'closable-tabs', title: 'Closable Tabs' },
     { id: 'combo-tab', title: 'Combo Tab' },

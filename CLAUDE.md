@@ -335,7 +335,7 @@ Save 按钮 → 输出 zh/en 双版本 JSON
 
 - 定义在 `src/utils/i18n-config.ts`
 - 支持语言：`zh`（中文）、`en`（English）、`jp`（日本語）
-- 适用范围：StickyFooter 按钮文字、Loading 加载提示、DateRangePicker 月份/星期标签、LanguageSwitcher 标签等
+- 适用范围：Loading 加载提示、DateRangePicker 月份/星期标签、LanguageSwitcher 标签等
 - 切换时通过 `setComponentLanguage(lang)` + `previewLanguageChange` 事件同步
 - 组件通过 `getComponentI18n()` 读取当前语言字符串
 
@@ -348,8 +348,8 @@ Save 按钮 → 输出 zh/en 双版本 JSON
 
 ### 组件分类
 - **配置系统**：i18n-config
-- **基础设施**：StickyFooter, Loading, LanguageSwitcher, I18nConfigPanel
-- **预览组件**：PhoneMockup, DateRangePicker, PreviewPanel
+- **基础设施**：Loading, LanguageSwitcher
+- **预览组件**：PhoneMockup, DateRangePicker
 
 ### Showcase 自定义组件
 
@@ -644,24 +644,12 @@ config.missionRule.ruleSetup.missionCode → formData.missionCode
     │   │   ├── index.tsx       # 手机预览（registerRenderer 注册，支持 i18n）
     │   │   ├── test.tsx
     │   │   └── showcase.tsx
-    │   ├── StickyFooter/
-    │   │   ├── index.tsx       # 吸底操作栏（支持 i18n-config）
-    │   │   ├── test.tsx
-    │   │   └── showcase.tsx
     │   ├── Loading/
     │   │   ├── index.tsx       # 加载/错误状态（支持 i18n-config）
     │   │   ├── test.tsx
     │   │   └── showcase.tsx
     │   ├── LanguageSwitcher/
     │   │   ├── index.tsx       # 语言切换下拉框
-    │   │   ├── test.tsx
-    │   │   └── showcase.tsx
-    │   ├── I18nConfigPanel/
-    │   │   ├── index.tsx       # i18n-config 面板（支持 i18n-config）
-    │   │   ├── test.tsx
-    │   │   └── showcase.tsx
-    │   ├── PreviewPanel/
-    │   │   ├── index.tsx       # 预览面板容器
     │   │   ├── test.tsx
     │   │   └── showcase.tsx
     │   ├── DateRangePicker/

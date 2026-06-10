@@ -2,7 +2,7 @@
  * i18n configuration for non-business UI components.
  *
  * "i18n-config" provides translation strings for infrastructure components
- * (StickyFooter, Loading, DateRangePicker, etc.) that are NOT page-specific
+ * (Loading, DateRangePicker, etc.) that are NOT page-specific
  * business content. Business i18n fields (mission descriptions, promotion
  * content, etc.) are handled separately via schema sourcePath's {zh, en} objects.
  *
@@ -13,7 +13,6 @@
 export type Language = 'zh' | 'en' | 'jp';
 
 export interface ComponentI18nStrings {
-  // StickyFooter
   cancel: string;
   saveDraft: string;
   save: string;

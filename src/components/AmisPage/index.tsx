@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { render as renderAmis } from 'amis';
+import {render as renderAmis, Schema} from 'amis';
 import ReactDOM from 'react-dom';
 import type { Language } from '@/components/LanguageSwitcher';
 import { MultiLangHandler } from '@/utils/MultiLangHandler';
@@ -108,7 +108,7 @@ export const AmisPage: React.FC<AmisPageProps> = ({
     detachedDiv.className = 'amis-scope-inner';
 
     const amisElement = renderAmis(
-      handler.injectFormName(schema),
+      handler.injectFormName(schema) as Schema,
       {
         data: {
           ...displayData,

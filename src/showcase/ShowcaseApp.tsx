@@ -100,14 +100,10 @@ function renderMarkdown(md: string): string {
 const lazyComponents: Record<string, React.LazyExoticComponent<React.FC<{ schema?: Record<string, unknown> }>>> = {
   'schema-preview': React.lazy(() => import('./SchemaPreview')),
   'i18n-config': React.lazy(() => import('../components/i18n-config/showcase')),
-  'sticky-footer': React.lazy(() => import('../components/StickyFooter/showcase')),
   'loading': React.lazy(() => import('../components/Loading/showcase')),
   'language-switcher': React.lazy(() => import('../components/LanguageSwitcher/showcase')),
-  'i18n-config-panel': React.lazy(() => import('../components/I18nConfigPanel/showcase')),
   'phone-mockup': React.lazy(() => import('../components/PhoneMockup/showcase')),
   'date-range-picker': React.lazy(() => import('../components/DateRangePicker/showcase')),
-  'preview-panel': React.lazy(() => import('../components/PreviewPanel/showcase')),
-  'amis-drawer': React.lazy(() => import('../components/DrawerShowcase')),
   'solid-fill-tabs': React.lazy(() => import('./SolidFillTabsShowcase')),
   'closable-tabs': React.lazy(() => import('./ClosableTabsShowcase')),
 };

@@ -13,15 +13,11 @@ const CLAUDE_TIMEOUT_MS = 300_000; // 5 minutes
 
 const customPages = [
   { id: 'schema-preview', category: '工具', title: 'Schema Design', description: '输入任意 Amis JSON Schema，实时渲染设计。支持所有 Amis 表单组件。' },
-  { id: 'i18n-config', category: '配置系统', title: 'i18n-config', description: '基础设施组件 i18n 文本配置。管理 StickyFooter、Loading、DateRangePicker 等组件的静态 UI 文本，支持 zh/en 双语。' },
-  { id: 'sticky-footer', category: '基础设施', title: 'StickyFooter', description: '吸底操作栏，提供 Cancel / Save Draft / Save 三个按钮。文本通过 i18n-config 切换语言。' },
+  { id: 'i18n-config', category: '配置系统', title: 'i18n-config', description: '基础设施组件 i18n 文本配置。管理 Loading、DateRangePicker 等组件的静态 UI 文本，支持 zh/en 双语。' },
   { id: 'loading', category: '基础设施', title: 'Loading', description: '加载状态组件（spinner + 文字）和错误提示组件。文本通过 i18n-config 切换。' },
   { id: 'language-switcher', category: '基础设施', title: 'LanguageSwitcher', description: '语言切换下拉框组件，支持 zh/en 切换。' },
-  { id: 'i18n-config-panel', category: '基础设施', title: 'I18nConfigPanel', description: 'i18n 配置面板，包含 LanguageSwitcher + 可自定义标签。标签文本通过 i18n-config 本地化。' },
   { id: 'phone-mockup', category: '预览组件', title: 'PhoneMockup', description: '手机预览自定义组件。通过 registerRenderer 注册到 Amis，支持 i18n 语言切换预览业务内容。' },
   { id: 'date-range-picker', category: '预览组件', title: 'DateRangePicker', description: '自定义 Amis 日期范围选择器。内置日历 UI、时间选择、验证。所有文本通过 i18n-config 本地化。' },
-  { id: 'preview-panel', category: '预览组件', title: 'PreviewPanel', description: '预览面板容器，包含 LanguageSwitcher + PhoneMockup。' },
-  { id: 'amis-drawer', category: '反馈组件', title: 'Drawer — 抽屉', description: '从边缘滑出的抽屉面板。通过 setValue 将抽屉内选择的值回写到父表单字段，无需 HTTP 请求。' },
   { id: 'solid-fill-tabs', category: '布局组件', title: 'Solid Fill Tabs', description: '实心填充型 Tab 样式。选中=蓝底白字，未选中=白底蓝字+实线外框。无 hover 效果，无下划线。' },
   { id: 'closable-tabs', category: '布局组件', title: 'Closable Tabs', description: '可关闭 Tab + 添加按钮，每个 tab 内嵌表单。新增 tab 时自动生成相同表单结构。支持表单提交并显示提交数据。' },
   { id: 'combo-tab', category: '布局组件', title: 'Combo Tab', description: '使用 Amis combo 组件，通过纯 CSS 样式实现与 Closable Tabs 一致的 Tab 栏效果。支持动态增减、每个 tab 内嵌完整表单。' },
