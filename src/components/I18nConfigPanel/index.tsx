@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import { getComponentI18n } from '../../utils/i18n-config';
-import type { Language } from '../LanguageSwitcher';
-import { LANGUAGES } from '../LanguageSwitcher';
+import { getComponentI18n } from '@/utils/i18n-config';
+import type { Language } from '@/components/LanguageSwitcher';
+import { LANGUAGES } from '@/components/LanguageSwitcher';
 
 export interface I18nConfigPanelProps {
   language: Language;

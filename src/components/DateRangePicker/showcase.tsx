@@ -1,6 +1,6 @@
 import React from 'react';
 import { DateRangePickerComponent } from './index';
-import { getComponentI18n } from '../../utils/i18n-config';
+import { getComponentI18n } from '@/utils/i18n-config';
 
 const DateRangePickerShowcase: React.FC = () => {
   const t = getComponentI18n();

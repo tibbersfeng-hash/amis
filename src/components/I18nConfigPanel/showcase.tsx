@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { I18nConfigPanel } from './index';
-import type { Language } from '../LanguageSwitcher';
-import { setComponentLanguage } from '../../utils/i18n-config';
+import type { Language } from '@/components/LanguageSwitcher';
+import { setComponentLanguage } from '@/utils/i18n-config';
 
 const I18nConfigPanelShowcase: React.FC = () => {
   const [lang, setLang] = useState<Language>('zh');

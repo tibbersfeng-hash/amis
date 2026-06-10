@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PreviewPanel } from './index';
-import type { Language } from '../LanguageSwitcher';
+import type { Language } from '@/components/LanguageSwitcher';
 
 const PreviewPanelShowcase: React.FC = () => {
   const [lang, setLang] = useState<Language>('zh');

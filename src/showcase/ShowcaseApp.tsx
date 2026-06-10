@@ -1,8 +1,8 @@
 import React, { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { Sidebar } from './Sidebar';
 import { getShowcasePage, showcasePages, preloadAmisPages } from './data';
-import type { Language } from '../components/LanguageSwitcher';
-import { LANGUAGES } from '../components/LanguageSwitcher';
+import type { Language } from '@/components/LanguageSwitcher';
+import { LANGUAGES } from '@/components/LanguageSwitcher';
 import { AmisLivePreview, AmisLivePreviewRef } from './AmisLivePreview';
 
 /**

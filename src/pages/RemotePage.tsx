@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useRemotePage } from '../hooks/useRemotePage';
-import { AmisPage } from '../components/AmisPage';
-import { Loading, ErrorDisplay } from '../components/Loading';
-import { getLocale } from '../utils/locale';
+import { useRemotePage } from '@/hooks/useRemotePage';
+import { AmisPage } from '@/components/AmisPage';
+import { Loading, ErrorDisplay } from '@/components/Loading';
+import { getLocale } from '@/utils/locale';
 
 /**
  * Parse URL query params: ?dataType=xxx&dataId=xxx

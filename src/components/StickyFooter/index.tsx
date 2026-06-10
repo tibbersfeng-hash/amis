@@ -1,5 +1,5 @@
 import React from 'react';
-import { getComponentI18n } from '../../utils/i18n-config';
+import { getComponentI18n } from '@/utils/i18n-config';
 
 interface StickyFooterProps {
   onCancel?: () => void;

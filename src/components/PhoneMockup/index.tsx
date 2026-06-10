@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { registerRenderer } from 'amis-core';
-import { LANGUAGES } from '../LanguageSwitcher';
+import { LANGUAGES } from '@/components/LanguageSwitcher';
 
 /**
  * Check if a value is an i18n JSON object {zh, en, ...}

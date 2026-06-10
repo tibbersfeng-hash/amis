@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { AmisPage } from '../components/AmisPage';
-import { Loading, ErrorDisplay } from '../components/Loading';
-import { getLocale } from '../utils/locale';
+import { AmisPage } from '@/components/AmisPage';
+import { Loading, ErrorDisplay } from '@/components/Loading';
+import { getLocale } from '@/utils/locale';
 
 const DEFAULT_PAGE_SIZE = 10;
 

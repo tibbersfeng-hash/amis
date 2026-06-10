@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { render as renderAmis } from 'amis';
 import ReactDOM from 'react-dom';
-import type { Language } from '../LanguageSwitcher';
-import { MultiLangHandler } from '../../utils/MultiLangHandler';
-import { defaultFetcher } from '../../utils/amisFetcher';
+import type { Language } from '@/components/LanguageSwitcher';
+import { MultiLangHandler } from '@/utils/MultiLangHandler';
+import { defaultFetcher } from '@/utils/amisFetcher';
 import '../AmisCustomComponents';
 
 // ── AmisPage component ──────────────────────────────────────

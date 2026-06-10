@@ -8,7 +8,7 @@ import '../components/PhoneMockup';
 import '../components/DateRangePicker';
 import '../components/FieldWithExclude';
 // Import ClosableTabs to register the closable-tab renderer
-import ClosableTabs from '../components/ClosableTabs';
+import ClosableTabs from '@/components/ClosableTabs';
 
 // Force the module to be evaluated (prevents tree-shaking)
 const _closableTabs = ClosableTabs;

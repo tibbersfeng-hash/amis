@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { registerRenderer } from 'amis';
 import type { FormControlProps } from 'amis';
-import { getComponentI18n, getComponentLanguage } from '../../utils/i18n-config';
+import { getComponentI18n, getComponentLanguage } from '@/utils/i18n-config';
 
 /**
  * DateRangePicker — Custom Amis form control for date range selection.

@@ -9,7 +9,7 @@
  * is loaded. The heavy schema JSON + component factories are deferred
  * until a specific page is actually viewed.
  */
-import type { ShowcasePage } from '../data';
+import type { ShowcasePage } from '@/showcase/data';
 
 // ─── Lightweight metadata for sidebar (no heavy schema/component) ───
 

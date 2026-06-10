@@ -3,7 +3,7 @@ import { render as renderAmis } from 'amis';
 import ReactDOM from 'react-dom';
 import { useRef, useEffect } from 'react';
 import { mockApiFetcher } from './mock-api';
-import { getLocale } from '../utils/locale';
+import { getLocale } from '@/utils/locale';
 
 function AmisRenderer({ schema }: { schema: Record<string, unknown> }) {
   const ref = useRef<HTMLDivElement>(null);

@@ -2,8 +2,8 @@
  * Shared helpers for Amis component showcase entries.
  */
 import React from 'react';
-import { AmisLivePreview } from '../AmisLivePreview';
-import type { ShowcasePage } from '../data';
+import { AmisLivePreview } from '@/showcase/AmisLivePreview';
+import type { ShowcasePage } from '@/showcase/data';
 
 /**
  * Recursively strip {zh,en} values and multiLang flags from schema/data.

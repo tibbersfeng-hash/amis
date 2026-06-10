@@ -1,5 +1,5 @@
 import React from 'react';
-import { LanguageSwitcher, Language } from '../LanguageSwitcher';
+import { LanguageSwitcher, Language } from '@/components/LanguageSwitcher';
 
 export interface PreviewPanelProps {
   language: Language;

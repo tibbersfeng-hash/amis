@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import DateRangePickerComponent from './index';
-import { setComponentLanguage } from '../../utils/i18n-config';
+import { setComponentLanguage } from '@/utils/i18n-config';
 
 describe('DateRangePicker', () => {
   it('renders input field', () => {

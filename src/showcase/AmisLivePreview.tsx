@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { render as renderAmis } from 'amis';
 import ReactDOM from 'react-dom';
-import { getLocale } from '../utils/locale';
-import { processSchemaMultiLang, flattenDataMultiLang } from '../utils/multiLang';
+import { getLocale } from '@/utils/locale';
+import { processSchemaMultiLang, flattenDataMultiLang } from '@/utils/multiLang';
 import { mockApiFetcher } from './mock-api';
-import type { Language } from '../components/LanguageSwitcher';
+import type { Language } from '@/components/LanguageSwitcher';
 
 // Register custom Amis renderers - these imports have side effects (registerRenderer calls)
 import '../components/PhoneMockup';
@@ -12,7 +12,7 @@ import '../components/DateRangePicker';
 import '../components/FieldWithExclude';
 import '../components/FieldWithExcludeV2';
 // Import ClosableTabs to register the closable-tab renderer
-import ClosableTabsModule from '../components/ClosableTabs';
+import ClosableTabsModule from '@/components/ClosableTabs';
 
 // Force the module to be evaluated (prevents tree-shaking)
 const _closableTabsLoaded = ClosableTabsModule;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Loading, ErrorDisplay } from './index';
-import { getComponentI18n } from '../../utils/i18n-config';
+import { getComponentI18n } from '@/utils/i18n-config';
 
 const LoadingShowcase: React.FC = () => {
   const t = getComponentI18n();

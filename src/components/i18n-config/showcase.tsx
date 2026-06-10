@@ -1,6 +1,6 @@
 import React from 'react';
-import { i18nStrings, getComponentI18n, getComponentLanguage, setComponentLanguage } from '../../utils/i18n-config';
-import type { Language } from '../../utils/i18n-config';
+import { i18nStrings, getComponentI18n, getComponentLanguage, setComponentLanguage } from '@/utils/i18n-config';
+import type { Language } from '@/utils/i18n-config';
 
 const I18nConfigShowcase: React.FC = () => {
   const t = getComponentI18n();

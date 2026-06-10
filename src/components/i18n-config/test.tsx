@@ -5,7 +5,7 @@ import {
   getComponentLanguage,
   setComponentLanguage,
   initComponentI18n,
-} from '../../utils/i18n-config';
+} from '@/utils/i18n-config';
 
 describe('i18n-config', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StickyFooter } from './index';
-import { setComponentLanguage } from '../../utils/i18n-config';
+import { setComponentLanguage } from '@/utils/i18n-config';
 
 describe('StickyFooter', () => {
   it('renders three buttons with i18n text', () => {

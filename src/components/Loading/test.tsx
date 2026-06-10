@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Loading, ErrorDisplay } from './index';
-import { setComponentLanguage } from '../../utils/i18n-config';
+import { setComponentLanguage } from '@/utils/i18n-config';
 
 describe('Loading', () => {
   it('renders spinner with default loading text', () => {
