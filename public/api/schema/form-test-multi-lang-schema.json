@@ -1,52 +1,57 @@
 {
-  "type": "form",
-  "title": "多语言测试 — 全部组件 multiLang",
-  "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
-  "mode": "horizontal",
-  "horizontal": { "left": 4, "right": 8 },
+  "type": "page",
   "body": [
-    { "type": "language-switcher", "variant": "select", "showLabel": true },
-    { "type": "input-text", "name": "textField", "label": "单行文本", "placeholder": "请输入文本", "multiLang": true, "clearable": true },
-    { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "multiLang": true, "minRows": 3 },
-    { "type": "input-email", "name": "email", "label": "邮箱", "placeholder": "请输入邮箱", "multiLang": true, "clearable": true },
-    { "type": "input-url", "name": "url", "label": "网址", "placeholder": "https://", "multiLang": true, "clearable": true },
-    { "type": "input-password", "name": "password", "label": "密码", "multiLang": true },
-    { "type": "input-number", "name": "number", "label": "数字", "placeholder": "请输入数字", "multiLang": true, "min": 0 },
-    { "type": "input-rich-text-quill", "name": "richText", "label": "富文本quill", "multiLang": true},
-    { "type": "select", "name": "select", "label": "下拉选择", "multiLang": true, "options": [
-      { "label": "选项一", "value": "opt1" },
-      { "label": "选项二", "value": "opt2" }
-    ], "clearable": true },
-    { "type": "radios", "name": "radio", "label": "单选", "multiLang": true, "options": [
-      { "label": "是", "value": "yes" },
-      { "label": "否", "value": "no" }
-    ] },
-    { "type": "checkboxes", "name": "checkbox", "label": "多选", "multiLang": true, "options": [
-      { "label": "选项A", "value": "a" },
-      { "label": "选项B", "value": "b" }
-    ] },
-    { "type": "switch", "name": "switch", "label": "开关", "multiLang": true },
-    { "type": "input-date", "name": "date", "label": "日期", "multiLang": true },
-    { "type": "input-time", "name": "time", "label": "时间", "multiLang": true },
-    { "type": "input-month", "name": "month", "label": "月份", "multiLang": true },
-    { "type": "input-datetime", "name": "datetime", "label": "日期时间", "multiLang": true, "format": "YYYY-MM-DD HH:mm:ss" },
-    { "type": "input-date-range", "name": "dateRange", "label": "日期范围", "multiLang": true, "format": "YYYY-MM-DD" },
-    { "type": "input-color", "name": "color", "label": "颜色", "multiLang": true },
-    { "type": "input-rating", "name": "rating", "label": "评分", "multiLang": true, "count": 5 },
-    { "type": "input-tag", "name": "tag", "label": "标签", "multiLang": true, "placeholder": "输入标签按回车" },
-    { "type": "input-image", "name": "image", "label": "图片上传", "multiLang": true, "receiver": "/api/upload", "accept": "image/*" },
-    { "type": "field-with-exclude-v2", "name": "excludeField", "label": "排除选择", "multiLang": true,
-      "excludeName": "excludeFieldExclude", "excludeCheckboxName": "excludeFieldCheckbox",
-      "multiple": true, "searchable": true,
-      "options": [
-        { "label": "选项X", "value": "x" },
-        { "label": "选项Y", "value": "y" },
-        { "label": "选项Z", "value": "z" }
+    { "type": "language-switcher", "variant": "select", "showLabel": true, "className": "lang-switch-bar" },
+    {
+      "type": "form",
+      "title": "多语言测试 — 全部组件 multiLang",
+      "api": "post:/api/page/save?dataId=${dataId}&dataType=${dataType}",
+      "mode": "horizontal",
+      "horizontal": { "left": 4, "right": 8 },
+      "body": [
+        { "type": "input-text", "name": "textField", "label": "单行文本", "placeholder": "请输入文本", "multiLang": true, "clearable": true },
+        { "type": "textarea", "name": "textArea", "label": "多行文本", "placeholder": "请输入多行内容", "multiLang": true, "minRows": 3 },
+        { "type": "input-email", "name": "email", "label": "邮箱", "placeholder": "请输入邮箱", "multiLang": true, "clearable": true },
+        { "type": "input-url", "name": "url", "label": "网址", "placeholder": "https://", "multiLang": true, "clearable": true },
+        { "type": "input-password", "name": "password", "label": "密码", "multiLang": true },
+        { "type": "input-number", "name": "number", "label": "数字", "placeholder": "请输入数字", "multiLang": true, "min": 0 },
+        { "type": "input-rich-text-quill", "name": "richText", "label": "富文本quill", "multiLang": true},
+        { "type": "select", "name": "select", "label": "下拉选择", "multiLang": true, "options": [
+          { "label": "选项一", "value": "opt1" },
+          { "label": "选项二", "value": "opt2" }
+        ], "clearable": true },
+        { "type": "radios", "name": "radio", "label": "单选", "multiLang": true, "options": [
+          { "label": "是", "value": "yes" },
+          { "label": "否", "value": "no" }
+        ] },
+        { "type": "checkboxes", "name": "checkbox", "label": "多选", "multiLang": true, "options": [
+          { "label": "选项A", "value": "a" },
+          { "label": "选项B", "value": "b" }
+        ] },
+        { "type": "switch", "name": "switch", "label": "开关", "multiLang": true },
+        { "type": "input-date", "name": "date", "label": "日期", "multiLang": true },
+        { "type": "input-time", "name": "time", "label": "时间", "multiLang": true },
+        { "type": "input-month", "name": "month", "label": "月份", "multiLang": true },
+        { "type": "input-datetime", "name": "datetime", "label": "日期时间", "multiLang": true, "format": "YYYY-MM-DD HH:mm:ss" },
+        { "type": "input-date-range", "name": "dateRange", "label": "日期范围", "multiLang": true, "format": "YYYY-MM-DD" },
+        { "type": "input-color", "name": "color", "label": "颜色", "multiLang": true },
+        { "type": "input-rating", "name": "rating", "label": "评分", "multiLang": true, "count": 5 },
+        { "type": "input-tag", "name": "tag", "label": "标签", "multiLang": true, "placeholder": "输入标签按回车" },
+        { "type": "input-image", "name": "image", "label": "图片上传", "multiLang": true, "receiver": "/api/upload", "accept": "image/*" },
+        { "type": "field-with-exclude-v2", "name": "excludeField", "label": "排除选择", "multiLang": true,
+          "excludeName": "excludeFieldExclude", "excludeCheckboxName": "excludeFieldCheckbox",
+          "multiple": true, "searchable": true,
+          "options": [
+            { "label": "选项X", "value": "x" },
+            { "label": "选项Y", "value": "y" },
+            { "label": "选项Z", "value": "z" }
+          ]
+        }
+      ],
+      "actions": [
+        { "type": "submit", "label": "提交保存", "level": "primary" },
+        { "type": "reset", "label": "重置" }
       ]
     }
-  ],
-  "actions": [
-    { "type": "submit", "label": "提交保存", "level": "primary" },
-    { "type": "reset", "label": "重置" }
   ]
 }

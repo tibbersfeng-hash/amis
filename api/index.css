@@ -301,6 +301,26 @@ body {
 }
 .language-select:focus { outline: none; border-color: var(--primary); }
 
+/* ===== Sticky Language Switch Bar (at top of page) ===== */
+.lang-switch-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card-bg); border-bottom: 1px solid var(--divider);
+  padding: 8px 16px; margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+.lang-switch-bar-inner {
+  display: flex; align-items: center; gap: 8px;
+}
+.lang-switch-label {
+  font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+}
+.lang-switch-select {
+  padding: 4px 8px; border: 1px solid var(--input-border); border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--text-primary); background: #fff; cursor: pointer;
+  font-family: var(--font-family);
+}
+.lang-switch-select:focus { outline: none; border-color: var(--primary); }
+
 /* ===== Preview Panel (sticky within tab-right) ===== */
 .preview-panel {
   display: flex; flex-direction: column; align-items: center; width: 100%;
